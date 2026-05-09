@@ -2,9 +2,12 @@
 
 import Link from "next/link";
 import { useCartStore } from "@/store/cart-store";
+import { useSession } from "next-auth/react";
 
 export function SiteHeader() {
   const itemCount = useCartStore((state) => state.itemCount);
+  const { data: session } = useSession();
+  const role = (session?.user as any)?.role;
 
   return (
     <header className="sticky top-0 z-50 border-b bg-white/90 backdrop-blur">
@@ -24,12 +27,14 @@ export function SiteHeader() {
               </span>
             )}
           </Link>
+          {(role === "ADMIN" || role === "OWNER") && (
           <Link
             href="/admin"
             className="rounded-full border px-4 py-2 text-sm"
           >
             Admin
           </Link>
+        )}
           <Link href="/account">Account</Link>
           <Link href="/login">Sign In</Link>
         </nav>

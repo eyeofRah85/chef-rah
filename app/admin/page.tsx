@@ -1,4 +1,13 @@
-export default function AdminPage() {
+import { requireAdmin } from "@/lib/auth-guards";
+import { redirect } from "next/navigation";
+
+export default async function AdminPage() {
+  try {
+    await requireAdmin();
+  } catch {
+    redirect("/");
+  }
+
   return (
     <main className="min-h-screen bg-neutral-50 px-6 py-12">
       <div className="mx-auto max-w-6xl">
@@ -6,11 +15,15 @@ export default function AdminPage() {
           <p className="text-sm font-semibold uppercase tracking-[0.3em] text-amber-700">
             Admin Dashboard
           </p>
-          <h1 className="mt-3 text-4xl font-bold">Kitchen Control Center</h1>
+
+          <h1 className="mt-3 text-4xl font-bold">
+            Kitchen Control Center
+          </h1>
+
           <p className="mt-3 max-w-2xl text-neutral-700">
-            This dashboard will allow the chef to manage menu items, seasonal
-            availability, order statuses, catering requests, reports, payment
-            settings, and business rules.
+            Manage orders, menu items, reports,
+            catering requests, notifications,
+            and seasonal offerings.
           </p>
         </div>
 
@@ -30,7 +43,10 @@ export default function AdminPage() {
               key={item}
               className="rounded-2xl border bg-white p-6 shadow-sm"
             >
-              <h2 className="text-xl font-semibold">{item}</h2>
+              <h2 className="text-xl font-semibold">
+                {item}
+              </h2>
+
               <p className="mt-2 text-sm text-neutral-600">
                 Coming soon.
               </p>
