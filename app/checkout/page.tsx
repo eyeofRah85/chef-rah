@@ -1,10 +1,40 @@
 "use client";
 
 import { useCheckoutStore } from "@/store/checkout-store";
+import { useCartStore } from "@/store/cart-store";
+import { calculateTip } from "@/lib/order-calculations";
+import { useRouter } from "next/navigation";
 
 export default function CheckoutPage() {
   const details = useCheckoutStore((state) => state.details);
   const updateField = useCheckoutStore((state) => state.updateField);
+
+  const router = useRouter();
+
+const items = useCartStore((state) => state.items);
+const clearCart = useCartStore((state) => state.clearCart);
+
+const subtotal = items.reduce(
+  (total, item) => total + item.price * item.quantity,
+  0,
+);
+
+const deliveryFee =
+  details.orderType === "delivery" ? 10 : 0;
+
+const lateFee = 0;
+
+const tipAmount = calculateTip(
+  subtotal,
+  details.tipType,
+  details.customTipAmount,
+);
+
+const total =
+  subtotal +
+  deliveryFee +
+  lateFee +
+  tipAmount;
 
   return (
     <main className="min-h-screen bg-neutral-50 px-6 py-12">
@@ -134,11 +164,40 @@ export default function CheckoutPage() {
           )}
 
           <button
-            type="button"
-            className="w-full rounded-xl bg-black px-5 py-3 font-medium text-white"
-          >
-            Continue to Payment
-          </button>
+  type="button"
+  onClick={async () => {
+    const response = await fetch("/api/orders", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+
+      body: JSON.stringify({
+        items,
+        checkout: details,
+        subtotal,
+        deliveryFee,
+        lateFee,
+        tipAmount,
+        total,
+      }),
+    });
+
+    if (!response.ok) {
+      alert("Failed to submit order.");
+      return;
+    }
+
+    const order = await response.json();
+
+    clearCart();
+
+    router.push(`/orders/${order.id}`);
+  }}
+  className="w-full rounded-xl bg-black px-5 py-3 font-medium text-white"
+>
+  Submit Order
+</button>
         </form>
 
         <div className="mt-10 rounded-2xl bg-neutral-100 p-5">
