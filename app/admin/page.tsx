@@ -31,6 +31,7 @@ export default async function AdminPage() {
         <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           {[
             { label: "Orders", href: "/admin/orders" },
+            { label: "Kitchen View", href: "/admin/kitchen" },
             { label: "Menu Manager", href: "/admin/menu" },
             { label: "Seasonal Items", href: "/admin/menu" },
             { label: "Catering Requests", href: "/admin/catering" },

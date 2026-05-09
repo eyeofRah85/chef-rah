@@ -6,7 +6,7 @@ import { useCartStore } from "@/store/cart-store";
 import { useSession } from "next-auth/react";
 
 export function SiteHeader() {
-  const itemCount = useCartStore((state) => state.itemCount);
+  const items = useCartStore((state) => state.items);
   const { data: session } = useSession();
 
   const [mounted, setMounted] = useState(false);
@@ -15,7 +15,10 @@ export function SiteHeader() {
     setMounted(true);
   }, []);
 
-  const count = mounted ? itemCount() : 0;
+  const count = mounted
+    ? items.reduce((total, item) => total + item.quantity, 0)
+    : 0;
+
   const role = (session?.user as any)?.role;
 
   return (

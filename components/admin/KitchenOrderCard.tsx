@@ -1,0 +1,142 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+
+type KitchenOrderCardProps = {
+  order: any;
+};
+
+const nextStatuses: Record<string, string> = {
+  PENDING: "ACCEPTED",
+  ACCEPTED: "PREPARING",
+  PREPARING: "READY",
+  READY: "COMPLETED",
+};
+
+export function KitchenOrderCard({
+  order,
+}: KitchenOrderCardProps) {
+  const router = useRouter();
+
+  async function advanceStatus() {
+    const nextStatus =
+      nextStatuses[order.status];
+
+    if (!nextStatus) return;
+
+    const response = await fetch(
+      `/api/admin/orders/${order.id}/status`,
+      {
+        method: "PATCH",
+
+        headers: {
+          "Content-Type": "application/json",
+        },
+
+        body: JSON.stringify({
+          status: nextStatus,
+          note: `Kitchen updated order to ${nextStatus}.`,
+        }),
+      },
+    );
+
+    if (!response.ok) {
+      alert("Failed to update order.");
+      return;
+    }
+
+    router.refresh();
+  }
+
+  return (
+    <div className="rounded-3xl border bg-white p-6 shadow-sm">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-700">
+            {order.orderType}
+          </p>
+
+          <h2 className="mt-2 text-2xl font-bold">
+            {order.customerName}
+          </h2>
+        </div>
+
+        <div className="rounded-full bg-neutral-100 px-4 py-2 text-sm font-medium">
+          {order.status}
+        </div>
+      </div>
+
+      <div className="mt-6 space-y-4">
+        {order.items.map((item: any) => (
+          <div
+            key={item.id}
+            className="rounded-2xl border p-4"
+          >
+            <div className="flex justify-between gap-4">
+              <div>
+                <h3 className="text-xl font-semibold">
+                  {item.quantity}× {item.name}
+                </h3>
+
+                {item.notes && (
+                  <div className="mt-3 rounded-xl bg-amber-50 p-3 text-sm text-amber-900 whitespace-pre-wrap">
+                    {item.notes}
+                  </div>
+                )}
+              </div>
+
+              <div className="text-right font-bold">
+                $
+                {Number(item.lineTotal).toFixed(
+                  2,
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {order.allergyNotes && (
+        <div className="mt-6 rounded-2xl border-2 border-red-500 bg-red-50 p-4">
+          <p className="text-sm font-bold uppercase text-red-700">
+            Allergy Alert
+          </p>
+
+          <p className="mt-2 text-red-900">
+            {order.allergyNotes}
+          </p>
+        </div>
+      )}
+
+      <div className="mt-6 flex items-center justify-between">
+        <div>
+          <p className="text-sm text-neutral-500">
+            Requested
+          </p>
+
+          <p className="font-medium">
+            {order.requestedDateTime
+              ? new Date(
+                  order.requestedDateTime,
+                ).toLocaleString()
+              : "ASAP"}
+          </p>
+        </div>
+
+        {nextStatuses[order.status] && (
+          <button
+            onClick={advanceStatus}
+            className="rounded-2xl bg-black px-5 py-3 font-medium text-white"
+          >
+            Mark{" "}
+            {
+              nextStatuses[
+                order.status
+              ]
+            }
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}

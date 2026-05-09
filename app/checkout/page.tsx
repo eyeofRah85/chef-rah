@@ -7,22 +7,27 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function CheckoutPage() {
-  const [mounted, setMounted] = useState(false);
 
-    useEffect(() => {
-      setMounted(true);
-    }, []);
+const details = useCheckoutStore((state) => state.details);
+const updateField = useCheckoutStore((state) => state.updateField);
 
-    if (!mounted) {
-      return null;
-    }
-  const details = useCheckoutStore((state) => state.details);
-  const updateField = useCheckoutStore((state) => state.updateField);
-
-  const router = useRouter();
+const router = useRouter();
 
 const items = useCartStore((state) => state.items);
 const clearCart = useCartStore((state) => state.clearCart);
+const resetCheckout = useCheckoutStore(
+  (state) => state.resetCheckout,
+);
+
+const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return null;
+  }
 
 const subtotal = items.reduce(
   (total, item) => total + item.price * item.quantity,
@@ -40,9 +45,6 @@ const tipAmount = calculateTip(
   details.customTipAmount,
 );
 
-const resetCheckout = useCheckoutStore(
-  (state) => state.resetCheckout,
-);
 
 const total =
   subtotal +
