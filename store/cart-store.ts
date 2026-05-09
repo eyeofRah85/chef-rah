@@ -1,6 +1,7 @@
 "use client";
 
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import type { MenuItem } from "@/types/menu";
 
 export type SelectedCartOption = {
@@ -23,10 +24,7 @@ export type CartItem = {
 
 type CartState = {
   items: CartItem[];
-  addItem: (
-    item: MenuItem,
-    selectedOptions?: SelectedCartOption[],
-  ) => void;
+  addItem: (item: MenuItem, selectedOptions?: SelectedCartOption[]) => void;
   removeItem: (cartId: string) => void;
   increaseQuantity: (cartId: string) => void;
   decreaseQuantity: (cartId: string) => void;
@@ -35,63 +33,73 @@ type CartState = {
   itemCount: () => number;
 };
 
-export const useCartStore = create<CartState>((set, get) => ({
-  items: [],
+export const useCartStore = create<CartState>()(
+  persist(
+    (set, get) => ({
+      items: [],
 
-addItem: (item, selectedOptions = []) => {
-  const optionsTotal = selectedOptions.reduce(
-    (total, option) => total + option.priceDelta,
-    0,
-  );
+      addItem: (item, selectedOptions = []) => {
+        const optionsTotal = selectedOptions.reduce(
+          (total, option) => total + option.priceDelta,
+          0,
+        );
 
-  const cartItem: CartItem = {
-    cartId: crypto.randomUUID(),
-    menuItemId: item.id,
-    name: item.name,
-    price: item.price + optionsTotal,
-    quantity: 1,
-    category: item.category,
-    selectedOptions,
-  };
+        const cartItem: CartItem = {
+          cartId: crypto.randomUUID(),
+          menuItemId: item.id,
+          name: item.name,
+          price: item.price + optionsTotal,
+          quantity: 1,
+          category: item.category,
+          selectedOptions,
+        };
 
-  set((state) => ({
-    items: [...state.items, cartItem],
-  }));
-},
+        set((state) => ({
+          items: [...state.items, cartItem],
+        }));
+      },
 
-  removeItem: (cartId) => {
-    set((state) => ({
-      items: state.items.filter((item) => item.cartId !== cartId),
-    }));
-  },
+      removeItem: (cartId) => {
+        set((state) => ({
+          items: state.items.filter((item) => item.cartId !== cartId),
+        }));
+      },
 
-  increaseQuantity: (cartId) => {
-    set((state) => ({
-      items: state.items.map((item) =>
-        item.cartId === cartId
-          ? { ...item, quantity: item.quantity + 1 }
-          : item,
-      ),
-    }));
-  },
+      increaseQuantity: (cartId) => {
+        set((state) => ({
+          items: state.items.map((item) =>
+            item.cartId === cartId
+              ? { ...item, quantity: item.quantity + 1 }
+              : item,
+          ),
+        }));
+      },
 
-  decreaseQuantity: (cartId) => {
-    set((state) => ({
-      items: state.items
-        .map((item) =>
-          item.cartId === cartId
-            ? { ...item, quantity: Math.max(0, item.quantity - 1) }
-            : item,
-        )
-        .filter((item) => item.quantity > 0),
-    }));
-  },
+      decreaseQuantity: (cartId) => {
+        set((state) => ({
+          items: state.items
+            .map((item) =>
+              item.cartId === cartId
+                ? { ...item, quantity: Math.max(0, item.quantity - 1) }
+                : item,
+            )
+            .filter((item) => item.quantity > 0),
+        }));
+      },
 
-  clearCart: () => set({ items: [] }),
+      clearCart: () => set({ items: [] }),
 
-  subtotal: () =>
-    get().items.reduce((total, item) => total + item.price * item.quantity, 0),
+      subtotal: () =>
+        get().items.reduce(
+          (total, item) => total + item.price * item.quantity,
+          0,
+        ),
 
-  itemCount: () =>
-    get().items.reduce((total, item) => total + item.quantity, 0),
-}));
+      itemCount: () =>
+        get().items.reduce((total, item) => total + item.quantity, 0),
+    }),
+    {
+      name: "chef-rahs-cart",
+    },
+  ),
+);
