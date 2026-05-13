@@ -1,29 +1,149 @@
+import Link from "next/link";
 import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 
 export default async function AccountPage() {
   const session = await auth();
 
-  if (!session?.user) {
+  if (!session?.user?.email) {
     redirect("/login");
   }
 
+  const user = await prisma.user.findUnique({
+    where: {
+      email: session.user.email,
+    },
+    include: {
+      orders: {
+        take: 5,
+        orderBy: {
+          createdAt: "desc",
+        },
+        include: {
+          items: true,
+        },
+      },
+    },
+  });
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const activeOrders = user.orders.filter((order) =>
+    ["PENDING", "ACCEPTED", "PREPARING", "READY", "OUT_FOR_DELIVERY"].includes(
+      order.status,
+    ),
+  );
+
+  const unpaidOrders = user.orders.filter((order) =>
+    ["PAY_BY_DATE", "OFFLINE_PAYMENT_DUE"].includes(order.paymentStatus ?? ""),
+  );
+
   return (
     <main className="min-h-screen bg-neutral-50 px-6 py-12">
-      <div className="mx-auto max-w-3xl rounded-2xl border bg-white p-8 shadow-sm">
-        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-amber-700">
-          Account
-        </p>
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-8">
+          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-amber-700">
+            Account
+          </p>
 
-        <h1 className="mt-3 text-4xl font-bold">
-          Welcome, {session.user.name}
-        </h1>
+          <h1 className="mt-3 text-4xl font-bold">
+            Welcome, {user.name ?? "Customer"}
+          </h1>
 
-        <div className="mt-8 rounded-xl bg-neutral-100 p-5">
-          <pre className="overflow-auto text-xs">
-            {JSON.stringify(session, null, 2)}
-          </pre>
+          <p className="mt-3 text-neutral-700">
+            View your recent orders, payment status, and order progress.
+          </p>
         </div>
+
+        <section className="grid gap-5 md:grid-cols-3">
+          <div className="rounded-2xl border bg-white p-6 shadow-sm">
+            <p className="text-sm text-neutral-500">Recent Orders</p>
+            <p className="mt-3 text-4xl font-bold">{user.orders.length}</p>
+          </div>
+
+          <div className="rounded-2xl border bg-white p-6 shadow-sm">
+            <p className="text-sm text-neutral-500">Active Orders</p>
+            <p className="mt-3 text-4xl font-bold">{activeOrders.length}</p>
+          </div>
+
+          <div className="rounded-2xl border bg-white p-6 shadow-sm">
+            <p className="text-sm text-neutral-500">Payments Due</p>
+            <p className="mt-3 text-4xl font-bold">{unpaidOrders.length}</p>
+          </div>
+        </section>
+
+        <section className="mt-10 rounded-2xl border bg-white p-6 shadow-sm">
+          <div className="mb-5 flex items-center justify-between">
+            <h2 className="text-2xl font-semibold">Recent Orders</h2>
+
+            <Link href="/account/orders" className="text-sm font-medium underline">
+              View all
+            </Link>
+          </div>
+
+          <div className="space-y-4">
+            {user.orders.map((order) => (
+              <Link
+                key={order.id}
+                href={`/orders/${order.id}`}
+                className="block rounded-xl border p-4 transition hover:bg-neutral-50"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="font-semibold">
+                      {order.orderType} Order
+                    </p>
+
+                    <p className="mt-1 text-sm text-neutral-600">
+                      {order.items.length} item
+                      {order.items.length === 1 ? "" : "s"} ·{" "}
+                      {order.createdAt.toLocaleDateString()}
+                    </p>
+
+                    <p className="mt-1 text-xs text-neutral-500">
+                      Requested:{" "}
+                      {order.requestedDateTime
+                        ? order.requestedDateTime.toLocaleString()
+                        : "Not provided"}
+                    </p>
+                  </div>
+
+                  <div className="text-right">
+                    <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium">
+                      {order.status}
+                    </span>
+
+                    <p className="mt-2 font-bold">
+                      ${Number(order.total).toFixed(2)}
+                    </p>
+
+                    {order.paymentStatus && (
+                      <p className="mt-1 text-xs text-neutral-500">
+                        {order.paymentStatus}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </Link>
+            ))}
+
+            {user.orders.length === 0 && (
+              <div className="rounded-xl bg-neutral-100 p-6 text-center">
+                <p className="font-medium">No orders yet.</p>
+
+                <Link
+                  href="/menu"
+                  className="mt-4 inline-flex rounded-xl bg-black px-5 py-3 text-sm font-medium text-white"
+                >
+                  View Menu
+                </Link>
+              </div>
+            )}
+          </div>
+        </section>
       </div>
     </main>
   );
