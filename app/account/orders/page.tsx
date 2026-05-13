@@ -4,6 +4,10 @@ import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { ReorderButton } from "@/components/account/ReorderButton";
 
+function isPaymentDue(paymentStatus: string | null | undefined) {
+    return paymentStatus === "PAY_BY_DATE" || paymentStatus === "OFFLINE_PAYMENT_DUE";
+}
+
 export default async function AccountOrdersPage() {
   const session = await auth();
 
@@ -74,6 +78,11 @@ export default async function AccountOrdersPage() {
                     Payment: {order.paymentStatus ?? "Not set"}
                   </p>
                 </div>
+                {order.payByDate && (
+                    <p className="mt-1 text-sm text-amber-700">
+                        Pay by: {order.payByDate.toLocaleDateString()}
+                    </p>
+                    )}
 
                 <div className="text-left md:text-right">
                   <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium">
@@ -84,12 +93,23 @@ export default async function AccountOrdersPage() {
                     ${Number(order.total).toFixed(2)}
                   </p>
 
-                  <Link
-                    href={`/orders/${order.id}`}
-                    className="mt-3 inline-flex rounded-xl bg-black px-5 py-2 text-sm font-medium text-white"
-                  >
-                    View Details
-                  </Link>
+                <div className="mt-3 flex flex-wrap gap-2 md:justify-end">
+                    <Link
+                        href={`/orders/${order.id}`}
+                        className="inline-flex rounded-xl bg-black px-5 py-2 text-sm font-medium text-white"
+                    >
+                        View Details
+                    </Link>
+
+                    {isPaymentDue(order.paymentStatus) && (
+                        <Link
+                        href={`/orders/${order.id}`}
+                        className="inline-flex rounded-xl border border-amber-400 bg-amber-50 px-5 py-2 text-sm font-medium text-amber-900"
+                        >
+                        Payment Instructions
+                        </Link>
+                    )}
+                </div>
                   <ReorderButton
                     items={order.items.map((item) => ({
                         menuItemId: item.menuItemId,
