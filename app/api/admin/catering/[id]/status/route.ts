@@ -1,0 +1,42 @@
+import { NextResponse } from "next/server";
+import { CateringStatus } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth-guards";
+
+type RouteContext = {
+  params: Promise<{
+    id: string;
+  }>;
+};
+
+export async function PATCH(request: Request, context: RouteContext) {
+  try {
+    await requireAdmin();
+
+    const { id } = await context.params;
+    const body = await request.json();
+
+    const status = body.status as CateringStatus;
+
+    if (!Object.values(CateringStatus).includes(status)) {
+      return NextResponse.json(
+        { error: "Invalid catering status." },
+        { status: 400 },
+      );
+    }
+
+    const updated = await prisma.cateringRequest.update({
+      where: { id },
+      data: { status },
+    });
+
+    return NextResponse.json(updated);
+  } catch (error) {
+    console.error(error);
+
+    return NextResponse.json(
+      { error: "Failed to update catering status." },
+      { status: 500 },
+    );
+  }
+}
