@@ -3,12 +3,21 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth-guards";
 
-export default async function AdminCustomersPage() {
+type PageProps = {
+  searchParams: Promise<{
+    filter?: string;
+  }>;
+};
+
+export default async function AdminCustomersPage({ searchParams }: PageProps) {
   try {
     await requireAdmin();
   } catch {
     redirect("/");
   }
+
+  const params = await searchParams;
+  const filter = params.filter;
 
   const customers = await prisma.user.findMany({
     where: {
@@ -31,6 +40,7 @@ export default async function AdminCustomersPage() {
       .filter((order) => order.status !== "CANCELLED" && order.status !== "REFUNDED")
       .reduce((sum, order) => sum + Number(order.total), 0);
 
+      
     const paymentDueCount = customer.orders.filter((order) =>
       ["PAY_BY_DATE", "OFFLINE_PAYMENT_DUE"].includes(order.paymentStatus ?? ""),
     ).length;
@@ -49,6 +59,17 @@ export default async function AdminCustomersPage() {
       lastOrderDate: lastOrder?.createdAt ?? null,
     };
   });
+  const filteredCustomerRows = customerRows.filter((customer) => {
+        if (filter === "HAS_ORDERS") {
+          return customer.orderCount > 0;
+        }
+
+        if (filter === "PAYMENT_DUE") {
+          return customer.paymentDueCount > 0;
+        }
+
+        return true;
+      });
 
   return (
     <main className="min-h-screen bg-neutral-50 px-6 py-12">
@@ -64,7 +85,25 @@ export default async function AdminCustomersPage() {
             Review customer accounts, order activity, and payment status.
           </p>
         </div>
+        <div className="mb-6 rounded-2xl border bg-white p-5 shadow-sm">
+          <p className="mb-4 font-semibold">Filters</p>
 
+          <div className="flex flex-wrap gap-3">
+            {[
+              { label: "All", href: "/admin/customers" },
+              { label: "Has Orders", href: "/admin/customers?filter=HAS_ORDERS" },
+              { label: "Payment Due", href: "/admin/customers?filter=PAYMENT_DUE" },
+            ].map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="rounded-full border px-4 py-2 text-sm font-medium transition hover:bg-neutral-100"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        </div>
         <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
           <table className="w-full text-left text-sm">
             <thead className="bg-neutral-100">
@@ -79,7 +118,7 @@ export default async function AdminCustomersPage() {
             </thead>
 
             <tbody>
-              {customerRows.map((customer) => (
+              {filteredCustomerRows.map((customer) => (
                 <tr key={customer.id} className="border-t">
                   <td className="p-4">
                     <div className="font-medium">{customer.name}</div>
@@ -119,10 +158,10 @@ export default async function AdminCustomersPage() {
                 </tr>
               ))}
 
-              {customerRows.length === 0 && (
+              {filteredCustomerRows.length === 0 && (
                 <tr>
                   <td className="p-6 text-center text-neutral-500" colSpan={6}>
-                    No customers yet.
+                    No customers match the selected filters.
                   </td>
                 </tr>
               )}
