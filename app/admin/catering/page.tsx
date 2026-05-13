@@ -3,18 +3,33 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth-guards";
 
-export default async function AdminCateringPage() {
+type PageProps = {
+  searchParams: Promise<{
+    status?: string;
+  }>;
+};
+
+export default async function AdminCateringPage({ searchParams }: PageProps) {
   try {
     await requireAdmin();
   } catch {
     redirect("/");
   }
 
+  const params = await searchParams;
+  const statusFilter = params.status;
+
   const requests = await prisma.cateringRequest.findMany({
+    where:
+      statusFilter && statusFilter !== "ALL"
+        ? { status: statusFilter as any }
+        : {},
+
     orderBy: { createdAt: "desc" },
   });
 
   return (
+    
     <main className="min-h-screen bg-neutral-50 px-6 py-12">
       <div className="mx-auto max-w-6xl">
         <div className="mb-8">
@@ -29,6 +44,32 @@ export default async function AdminCateringPage() {
           </p>
         </div>
 
+        <div className="mb-6 rounded-2xl border bg-white p-5 shadow-sm">
+          <p className="mb-4 font-semibold">Filters</p>
+
+          <div className="flex flex-wrap gap-3">
+            {[
+              { label: "All", href: "/admin/catering" },
+              { label: "New", href: "/admin/catering?status=NEW" },
+              { label: "Reviewing", href: "/admin/catering?status=REVIEWING" },
+              { label: "Quoted", href: "/admin/catering?status=QUOTED" },
+              { label: "Approved", href: "/admin/catering?status=APPROVED" },
+              { label: "Deposit Due", href: "/admin/catering?status=DEPOSIT_DUE" },
+              { label: "Deposit Paid", href: "/admin/catering?status=DEPOSIT_PAID" },
+              { label: "Completed", href: "/admin/catering?status=COMPLETED" },
+              { label: "Cancelled", href: "/admin/catering?status=CANCELLED" },
+            ].map((filter) => (
+              <Link
+                key={filter.href}
+                href={filter.href}
+                className="rounded-full border px-4 py-2 text-sm font-medium transition hover:bg-neutral-100"
+              >
+                {filter.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+        
         <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
           <table className="w-full text-left text-sm">
             <thead className="bg-neutral-100">
