@@ -6,6 +6,7 @@ import { requireAdmin } from "@/lib/auth-guards";
 type PageProps = {
   searchParams: Promise<{
     filter?: string;
+    q?: string;
   }>;
 };
 
@@ -18,7 +19,7 @@ export default async function AdminCustomersPage({ searchParams }: PageProps) {
 
   const params = await searchParams;
   const filter = params.filter;
-
+  const query = params.q?.trim().toLowerCase() ?? ""; 
   const customers = await prisma.user.findMany({
     where: {
       role: "CUSTOMER",
@@ -60,16 +61,20 @@ export default async function AdminCustomersPage({ searchParams }: PageProps) {
     };
   });
   const filteredCustomerRows = customerRows.filter((customer) => {
-        if (filter === "HAS_ORDERS") {
-          return customer.orderCount > 0;
-        }
+    const matchesFilter =
+      filter === "HAS_ORDERS"
+        ? customer.orderCount > 0
+        : filter === "PAYMENT_DUE"
+          ? customer.paymentDueCount > 0
+          : true;
 
-        if (filter === "PAYMENT_DUE") {
-          return customer.paymentDueCount > 0;
-        }
+    const matchesSearch =
+      !query ||
+      customer.name.toLowerCase().includes(query) ||
+      customer.email.toLowerCase().includes(query);
 
-        return true;
-      });
+    return matchesFilter && matchesSearch;
+  });
 
   return (
     <main className="min-h-screen bg-neutral-50 px-6 py-12">
@@ -85,6 +90,22 @@ export default async function AdminCustomersPage({ searchParams }: PageProps) {
             Review customer accounts, order activity, and payment status.
           </p>
         </div>
+
+        <form className="mb-4 flex gap-3" action="/admin/customers">
+          {filter && <input type="hidden" name="filter" value={filter} />}
+
+          <input
+            name="q"
+            defaultValue={query}
+            placeholder="Search by name or email"
+            className="w-full rounded-xl border px-4 py-3 text-sm"
+          />
+
+          <button className="rounded-xl bg-black px-5 py-3 text-sm font-medium text-white">
+            Search
+          </button>
+        </form>
+
         <div className="mb-6 rounded-2xl border bg-white p-5 shadow-sm">
           <p className="mb-4 font-semibold">Filters</p>
 
@@ -104,6 +125,7 @@ export default async function AdminCustomersPage({ searchParams }: PageProps) {
             ))}
           </div>
         </div>
+
         <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
           <table className="w-full text-left text-sm">
             <thead className="bg-neutral-100">
