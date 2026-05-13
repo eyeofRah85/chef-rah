@@ -3,21 +3,50 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth-guards";
 
-export default async function AdminOrdersPage() {
+type PageProps = {
+  searchParams: Promise<{
+    status?: string;
+    payment?: string;
+    type?: string;
+  }>;
+};
+
+export default async function AdminOrdersPage({ searchParams }: PageProps) {
   try {
     await requireAdmin();
   } catch {
     redirect("/");
   }
 
+  const params = await searchParams;
+
+  const statusFilter = params.status;
+  const paymentFilter = params.payment;
+  const typeFilter = params.type;
+
   const orders = await prisma.order.findMany({
-    orderBy: {
-      createdAt: "desc",
-    },
-    include: {
-      items: true,
-    },
-  });
+  where: {
+    ...(statusFilter && statusFilter !== "ALL"
+      ? { status: statusFilter as any }
+      : {}),
+
+    ...(paymentFilter && paymentFilter !== "ALL"
+      ? { paymentStatus: paymentFilter }
+      : {}),
+
+    ...(typeFilter && typeFilter !== "ALL"
+      ? { orderType: typeFilter as any }
+      : {}),
+  },
+
+  orderBy: {
+    createdAt: "desc",
+  },
+
+  include: {
+    items: true,
+  },
+});
 
   return (
     <main className="min-h-screen bg-neutral-50 px-6 py-12">
@@ -32,6 +61,34 @@ export default async function AdminOrdersPage() {
           </p>
         </div>
 
+      <div className="overflow-hidden rounded-2xl border bg-white shadow-sm"></div>
+        <div className="mb-6 rounded-2xl border bg-white p-5 shadow-sm">
+          <p className="mb-4 font-semibold">Filters</p>
+
+          <div className="flex flex-wrap gap-3">
+            {[
+              { label: "All", href: "/admin/orders" },
+              { label: "Pending", href: "/admin/orders?status=PENDING" },
+              { label: "Accepted", href: "/admin/orders?status=ACCEPTED" },
+              { label: "Preparing", href: "/admin/orders?status=PREPARING" },
+              { label: "Ready", href: "/admin/orders?status=READY" },
+              { label: "Completed", href: "/admin/orders?status=COMPLETED" },
+              { label: "Payments Due", href: "/admin/orders?payment=PAY_BY_DATE" },
+              { label: "Offline Due", href: "/admin/orders?payment=OFFLINE_PAYMENT_DUE" },
+              { label: "Delivery", href: "/admin/orders?type=DELIVERY" },
+              { label: "Pickup", href: "/admin/orders?type=PICKUP" },
+              { label: "Catering", href: "/admin/orders?type=CATERING" },
+            ].map((filter) => (
+              <Link
+                key={filter.href}
+                href={filter.href}
+                className="rounded-full border px-4 py-2 text-sm font-medium transition hover:bg-neutral-100"
+              >
+                {filter.label}
+              </Link>
+            ))}
+          </div>
+        </div>
         <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
           <table className="w-full text-left text-sm">
             <thead className="bg-neutral-100">
@@ -100,7 +157,7 @@ export default async function AdminOrdersPage() {
               {orders.length === 0 && (
                 <tr>
                   <td className="p-6 text-center text-neutral-500" colSpan={9}>
-                    No orders yet.
+                    No orders match the selected filters.
                   </td>
                 </tr>
               )}

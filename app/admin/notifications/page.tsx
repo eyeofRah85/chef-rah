@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth-guards";
 
 export default async function AdminNotificationsPage() {
@@ -8,9 +9,58 @@ export default async function AdminNotificationsPage() {
     redirect("/");
   }
 
+  const [pendingOrders, unpaidOrders, cateringRequests] = await Promise.all([
+    prisma.order.count({
+      where: { status: "PENDING" },
+    }),
+
+    prisma.order.count({
+      where: {
+        paymentStatus: {
+          in: ["PAY_BY_DATE", "OFFLINE_PAYMENT_DUE"],
+        },
+      },
+    }),
+
+    prisma.cateringRequest.count({
+      where: {
+        status: {
+          in: ["NEW", "REVIEWING", "QUOTED", "DEPOSIT_DUE"],
+        },
+      },
+    }),
+  ]);
+
+  const notificationGroups = [
+    {
+      title: "Order Confirmations",
+      status: "Planned",
+      description:
+        "Send customers an email after an order is submitted.",
+    },
+    {
+      title: "Kitchen Status Updates",
+      status: "Planned",
+      description:
+        "Notify customers when an order is accepted, preparing, ready, or completed.",
+    },
+    {
+      title: "Payment Reminders",
+      status: "Planned",
+      description:
+        "Send reminders for manual invoices, offline payments, and pay-by-date orders.",
+    },
+    {
+      title: "Catering Follow-ups",
+      status: "Planned",
+      description:
+        "Notify customers when catering requests are reviewed, quoted, approved, or require deposit.",
+    },
+  ];
+
   return (
     <main className="min-h-screen bg-neutral-50 px-6 py-12">
-      <div className="mx-auto max-w-5xl">
+      <div className="mx-auto max-w-6xl">
         <div className="mb-8">
           <p className="text-sm font-semibold uppercase tracking-[0.3em] text-amber-700">
             Admin
@@ -19,57 +69,72 @@ export default async function AdminNotificationsPage() {
           <h1 className="mt-3 text-4xl font-bold">Notifications</h1>
 
           <p className="mt-3 text-neutral-700">
-            Manage customer notifications, kitchen alerts, catering follow-ups,
-            and future automated messaging.
+            Track notification needs for customer orders, payment reminders,
+            kitchen status updates, and catering follow-ups.
           </p>
         </div>
 
-        <div className="grid gap-6">
-          <section className="rounded-2xl border bg-white p-6 shadow-sm">
-            <h2 className="text-2xl font-semibold">Current Notification Flow</h2>
+        <section className="grid gap-5 md:grid-cols-3">
+          <div className="rounded-2xl border bg-white p-6 shadow-sm">
+            <p className="text-sm text-neutral-500">Pending Order Notices</p>
+            <p className="mt-3 text-4xl font-bold">{pendingOrders}</p>
+          </div>
 
-            <div className="mt-5 space-y-4">
-              <div className="rounded-xl border bg-neutral-50 p-5">
-                <p className="font-semibold">Order Workflow Notifications</p>
+          <div className="rounded-2xl border bg-white p-6 shadow-sm">
+            <p className="text-sm text-neutral-500">Payment Reminders</p>
+            <p className="mt-3 text-4xl font-bold">{unpaidOrders}</p>
+          </div>
 
-                <p className="mt-2 text-sm text-neutral-600">
-                  Order statuses are tracked internally through the admin and
-                  kitchen dashboards.
-                </p>
+          <div className="rounded-2xl border bg-white p-6 shadow-sm">
+            <p className="text-sm text-neutral-500">Catering Follow-ups</p>
+            <p className="mt-3 text-4xl font-bold">{cateringRequests}</p>
+          </div>
+        </section>
+
+        <section className="mt-10 rounded-2xl border bg-white p-6 shadow-sm">
+          <h2 className="text-2xl font-semibold">Notification Roadmap</h2>
+
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            {notificationGroups.map((group) => (
+              <div key={group.title} className="rounded-xl border p-5">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h3 className="font-semibold">{group.title}</h3>
+                    <p className="mt-2 text-sm text-neutral-600">
+                      {group.description}
+                    </p>
+                  </div>
+
+                  <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium">
+                    {group.status}
+                  </span>
+                </div>
               </div>
+            ))}
+          </div>
+        </section>
 
-              <div className="rounded-xl border bg-neutral-50 p-5">
-                <p className="font-semibold">Payment Tracking</p>
+        <section className="mt-8 rounded-2xl border bg-white p-6 shadow-sm">
+          <h2 className="text-2xl font-semibold">Recommended Providers</h2>
 
-                <p className="mt-2 text-sm text-neutral-600">
-                  Manual invoice and offline payment states are visible through
-                  account dashboards and admin tools.
-                </p>
-              </div>
-
-              <div className="rounded-xl border bg-neutral-50 p-5">
-                <p className="font-semibold">Catering Requests</p>
-
-                <p className="mt-2 text-sm text-neutral-600">
-                  Catering requests are routed into the admin review workflow.
-                </p>
-              </div>
+          <div className="mt-5 grid gap-4 md:grid-cols-2">
+            <div className="rounded-xl bg-neutral-100 p-5">
+              <p className="font-semibold">Email</p>
+              <p className="mt-2 text-sm text-neutral-600">
+                Use Resend, SendGrid, or Postmark for order confirmations and
+                payment reminders.
+              </p>
             </div>
-          </section>
 
-          <section className="rounded-2xl border bg-white p-6 shadow-sm">
-            <h2 className="text-2xl font-semibold">Planned Notification Features</h2>
-
-            <ul className="mt-5 list-inside list-disc space-y-2 text-neutral-700">
-              <li>Email order confirmations</li>
-              <li>Kitchen status notifications</li>
-              <li>Payment reminders</li>
-              <li>Catering quote notifications</li>
-              <li>SMS delivery alerts</li>
-              <li>Admin operational alerts</li>
-            </ul>
-          </section>
-        </div>
+            <div className="rounded-xl bg-neutral-100 p-5">
+              <p className="font-semibold">SMS</p>
+              <p className="mt-2 text-sm text-neutral-600">
+                Use Twilio later for delivery alerts, pickup reminders, and
+                kitchen status updates.
+              </p>
+            </div>
+          </div>
+        </section>
       </div>
     </main>
   );
