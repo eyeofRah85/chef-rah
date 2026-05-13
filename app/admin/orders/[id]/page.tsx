@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth-guards";
 import { UpdateOrderStatusForm } from "@/components/admin/UpdateOrderStatusForm";
 import { MarkOrderPaidButton } from "@/components/admin/MarkOrderPaidButton";
+import { OrderApprovalForm } from "@/components/admin/OrderApprovalForm";
 
 type PageProps = {
   params: Promise<{
@@ -132,6 +133,23 @@ export default async function AdminOrderDetailsPage({ params }: PageProps) {
           </section>
 
           <aside className="space-y-6">
+            <div className="rounded-2xl border bg-white p-6 shadow-sm">
+              <h2 className="text-2xl font-semibold">Approval</h2>
+
+              <div className="mt-6">
+                  <OrderApprovalForm
+                    orderId={order.id}
+                    currentApprovalStatus={order.approvalStatus}
+                  />
+                </div>
+
+                {order.approvalNote && (
+                  <p className="mt-4 text-sm text-neutral-600">
+                    <strong>Note:</strong> {order.approvalNote}
+                  </p>
+                  )}
+              </div>
+              
             <div className="rounded-2xl border bg-white p-6 shadow-sm">
               <h2 className="text-2xl font-semibold">Status</h2>
               <p className="mt-3 rounded-full bg-neutral-100 px-3 py-2 text-center text-sm font-medium">

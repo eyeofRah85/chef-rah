@@ -57,6 +57,12 @@ enum CateringStatus {
   CANCELLED
 }
 
+enum ApprovalStatus{
+  PENDING
+  APPROVED
+  DENIED
+}
+
 model CateringRequest {
   id              String         @id @default(cuid())
 
@@ -84,6 +90,10 @@ model CateringRequest {
 
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
+  approvalStatus ApprovalStatus @default(PENDING)
+  approvalNote   String?
+  approvedAt     DateTime?
+  deniedAt       DateTime?
 }
 
 model User {
@@ -255,6 +265,10 @@ model Order {
 
   createdAt                DateTime    @default(now())
   updatedAt                DateTime    @updatedAt
+  approvalStatus ApprovalStatus @default(PENDING)
+  approvalNote   String?
+  approvedAt     DateTime?
+  deniedAt       DateTime?
 }
 
 model OrderItem {

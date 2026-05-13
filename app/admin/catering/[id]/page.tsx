@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth-guards";
 import { UpdateCateringStatusForm } from "@/components/admin/UpdateCateringStatusForm";
+import { CateringApprovalForm } from "@/components/admin/CateringApprovalForm";
 
 type PageProps = {
   params: Promise<{
@@ -106,6 +107,22 @@ export default async function AdminCateringDetailsPage({ params }: PageProps) {
 
           <aside className="space-y-6">
             <div className="rounded-2xl border bg-white p-6 shadow-sm">
+              <div className="rounded-2xl border bg-white p-6 shadow-sm">
+              <h2 className="text-2xl font-semibold">Approval</h2>
+
+                <div className="mt-6">
+                  <CateringApprovalForm
+                    requestId={request.id}
+                    currentApprovalStatus={request.approvalStatus}
+                  />
+                </div>
+
+                  {request.approvalNote && (
+                    <p className="mt-4 text-sm text-neutral-600">
+                      <strong>Note:</strong> {request.approvalNote}
+                    </p>
+                  )}
+                </div>
               <h2 className="text-2xl font-semibold">Status</h2>
 
               <p className="mt-3 rounded-full bg-neutral-100 px-3 py-2 text-center text-sm font-medium">
