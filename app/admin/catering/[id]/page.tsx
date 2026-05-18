@@ -4,6 +4,7 @@ import { requireAdmin } from "@/lib/auth-guards";
 import { UpdateCateringStatusForm } from "@/components/admin/UpdateCateringStatusForm";
 import { CateringApprovalForm } from "@/components/admin/CateringApprovalForm";
 import Link from "next/link";
+import { CateringQuoteForm } from "@/components/admin/CateringQuoteForm";
 
 type PageProps = {
   params: Promise<{
@@ -145,29 +146,41 @@ export default async function AdminCateringDetailsPage({ params }: PageProps) {
             </div>
 
             <div className="rounded-2xl border bg-white p-6 shadow-sm">
+
               <h2 className="text-2xl font-semibold">Quote / Deposit</h2>
+                <div className="mt-5 space-y-3 text-sm">
+                  <p>
+                    <strong>Estimated Total:</strong>{" "}
+                    {request.estimatedTotal
+                      ? `$${Number(request.estimatedTotal).toFixed(2)}`
+                      : "Not set"}
+                  </p>
 
-              <div className="mt-5 space-y-3 text-sm">
-                <p>
-                  <strong>Estimated Total:</strong>{" "}
-                  {request.estimatedTotal
-                    ? `$${Number(request.estimatedTotal).toFixed(2)}`
-                    : "Not set"}
-                </p>
+                  <p>
+                    <strong>Deposit Amount:</strong>{" "}
+                    {request.depositAmount
+                      ? `$${Number(request.depositAmount).toFixed(2)}`
+                      : "Not set"}
+                  </p>
 
-                <p>
-                  <strong>Deposit Amount:</strong>{" "}
-                  {request.depositAmount
-                    ? `$${Number(request.depositAmount).toFixed(2)}`
-                    : "Not set"}
-                </p>
-
-                <p>
-                  <strong>Deposit Paid:</strong>{" "}
-                  {request.depositPaidAt
-                    ? request.depositPaidAt.toLocaleString()
-                    : "Not paid"}
-                </p>
+                  <p>
+                    <strong>Deposit Paid:</strong>{" "}
+                    {request.depositPaidAt
+                      ? request.depositPaidAt.toLocaleString()
+                      : "Not paid"}
+                  </p>
+                  
+                  <div className="mt-6 border-t pt-5">
+                    <CateringQuoteForm
+                      requestId={request.id}
+                      currentEstimatedTotal={
+                        request.estimatedTotal ? Number(request.estimatedTotal) : null
+                      }
+                      currentDepositAmount={
+                        request.depositAmount ? Number(request.depositAmount) : null
+                      }
+                    />
+                  </div>
               </div>
             </div>
           </aside>
