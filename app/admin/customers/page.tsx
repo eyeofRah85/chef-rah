@@ -80,6 +80,9 @@ export default async function AdminCustomersPage({ searchParams }: PageProps) {
     <main className="min-h-screen bg-neutral-50 px-6 py-12">
       <div className="mx-auto max-w-6xl">
         <div className="mb-8">
+          <Link className="text-sm font-medium underline" href="/admin">
+            &larr;  Back to Dashboard
+          </Link>
           <p className="text-sm font-semibold uppercase tracking-[0.3em] text-amber-700">
             Admin
           </p>

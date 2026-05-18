@@ -11,13 +11,14 @@ export default async function AdminPage() {
   }
 
   const [
-    pendingOrders,
-    activeOrders,
-    completedOrders,
-    unpaidOrders,
-    approvalOrders,
-    recentOrders,
-  ] = await Promise.all([
+  pendingOrders,
+  activeOrders,
+  completedOrders,
+  unpaidOrders,
+  approvalOrders,
+  pendingCateringApprovals,
+  recentOrders,
+] = await Promise.all([
     prisma.order.count({
       where: { status: "PENDING" },
     }),
@@ -41,16 +42,14 @@ export default async function AdminPage() {
         },
       },
     }),
-
-    prisma.order.count({
+    prisma.cateringRequest.count({
       where: {
-        items: {
-          some: {
-            menuItem: {
-              requiresApproval: true,
-            },
-          },
-        },
+        approvalStatus: "PENDING",
+      },
+    }),
+        prisma.order.count({
+      where: {
+        approvalStatus: "PENDING",
       },
     }),
 
@@ -81,6 +80,11 @@ export default async function AdminPage() {
       label: "Pending Orders",
       value: pendingOrders,
       href: "/admin/orders",
+    },
+    {
+      label: "Catering Approvals",
+      value: pendingCateringApprovals,
+      href: "/admin/catering?approval=PENDING",
     },
     {
       label: "Active Orders",
@@ -243,8 +247,19 @@ export default async function AdminPage() {
                   </Link>
                 )}
 
+                {pendingCateringApprovals > 0 && (
+                  <Link
+                    href="/admin/catering?approval=PENDING"
+                    className="block rounded-xl border border-blue-300 bg-blue-50 p-4 text-blue-900"
+                  >
+                    {pendingCateringApprovals} catering request
+                    {pendingCateringApprovals === 1 ? "" : "s"} waiting for approval.
+                  </Link>
+                )}
+
                 {unpaidOrders === 0 &&
                   approvalOrders === 0 &&
+                  pendingCateringApprovals === 0 &&
                   pendingOrders === 0 && (
                     <p className="rounded-xl bg-neutral-100 p-4 text-neutral-600">
                       No urgent alerts.

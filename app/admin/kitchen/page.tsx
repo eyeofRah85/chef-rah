@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth-guards";
 import { KitchenOrderCard } from "@/components/admin/KitchenOrderCard";
-
+import Link from "next/link";
 export default async function KitchenPage() {
   try {
     await requireAdmin();
@@ -34,6 +34,9 @@ export default async function KitchenPage() {
   return (
     <main className="min-h-screen bg-neutral-100 p-6">
       <div className="mb-8">
+        <Link className="text-sm font-medium underline" href="/admin">
+          &larr;  Back to Dashboard
+        </Link>
         <p className="text-sm font-semibold uppercase tracking-[0.3em] text-amber-700">
           Kitchen View
         </p>
