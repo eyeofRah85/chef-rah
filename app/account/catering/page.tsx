@@ -102,6 +102,12 @@ export default async function AccountCateringPage() {
                       Deposit pending
                     </p>
                   ) : null}
+                  <Link
+                    href={`/account/catering/${request.id}`}
+                    className="mt-4 inline-flex rounded-xl bg-black px-5 py-2 text-sm font-medium text-white"
+                    >
+                    View Details
+                </Link>
                 </div>
               </div>
             </div>
