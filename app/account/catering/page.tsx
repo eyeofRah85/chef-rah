@@ -1,0 +1,132 @@
+import Link from "next/link";
+import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
+import { redirect } from "next/navigation";
+
+export default async function AccountCateringPage() {
+  const session = await auth();
+
+  if (!session?.user?.email) {
+    redirect("/login");
+  }
+
+  const user = await prisma.user.findUnique({
+    where: {
+      email: session.user.email,
+    },
+    include: {
+      cateringRequests: {
+        orderBy: {
+          createdAt: "desc",
+        },
+      },
+    },
+  });
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  return (
+    <main className="min-h-screen bg-neutral-50 px-6 py-12">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-8">
+          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-amber-700">
+            Account
+          </p>
+
+          <h1 className="mt-3 text-4xl font-bold">
+            Catering Requests
+          </h1>
+
+          <p className="mt-3 text-neutral-700">
+            Track event requests, quotes, approvals, and deposit status.
+          </p>
+        </div>
+
+        <div className="space-y-5">
+          {user.cateringRequests.map((request) => (
+            <div
+              key={request.id}
+              className="rounded-2xl border bg-white p-6 shadow-sm"
+            >
+              <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
+                <div>
+                  <p className="text-sm font-semibold uppercase tracking-[0.2em] text-amber-700">
+                    {request.eventType ?? "Catering Request"}
+                  </p>
+
+                  <h2 className="mt-2 text-2xl font-bold">
+                    Submitted {request.createdAt.toLocaleDateString()}
+                  </h2>
+
+                  <p className="mt-2 text-sm text-neutral-600">
+                    Event Date:{" "}
+                    {request.eventDate
+                      ? request.eventDate.toLocaleString()
+                      : "Not provided"}
+                  </p>
+
+                  <p className="mt-1 text-sm text-neutral-600">
+                    Guests: {request.guestCount ?? "Not provided"}
+                  </p>
+
+                  <p className="mt-1 text-sm text-neutral-600">
+                    Approval: {request.approvalStatus}
+                  </p>
+                </div>
+
+                <div className="text-left md:text-right">
+                  <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium">
+                    {request.status}
+                  </span>
+
+                  {request.estimatedTotal && (
+                    <p className="mt-3 text-2xl font-bold">
+                      ${Number(request.estimatedTotal).toFixed(2)}
+                    </p>
+                  )}
+
+                  {request.depositAmount && (
+                    <p className="mt-1 text-sm text-amber-700">
+                      Deposit: ${Number(request.depositAmount).toFixed(2)}
+                    </p>
+                  )}
+
+                  {request.depositPaidAt ? (
+                    <p className="mt-1 text-xs text-green-700">
+                      Deposit paid
+                    </p>
+                  ) : request.depositAmount ? (
+                    <p className="mt-1 text-xs text-amber-700">
+                      Deposit pending
+                    </p>
+                  ) : null}
+                </div>
+              </div>
+            </div>
+          ))}
+
+          {user.cateringRequests.length === 0 && (
+            <div className="rounded-2xl border bg-white p-8 text-center shadow-sm">
+              <h2 className="text-2xl font-semibold">
+                No catering requests yet
+              </h2>
+
+              <p className="mt-2 text-neutral-600">
+                Catering requests will appear here after submission.
+              </p>
+
+              <Link
+                href="/catering"
+                className="mt-6 inline-flex rounded-xl bg-black px-5 py-3 font-medium text-white"
+              >
+                Start Catering Request
+              </Link>
+            </div>
+          )}
+        </div>
+      </div>
+    </main>
+  );
+}

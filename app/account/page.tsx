@@ -24,6 +24,12 @@ export default async function AccountPage() {
           items: true,
         },
       },
+      cateringRequests: {
+        take: 3,
+        orderBy: {
+          createdAt: "desc",
+        },
+      },
     },
   });
 
@@ -82,6 +88,16 @@ export default async function AccountPage() {
           >
             <p className="text-sm text-neutral-500">Payments Due</p>
             <p className="mt-3 text-4xl font-bold">{unpaidOrders.length}</p>
+          </Link>
+          
+          <Link
+            href="/account/catering"
+            className="rounded-2xl border bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+          >
+            <p className="text-sm text-neutral-500">Catering Requests</p>
+            <p className="mt-3 text-4xl font-bold">
+              {user.cateringRequests.length}
+            </p>
           </Link>
         </section>
 
