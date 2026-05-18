@@ -9,21 +9,13 @@ export default async function AdminPage() {
   } catch {
     redirect("/");
   }
-
-  const [
-  pendingOrders,
-  activeOrders,
-  completedOrders,
-  unpaidOrders,
-  approvalOrders,
-  pendingCateringApprovals,
-  recentOrders,
-] = await Promise.all([
-    prisma.order.count({
+  
+  const metrics = {
+    pendingOrders: prisma.order.count({
       where: { status: "PENDING" },
     }),
 
-    prisma.order.count({
+    activeOrders: prisma.order.count({
       where: {
         status: {
           in: ["PENDING", "ACCEPTED", "PREPARING", "READY"],
@@ -31,35 +23,55 @@ export default async function AdminPage() {
       },
     }),
 
-    prisma.order.count({
+    completedOrders: prisma.order.count({
       where: { status: "COMPLETED" },
     }),
 
-    prisma.order.count({
+    unpaidOrders: prisma.order.count({
       where: {
         paymentStatus: {
           in: ["PAY_BY_DATE", "OFFLINE_PAYMENT_DUE"],
         },
       },
     }),
-    prisma.cateringRequest.count({
-      where: {
-        approvalStatus: "PENDING",
-      },
-    }),
-        prisma.order.count({
+
+    approvalOrders: prisma.order.count({
       where: {
         approvalStatus: "PENDING",
       },
     }),
 
-    prisma.order.findMany({
+    pendingCateringApprovals: prisma.cateringRequest.count({
+      where: {
+        approvalStatus: "PENDING",
+      },
+    }),
+
+    recentOrders: prisma.order.findMany({
       take: 5,
       orderBy: { createdAt: "desc" },
       include: {
         items: true,
       },
     }),
+  };
+
+  const [
+    pendingOrders,
+    activeOrders,
+    completedOrders,
+    unpaidOrders,
+    approvalOrders,
+    pendingCateringApprovals,
+    recentOrders,
+  ] = await Promise.all([
+    metrics.pendingOrders,
+    metrics.activeOrders,
+    metrics.completedOrders,
+    metrics.unpaidOrders,
+    metrics.approvalOrders,
+    metrics.pendingCateringApprovals,
+    metrics.recentOrders,
   ]);
 
   const totalRevenueResult = await prisma.order.aggregate({
