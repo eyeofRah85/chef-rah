@@ -6,6 +6,7 @@ import { requireAdmin } from "@/lib/auth-guards";
 type PageProps = {
   searchParams: Promise<{
     status?: string;
+    approval?: string;
   }>;
 };
 
@@ -18,12 +19,18 @@ export default async function AdminCateringPage({ searchParams }: PageProps) {
 
   const params = await searchParams;
   const statusFilter = params.status;
+  const approvalFilter = params.approval;
 
   const requests = await prisma.cateringRequest.findMany({
-    where:
-      statusFilter && statusFilter !== "ALL"
-        ? { status: statusFilter as any }
-        : {},
+   where: {
+        ...(statusFilter && statusFilter !== "ALL"
+          ? { status: statusFilter as any }
+          : {}),
+
+        ...(approvalFilter && approvalFilter !== "ALL"
+          ? { approvalStatus: approvalFilter as any }
+          : {}),
+      },
 
     orderBy: { createdAt: "desc" },
   });
@@ -58,6 +65,9 @@ export default async function AdminCateringPage({ searchParams }: PageProps) {
               { label: "Deposit Paid", href: "/admin/catering?status=DEPOSIT_PAID" },
               { label: "Completed", href: "/admin/catering?status=COMPLETED" },
               { label: "Cancelled", href: "/admin/catering?status=CANCELLED" },
+              { label: "Approval Pending", href: "/admin/catering?approval=PENDING" },
+              { label: "Approved", href: "/admin/catering?approval=APPROVED" },
+              { label: "Denied", href: "/admin/catering?approval=DENIED" },
             ].map((filter) => (
               <Link
                 key={filter.href}
@@ -78,6 +88,7 @@ export default async function AdminCateringPage({ searchParams }: PageProps) {
                 <th className="p-4">Event</th>
                 <th className="p-4">Guests</th>
                 <th className="p-4">Status</th>
+                <th className="p-4">Approval</th>
                 <th className="p-4">Submitted</th>
                 <th className="p-4"></th>
               </tr>
@@ -108,6 +119,12 @@ export default async function AdminCateringPage({ searchParams }: PageProps) {
                     </span>
                   </td>
 
+                  <td className="p-4">
+                    <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium">
+                      {request.approvalStatus}
+                    </span>
+                  </td>
+
                   <td className="p-4 text-neutral-600">
                     {request.createdAt.toLocaleDateString()}
                   </td>
@@ -125,7 +142,7 @@ export default async function AdminCateringPage({ searchParams }: PageProps) {
 
               {requests.length === 0 && (
                 <tr>
-                  <td className="p-6 text-center text-neutral-500" colSpan={6}>
+                  <td className="p-6 text-center text-neutral-500" colSpan={7}>
                     No catering requests yet.
                   </td>
                 </tr>

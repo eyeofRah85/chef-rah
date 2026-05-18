@@ -8,6 +8,7 @@ type PageProps = {
     status?: string;
     payment?: string;
     type?: string;
+    approval?: string;
   }>;
 };
 
@@ -23,6 +24,7 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
   const statusFilter = params.status;
   const paymentFilter = params.payment;
   const typeFilter = params.type;
+  const approvalFilter = params.approval;
 
   const orders = await prisma.order.findMany({
   where: {
@@ -36,6 +38,10 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
 
     ...(typeFilter && typeFilter !== "ALL"
       ? { orderType: typeFilter as any }
+      : {}),
+
+    ...(approvalFilter && approvalFilter !== "ALL"
+      ? { approvalStatus: approvalFilter as any }
       : {}),
   },
 
@@ -78,6 +84,9 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
               { label: "Delivery", href: "/admin/orders?type=DELIVERY" },
               { label: "Pickup", href: "/admin/orders?type=PICKUP" },
               { label: "Catering", href: "/admin/orders?type=CATERING" },
+              { label: "Approval Pending", href: "/admin/orders?approval=PENDING" },
+              { label: "Approved", href: "/admin/orders?approval=APPROVED" },
+              { label: "Denied", href: "/admin/orders?approval=DENIED" },
             ].map((filter) => (
               <Link
                 key={filter.href}
@@ -101,6 +110,7 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
                 <th className="p-4">Payment</th>
                 <th className="p-4">Pay By</th>
                 <th className="p-4">Created</th>
+                <th className="p-4">Approval</th>
                 <th className="p-4"></th>
               </tr>
             </thead>
@@ -120,6 +130,12 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
                   <td className="p-4">
                     <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium">
                       {order.status}
+                    </span>
+                  </td>
+
+                  <td className="p-4">
+                    <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium">
+                      {order.approvalStatus}
                     </span>
                   </td>
 
@@ -156,7 +172,7 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
 
               {orders.length === 0 && (
                 <tr>
-                  <td className="p-6 text-center text-neutral-500" colSpan={9}>
+                  <td className="p-6 text-center text-neutral-500" colSpan={10}>
                     No orders match the selected filters.
                   </td>
                 </tr>
