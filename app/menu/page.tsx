@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { MenuCard } from "@/components/menu/MenuCard";
+import { MenuCategoryFilter } from "@/components/menu/MenuCategoryFilter";
 
 export default async function MenuPage() {
 
@@ -48,6 +49,8 @@ const categories = await prisma.menuCategory.findMany({
             during checkout.
           </p>
         </div>
+        
+        <MenuCategoryFilter categories={categories.map((category) => category.name)} />
 
         <div className="space-y-10">
           {categories.map((category) => (
