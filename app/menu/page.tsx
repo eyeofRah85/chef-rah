@@ -2,14 +2,18 @@ import { prisma } from "@/lib/prisma";
 import { MenuCard } from "@/components/menu/MenuCard";
 
 export default async function MenuPage() {
+
 const categories = await prisma.menuCategory.findMany({
   orderBy: {
     sortOrder: "asc",
   },
   include: {
     items: {
+         where: {
+          archived: false,
+        },
       orderBy: {
-        createdAt: "desc",
+        createdAt: "desc",         
       },
       include: {
         allergens: {

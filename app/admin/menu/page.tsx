@@ -7,6 +7,7 @@ import Link from "next/link";
 import { MenuAvailabilityToggle } from "@/components/admin/MenuAvailabilityToggle";
 import { MenuItemEditForm } from "@/components/admin/MenuItemEditForm";
 import { DeleteOptionGroupButton } from "@/components/admin/DeleteOptionGroupButton";
+import { ArchiveMenuItemButton } from "@/components/admin/ArchiveMenuItemButton";
 
 export default async function AdminMenuPage() {
   try {
@@ -20,6 +21,9 @@ export default async function AdminMenuPage() {
 
   include: {
     items: {
+         where: {
+          archived: false,
+        },
       orderBy: {
         createdAt: "desc",
       },
@@ -152,6 +156,7 @@ const allergens =
                               customerInstructionsEnabled: item.customerInstructionsEnabled,
                             }}
                           />
+                          <ArchiveMenuItemButton menuItemId={item.id} />
                         </div>
                       </div>
                     </div>
