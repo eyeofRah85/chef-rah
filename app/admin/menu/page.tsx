@@ -5,6 +5,7 @@ import { MenuItemForm } from "@/components/admin/MenuItemForm";
 import { MenuItemCustomizationEditor } from "@/components/admin/MenuItemCustomizationEditor";
 import Link from "next/link"; 
 import { MenuAvailabilityToggle } from "@/components/admin/MenuAvailabilityToggle";
+import { MenuItemEditForm } from "@/components/admin/MenuItemEditForm";
 
 export default async function AdminMenuPage() {
   try {
@@ -137,7 +138,18 @@ const allergens =
                             menuItemId={item.id}
                             available={item.available}
                           />
-                          
+                          <MenuItemEditForm
+                            item={{
+                              id: item.id,
+                              name: item.name,
+                              description: item.description,
+                              price: Number(item.price),
+                              type: item.type,
+                              seasonal: item.seasonal,
+                              requiresApproval: item.requiresApproval,
+                              customerInstructionsEnabled: item.customerInstructionsEnabled,
+                            }}
+                          />
                         </div>
                       </div>
                     </div>
