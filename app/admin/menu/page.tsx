@@ -73,6 +73,14 @@ const allergens =
         >
           View Archived Items
         </a>
+
+        <a
+          href="/admin/menu/categories"
+          className="inline-flex rounded-xl border px-4 py-2 text-sm font-medium"
+        >
+          Manage Categories
+        </a>
+        
         <div className="grid gap-8 lg:grid-cols-[380px_1fr]">
           <MenuItemForm />
 

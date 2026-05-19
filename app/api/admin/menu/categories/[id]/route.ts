@@ -1,0 +1,45 @@
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth-guards";
+
+type RouteContext = {
+  params: Promise<{
+    id: string;
+  }>;
+};
+
+export async function PATCH(request: Request, context: RouteContext) {
+  try {
+    await requireAdmin();
+
+    const { id } = await context.params;
+    const formData = await request.formData();
+
+    const name = String(formData.get("name") ?? "").trim();
+    const sortOrder = Number(formData.get("sortOrder") ?? 0);
+
+    if (!name) {
+      return NextResponse.json(
+        { error: "Category name is required." },
+        { status: 400 },
+      );
+    }
+
+    const updated = await prisma.menuCategory.update({
+      where: { id },
+      data: {
+        name,
+        sortOrder: Number.isNaN(sortOrder) ? 0 : sortOrder,
+      },
+    });
+
+    return NextResponse.json(updated);
+  } catch (error) {
+    console.error(error);
+
+    return NextResponse.json(
+      { error: "Failed to update category." },
+      { status: 500 },
+    );
+  }
+}
