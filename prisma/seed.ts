@@ -1,6 +1,14 @@
+import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 
-const prisma = new PrismaClient();
+const adapter = new PrismaPg({
+  connectionString: process.env.DATABASE_URL,
+});
+
+const prisma = new PrismaClient({
+  adapter,
+});
 
 async function main() {
   const allergens = [
@@ -30,6 +38,25 @@ async function main() {
   }
 
   console.log("Allergens seeded.");
+
+  const existingSettings = await prisma.businessSettings.findFirst();
+
+  if (!existingSettings) {
+    await prisma.businessSettings.create({
+      data: {
+        deliveryFee: 10,
+        lateFee: 10,
+        cateringDepositPercent: 50,
+        orderCutoffDay: 4,
+        orderCutoffHour: 17,
+        orderCutoffMinute: 0,
+        noWeekendOrdering: true,
+        deliveryArea: "Greater Atlanta area",
+      },
+    });
+  }
+
+  console.log("Business settings seeded");
 }
 
 main()

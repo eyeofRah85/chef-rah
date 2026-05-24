@@ -299,3 +299,21 @@ model OrderStatusHistory {
 
   createdAt DateTime    @default(now())
 }
+
+model BusinessSettings {
+  id                       String   @id @default(cuid())
+
+  deliveryFee              Decimal  @db.Decimal(10, 2) @default(10)
+  lateFee                  Decimal  @db.Decimal(10, 2) @default(10)
+  cateringDepositPercent   Int      @default(50)
+
+  orderCutoffDay           Int      @default(4)
+  orderCutoffHour          Int      @default(17)
+  orderCutoffMinute        Int      @default(0)
+
+  noWeekendOrdering        Boolean  @default(true)
+  deliveryArea             String?  @default("Greater Atlanta area")
+
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+}

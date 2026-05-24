@@ -3,9 +3,10 @@ import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { calculateTip } from "@/lib/order-calculations";
 import {
-  calculateDeliveryFee,
-  calculateLateFee,
-} from "@/lib/business-rules";
+  calculateServerDeliveryFee,
+  calculateServerLateFee,
+  validateServerRequestedDate,
+} from "@/lib/server-business-rules";
 
 export async function POST(request: Request) {
   try {
@@ -33,8 +34,8 @@ export async function POST(request: Request) {
       0,
     );
 
-    const deliveryFee = calculateDeliveryFee(checkout.orderType);
-    const lateFee = calculateLateFee();
+    const deliveryFee = await calculateServerDeliveryFee(checkout.orderType);
+    const lateFee = await calculateServerLateFee();
 
     const tipAmount = calculateTip(
       subtotal,
@@ -44,6 +45,20 @@ export async function POST(request: Request) {
 
     const total = subtotal + deliveryFee + lateFee + tipAmount;
     const requiresApproval = items.some((item: any) => item.requiresApproval);
+
+    if (checkout.requestedDateTime) {
+      const requestedDate = new Date(checkout.requestedDateTime);
+
+      const validation = await validateServerRequestedDate(requestedDate);
+
+      if (!validation.valid) {
+        return NextResponse.json(
+          { error: validation.error },
+          { status: 400 },
+        );
+      }
+    }
+
     const order = await prisma.order.create({
       data: {
         user: {
