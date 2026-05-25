@@ -1,83 +1,82 @@
-export const DELIVERY_FEE = 10;
-export const LATE_FEE = 10;
-
 export function isWeekend(date: Date) {
   const day = date.getDay();
-
   return day === 0 || day === 6;
 }
 
-export function getNextSunday() {
+export function getCurrentWeekCutoff({
+  cutoffDay,
+  cutoffHour,
+  cutoffMinute,
+}: {
+  cutoffDay: number;
+  cutoffHour: number;
+  cutoffMinute: number;
+}) {
   const now = new Date();
 
-  const result = new Date(now);
+  const cutoff = new Date(now);
+  cutoff.setHours(cutoffHour, cutoffMinute, 0, 0);
 
-  result.setHours(12, 0, 0, 0);
+  const currentDay = cutoff.getDay();
+  const diff = cutoffDay - currentDay;
 
-  const currentDay = result.getDay();
-
-  const daysUntilSunday =
-    currentDay === 0
-      ? 7
-      : 7 - currentDay;
-
-  result.setDate(
-    result.getDate() + daysUntilSunday,
-  );
-
-  return result;
-}
-
-export function getThursdayCutoff() {
-  const nextSunday = getNextSunday();
-
-  const cutoff = new Date(nextSunday);
-
-  cutoff.setDate(cutoff.getDate() - 3);
-
-  cutoff.setHours(17, 0, 0, 0);
+  cutoff.setDate(cutoff.getDate() + diff);
 
   return cutoff;
 }
 
-export function isLateOrder() {
+export function isLateOrder({
+  cutoffDay,
+  cutoffHour,
+  cutoffMinute,
+}: {
+  cutoffDay: number;
+  cutoffHour: number;
+  cutoffMinute: number;
+}) {
   const now = new Date();
 
-  return now > getThursdayCutoff();
+  return now > getCurrentWeekCutoff({
+    cutoffDay,
+    cutoffHour,
+    cutoffMinute,
+  });
 }
 
-export function calculateDeliveryFee(
-  orderType: string,
-) {
-  return orderType === "delivery"
-    ? DELIVERY_FEE
-    : 0;
-}
-
-export function calculateLateFee() {
-  return isLateOrder()
-    ? LATE_FEE
+export function calculateLateFeeFromSettings({
+  lateFee,
+  cutoffDay,
+  cutoffHour,
+  cutoffMinute,
+}: {
+  lateFee: number;
+  cutoffDay: number;
+  cutoffHour: number;
+  cutoffMinute: number;
+}) {
+  return isLateOrder({
+    cutoffDay,
+    cutoffHour,
+    cutoffMinute,
+  })
+    ? lateFee
     : 0;
 }
 
 export function validateRequestedDate(
   requestedDate: Date,
+  options?: {
+    noWeekendOrdering?: boolean;
+  },
 ) {
-  if (isWeekend(requestedDate)) {
+  if (options?.noWeekendOrdering && isWeekend(requestedDate)) {
     return {
       valid: false,
-      error:
-        "Weekend ordering is unavailable.",
+      error: "Weekend ordering is unavailable.",
     };
   }
 
   return {
     valid: true,
   };
-}
-
-export function calculateCateringDeposit(
-  total: number,
-) {
-  return total * 0.5;
 }

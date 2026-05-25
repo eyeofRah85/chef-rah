@@ -6,10 +6,7 @@ import { calculateTip } from "@/lib/order-calculations";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
-  calculateDeliveryFee,
-  calculateLateFee,
-} from "@/lib/business-rules";
-import {
+  calculateLateFeeFromSettings,
   validateRequestedDate,
 } from "@/lib/business-rules";
 import { useBusinessSettings } from "@/hooks/useBusinessSettings";
@@ -47,14 +44,18 @@ export default function CheckoutPage() {
   const deliveryFee =
   details.orderType === "delivery" ? settings.deliveryFee : 0;
 
-  const lateFee = calculateLateFee();
+  const lateFee = calculateLateFeeFromSettings({
+  lateFee: settings.lateFee,
+  cutoffDay: settings.orderCutoffDay,
+  cutoffHour: settings.orderCutoffHour,
+  cutoffMinute: settings.orderCutoffMinute,
+  });
 
   const tipAmount = calculateTip(
     subtotal,
     details.tipType,
     details.customTipAmount,
   );
-
 
   const total =
     subtotal +
@@ -109,8 +110,8 @@ export default function CheckoutPage() {
             />
 
             <p className="mt-2 text-xs text-neutral-500">
-              Sunday delivery orders are due by Thursday at 5:00 PM.
-              Weekend ordering rules will be enforced later.
+              Late-week orders may include an additional fee.
+              Weekend ordering availability may be limited..
             </p>
           </div>
 
@@ -250,7 +251,9 @@ export default function CheckoutPage() {
                 return;
               }
 
-              const validation = validateRequestedDate(requestedDate);
+              const validation = validateRequestedDate(requestedDate, {
+                noWeekendOrdering: settings.noWeekendOrdering,
+              });
 
               if (!validation.valid) {
                 alert(validation.error);
