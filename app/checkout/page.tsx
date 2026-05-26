@@ -65,6 +65,32 @@ export default function CheckoutPage() {
     
   const requiresApproval = items.some((item) => item.requiresApproval);
 
+  const cutoffDayNames = [
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+];
+
+const cutoffHour12 =
+  settings.orderCutoffHour === 0
+    ? 12
+    : settings.orderCutoffHour > 12
+      ? settings.orderCutoffHour - 12
+      : settings.orderCutoffHour;
+
+const cutoffAmPm =
+  settings.orderCutoffHour >= 12 ? "PM" : "AM";
+
+const cutoffMinute = settings.orderCutoffMinute
+  .toString()
+  .padStart(2, "0");
+
+const cutoffText = `${cutoffDayNames[settings.orderCutoffDay]} at ${cutoffHour12}:${cutoffMinute} ${cutoffAmPm}`;
+
   return (
     <main className="min-h-screen bg-neutral-50 px-6 py-12">
       <div className="mx-auto max-w-3xl rounded-2xl border bg-white p-8 shadow-sm">
@@ -94,7 +120,11 @@ export default function CheckoutPage() {
               <option value="catering">Catering</option>
             </select>
           </div>
-
+          {details.orderType === "delivery" && settings.deliveryArea && (
+            <p className="mt-2 text-xs text-neutral-500">
+              Delivery area: {settings.deliveryArea}.
+            </p>
+          )}
           <div>
             <label className="block text-sm font-medium">
               Requested Date / Time
@@ -114,7 +144,13 @@ export default function CheckoutPage() {
               Weekend ordering availability may be limited..
             </p>
           </div>
-
+          <p className="mt-2 text-xs text-neutral-500">
+            Orders placed after {cutoffText} may include a $
+            {settings.lateFee.toFixed(2)} late-order fee.
+            {settings.noWeekendOrdering
+              ? " Weekend ordering is currently unavailable."
+              : ""}
+          </p>
           <div>
             <label className="block text-sm font-medium">
               Allergy Notes
@@ -229,20 +265,20 @@ export default function CheckoutPage() {
                 className="mt-2 w-full rounded-xl border px-4 py-3"
               />
             </div>
-          )}
-          {requiresApproval && (
-            <div className="rounded-xl border border-blue-300 bg-blue-50 p-4 text-sm text-blue-900">
-              One or more items in this order require chef approval. Your order may need
-              review before final confirmation.
-            </div>
-          )}
-          <button
-            type="button"
-            onClick={async () => {
-              if (!details.requestedDateTime) {
-                alert("Please choose a requested date and time.");
-                return;
-              }
+            )}
+            {requiresApproval && (
+              <div className="rounded-xl border border-blue-300 bg-blue-50 p-4 text-sm text-blue-900">
+                One or more items in this order require chef approval. Your order may need
+                review before final confirmation.
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={async () => {
+                if (!details.requestedDateTime) {
+                  alert("Please choose a requested date and time.");
+                  return;
+                }
 
               const requestedDate = new Date(details.requestedDateTime);
 
