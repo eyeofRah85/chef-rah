@@ -116,12 +116,31 @@ export default async function AccountCateringDetailsPage({ params }: PageProps) 
                     : "Not set"}
                 </p>
 
-                <p>
-                  <strong>Deposit Paid:</strong>{" "}
-                  {request.depositPaidAt
-                    ? request.depositPaidAt.toLocaleString()
-                    : "Not paid"}
-                </p>
+                {request.depositAmount && !request.depositPaidAt && (
+                  <div className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+                    <p className="font-semibold">Deposit Pending</p>
+
+                    <p className="mt-2">
+                      A deposit of ${Number(request.depositAmount).toFixed(2)} is due before
+                      this catering request can be finalized.
+                    </p>
+
+                    <p className="mt-2 text-xs">
+                      Online deposit payments are coming soon. For now, the business will
+                      provide manual payment instructions.
+                    </p>
+                  </div>
+                )}
+
+                {request.depositPaidAt && (
+                  <div className="mt-4 rounded-xl border border-green-300 bg-green-50 p-4 text-sm text-green-900">
+                    <p className="font-semibold">Deposit Paid</p>
+
+                    <p className="mt-2">
+                      Deposit received on {request.depositPaidAt.toLocaleString()}.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </section>

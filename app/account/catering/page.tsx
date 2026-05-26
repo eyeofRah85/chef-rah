@@ -88,20 +88,18 @@ export default async function AccountCateringPage() {
                   )}
 
                   {request.depositAmount && (
-                    <p className="mt-1 text-sm text-amber-700">
-                      Deposit: ${Number(request.depositAmount).toFixed(2)}
-                    </p>
-                  )}
+                    <div className="mt-2 rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+                      <p className="font-medium">
+                        Deposit: ${Number(request.depositAmount).toFixed(2)}
+                      </p>
 
-                  {request.depositPaidAt ? (
-                    <p className="mt-1 text-xs text-green-700">
-                      Deposit paid
-                    </p>
-                  ) : request.depositAmount ? (
-                    <p className="mt-1 text-xs text-amber-700">
-                      Deposit pending
-                    </p>
-                  ) : null}
+                      <p className="mt-1 text-xs">
+                        {request.depositPaidAt
+                          ? "Deposit paid"
+                          : "Deposit pending"}
+                      </p>
+                    </div>
+                  )}
                   <Link
                     href={`/account/catering/${request.id}`}
                     className="mt-4 inline-flex rounded-xl bg-black px-5 py-2 text-sm font-medium text-white"
