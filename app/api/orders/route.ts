@@ -7,6 +7,8 @@ import {
   calculateServerLateFee,
   validateServerRequestedDate,
 } from "@/lib/server-business-rules";
+import { resend } from "@/lib/email";
+import { OrderConfirmationEmail } from "@/emails/OrderConfirmationEmail";
 
 export async function POST(request: Request) {
   try {
@@ -138,6 +140,26 @@ export async function POST(request: Request) {
         items: true,
       },
     });
+
+    // email section
+    try {
+      await resend.emails.send({
+        from: "Chef Rah's Twisted Kitchen <orders@yourdomain.com>",
+        /*from: "Chef Rah's Twisted Kitchen <preston.s.butler@rcndev.com>",*/
+        to: session.user.email,
+        subject: "Order Confirmation",
+        react: OrderConfirmationEmail({
+          customerName: session.user.name ?? "Customer",
+          orderId: order.id,
+          total: Number(order.total),
+          orderType: order.orderType,
+        }),
+      });
+      
+    } catch (emailError) {
+      console.error("Failed to send order confirmation email", emailError);
+    }
+    // end email section
     return NextResponse.json(order);
   } catch (error) {
     console.error(error);
