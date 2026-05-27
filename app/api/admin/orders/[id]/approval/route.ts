@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { ApprovalStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth-guards";
+import { resend } from "@/lib/email";
+import { OrderApprovalEmail } from "@/emails/OrderApprovalEmail";
+
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -60,7 +63,26 @@ export async function PATCH(request: Request, context: RouteContext) {
       },
     },
   });
-
+  try {
+    if (approvalStatus === "APPROVED" || approvalStatus === "DENIED") {
+      await resend.emails.send({
+        from: "Chef Rah's Twisted Kitchen <orders@yourdomain.com>",
+        to: updated.customerEmail,
+        subject:
+          approvalStatus === "APPROVED"
+            ? "Your order has been approved"
+            : "Your order was not approved",
+        react: OrderApprovalEmail({
+          customerName: updated.customerName,
+          orderId: updated.id,
+          approved: approvalStatus === "APPROVED",
+          approvalNote,
+        }),
+      });
+    }
+  } catch (emailError) {
+    console.error("Failed to send order approval email", emailError);
+  }
     return NextResponse.json(updated);
   } catch (error) {
     console.error(error);
