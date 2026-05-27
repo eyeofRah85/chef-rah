@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { ApprovalStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth-guards";
-import { resend, emailFromAddress } from "@/lib/email";
+import { resend, emailFromAddress, appUrl } from "@/lib/email";
 import { OrderApprovalEmail } from "@/emails/OrderApprovalEmail";
 
 
@@ -79,6 +79,7 @@ export async function PATCH(request: Request, context: RouteContext) {
             customerName: updated.customerName,
             orderId: updated.id,
             approved: approvalStatus === "APPROVED",
+            orderUrl: `${appUrl}/orders/${updated.id}`,
             approvalNote,
           }),
         });

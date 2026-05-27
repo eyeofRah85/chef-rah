@@ -7,6 +7,7 @@ import {
   Html,
   Preview,
   Text,
+  Button
 } from "react-email";
 
 type Props = {
@@ -14,6 +15,7 @@ type Props = {
   orderId: string;
   approved: boolean;
   approvalNote?: string | null;
+  orderUrl: string;
 };
 
 export function OrderApprovalEmail({
@@ -21,6 +23,7 @@ export function OrderApprovalEmail({
   orderId,
   approved,
   approvalNote,
+  orderUrl
 }: Props) {
   return (
     <Html>
@@ -64,7 +67,20 @@ export function OrderApprovalEmail({
               <strong>Note:</strong> {approvalNote}
             </Text>
           )}
-
+          <Button
+            href={orderUrl}
+            style={{
+              display: "inline-block",
+              backgroundColor: "#000000",
+              color: "#ffffff",
+              padding: "12px 20px",
+              borderRadius: "8px",
+              textDecoration: "none",
+              marginTop: "20px",
+            }}
+          >
+            View Order Details
+          </Button>
           <Hr />
 
           <Text>

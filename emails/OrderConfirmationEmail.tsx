@@ -8,13 +8,30 @@ import {
   Preview,
   Section,
   Text,
+  Button
 } from "react-email";
+
+type OrderEmailItem = {
+  name: string;
+  quantity: number;
+  unitPrice: number;
+  lineTotal: number;
+  notes?: string | null;
+};
 
 type Props = {
   customerName: string;
   orderId: string;
   total: number;
+  subtotal: number;
+  deliveryFee: number;
+  lateFee: number;
+  tipAmount: number;
   orderType: string;
+  paymentStatus?: string | null;
+  approvalStatus?: string | null;
+  orderUrl: string;
+  items: OrderEmailItem[];
 };
 
 export function OrderConfirmationEmail({
@@ -22,6 +39,14 @@ export function OrderConfirmationEmail({
   orderId,
   total,
   orderType,
+  paymentStatus,
+  approvalStatus,
+  subtotal,
+  deliveryFee,
+  lateFee,
+  tipAmount,
+  orderUrl,
+  items
 }: Props) {
   return (
     <Html>
@@ -62,7 +87,74 @@ export function OrderConfirmationEmail({
             <Text>
               <strong>Order Type:</strong> {orderType}
             </Text>
+            <Text>
+              <strong>Payment:</strong> {paymentStatus ?? "Not set"}
+            </Text>
 
+            <Text>
+              <strong>Approval:</strong> {approvalStatus ?? "Not set"}
+            </Text>
+
+            <Hr />
+
+            <Heading as="h2">Order Summary</Heading>
+
+            {items.map((item, index) => (
+              <Section key={`${item.name}-${index}`}>
+                <Text>
+                  <strong>
+                    {item.quantity}× {item.name}
+                  </strong>
+                </Text>
+
+                <Text>
+                  ${item.unitPrice.toFixed(2)} each — ${item.lineTotal.toFixed(2)}
+                </Text>
+
+                {item.notes && (
+                  <Text style={{ whiteSpace: "pre-wrap" }}>
+                    {item.notes}
+                  </Text>
+                )}
+              </Section>
+            ))}
+
+            <Hr />
+
+            <Text>
+              <strong>Subtotal:</strong> ${subtotal.toFixed(2)}
+            </Text>
+
+            <Text>
+              <strong>Delivery Fee:</strong> ${deliveryFee.toFixed(2)}
+            </Text>
+
+            <Text>
+              <strong>Late Fee:</strong> ${lateFee.toFixed(2)}
+            </Text>
+
+            <Text>
+              <strong>Tip:</strong> ${tipAmount.toFixed(2)}
+            </Text>
+
+            <Text>
+              <strong>Total:</strong> ${total.toFixed(2)}
+            </Text>
+
+            <Button
+              href={orderUrl}
+              style={{
+                display: "inline-block",
+                backgroundColor: "#000000",
+                color: "#ffffff",
+                padding: "12px 20px",
+                borderRadius: "8px",
+                textDecoration: "none",
+                marginTop: "20px",
+              }}
+            >
+              View Order Details
+            </Button>
             <Text>
               <strong>Total:</strong> ${total.toFixed(2)}
             </Text>

@@ -7,6 +7,7 @@ import {
   Html,
   Preview,
   Text,
+  Button
 } from "react-email";
 
 type Props = {
@@ -17,6 +18,7 @@ type Props = {
   approvalNote?: string | null;
   estimatedTotal?: number | null;
   depositAmount?: number | null;
+  requestUrl: string;
 };
 
 export function CateringStatusEmail({
@@ -27,6 +29,7 @@ export function CateringStatusEmail({
   approvalNote,
   estimatedTotal,
   depositAmount,
+  requestUrl,
 }: Props) {
   return (
     <Html>
@@ -86,7 +89,20 @@ export function CateringStatusEmail({
           )}
 
           <Hr />
-
+            <Button
+              href={requestUrl}
+              style={{
+                display: "inline-block",
+                backgroundColor: "#000000",
+                color: "#ffffff",
+                padding: "12px 20px",
+                borderRadius: "8px",
+                textDecoration: "none",
+                marginTop: "20px",
+              }}
+            >
+              View Catering Request
+            </Button>
           <Text>
             You can log into your account to review catering request details,
             quote information, and deposit status.

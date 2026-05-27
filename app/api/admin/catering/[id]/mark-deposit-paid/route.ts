@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth-guards";
-import { resend, emailFromAddress } from "@/lib/email";
+import { resend, emailFromAddress, appUrl } from "@/lib/email";
 import { CateringDepositPaidEmail } from "@/emails/CateringDepositPaidEmail";
 
 type RouteContext = {
@@ -40,6 +40,7 @@ export async function PATCH(request: Request, context: RouteContext) {
             paidAt: updated.depositPaidAt
               ? updated.depositPaidAt.toLocaleString()
               : new Date().toLocaleString(),
+              requestUrl: `${appUrl}/account/catering/${updated.id}`,
           }),
         });
       }

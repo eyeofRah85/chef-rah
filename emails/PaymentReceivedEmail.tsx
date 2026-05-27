@@ -7,6 +7,7 @@ import {
   Html,
   Preview,
   Text,
+  Button
 } from "react-email";
 
 type Props = {
@@ -14,6 +15,7 @@ type Props = {
   orderId: string;
   total: number;
   paidAt: string;
+  orderUrl: string;
 };
 
 export function PaymentReceivedEmail({
@@ -21,6 +23,7 @@ export function PaymentReceivedEmail({
   orderId,
   total,
   paidAt,
+  orderUrl
 }: Props) {
   return (
     <Html>
@@ -64,7 +67,20 @@ export function PaymentReceivedEmail({
           </Text>
 
           <Hr />
-
+          <Button
+            href={orderUrl}
+            style={{
+              display: "inline-block",
+              backgroundColor: "#000000",
+              color: "#ffffff",
+              padding: "12px 20px",
+              borderRadius: "8px",
+              textDecoration: "none",
+              marginTop: "20px",
+            }}
+          >
+            View Order Details
+          </Button>
           <Text>
             Thank you for your order with Chef Rah&apos;s Twisted Kitchen.
           </Text>

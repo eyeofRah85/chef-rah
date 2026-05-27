@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
-import { resend, emailFromAddress } from "@/lib/email";
+import { resend, emailFromAddress, appUrl } from "@/lib/email";
 import { CateringRequestEmail } from "@/emails/CateringRequestEmail";
 
 
@@ -54,24 +54,26 @@ try {
     console.warn("Email skipped: RESEND_API_KEY is not configured.");
   } else {
     await resend.emails.send({
-    from: emailFromAddress,
-    to: email,
-    subject: "Catering Request Received",
-    react: CateringRequestEmail({
-      customerName: requestRecord.name,
-      eventType: requestRecord.eventType ?? "Catering Request",
-      guestCount: requestRecord.guestCount,
-      eventDate: requestRecord.eventDate
-        ? requestRecord.eventDate.toLocaleString()
-        : null,
-    }),
-  });
-}
+      from: emailFromAddress,
+      to: email,
+      subject: "Catering Request Received",
+      react: CateringRequestEmail({
+        customerName: requestRecord.name,
+        requestId: requestRecord.id,
+        eventType: requestRecord.eventType ?? "Catering Request",
+        guestCount: requestRecord.guestCount,
+        eventDate: requestRecord.eventDate
+          ? requestRecord.eventDate.toLocaleString()
+          : null,
+        location: requestRecord.location,
+        requestedMenu: requestRecord.requestedMenu,
+        specialRequests: requestRecord.specialRequests,
+        requestUrl: `${appUrl}/account/catering/${requestRecord.id}`,
+      }),
+    });
+  }
 } catch (emailError) {
-  console.error(
-    "Failed to send catering confirmation email",
-    emailError,
-  );
+  console.error("Failed to send catering confirmation email", emailError);
 }
   return NextResponse.redirect(
     new URL(`/catering/thank-you?id=${requestRecord.id}`, request.url),

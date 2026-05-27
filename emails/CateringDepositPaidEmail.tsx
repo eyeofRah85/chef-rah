@@ -7,6 +7,7 @@ import {
   Html,
   Preview,
   Text,
+  Button
 } from "react-email";
 
 type Props = {
@@ -14,6 +15,7 @@ type Props = {
   eventType: string;
   depositAmount: number;
   paidAt: string;
+  requestUrl: string;
 };
 
 export function CateringDepositPaidEmail({
@@ -21,6 +23,7 @@ export function CateringDepositPaidEmail({
   eventType,
   depositAmount,
   paidAt,
+  requestUrl,
 }: Props) {
   return (
     <Html>
@@ -67,7 +70,20 @@ export function CateringDepositPaidEmail({
             Thank you. Your catering request can now continue through the
             planning process.
           </Text>
-
+            <Button
+              href={requestUrl}
+              style={{
+                display: "inline-block",
+                backgroundColor: "#000000",
+                color: "#ffffff",
+                padding: "12px 20px",
+                borderRadius: "8px",
+                textDecoration: "none",
+                marginTop: "20px",
+              }}
+            >
+              View Catering Request
+            </Button>
           <Text
             style={{
               fontSize: "12px",

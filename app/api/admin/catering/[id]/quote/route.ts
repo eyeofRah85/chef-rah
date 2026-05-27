@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth-guards";
 import { calculateServerCateringDeposit } from "@/lib/server-business-rules";
-import { resend, emailFromAddress } from "@/lib/email";
+import { resend, emailFromAddress, appUrl } from "@/lib/email";
 import { CateringStatusEmail } from "@/emails/CateringStatusEmail";
 
 type RouteContext = {
@@ -78,6 +78,7 @@ try {
           depositAmount: updated.depositAmount
             ? Number(updated.depositAmount)
             : null,
+            requestUrl: `${appUrl}/account/catering/${updated.id}`,
         }),
       });
     }
