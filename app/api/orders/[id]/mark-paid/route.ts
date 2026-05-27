@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth-guards";
+import { resend } from "@/lib/email";
+import { PaymentReceivedEmail } from "@/emails/PaymentReceivedEmail";
 
 type RouteContext = {
   params: Promise<{
@@ -27,10 +29,26 @@ export async function PATCH(request: Request, context: RouteContext) {
         },
       },
     });
-
+    try {
+      await resend.emails.send({
+        from: "Chef Rah's Twisted Kitchen <orders@yourdomain.com>",
+        to: updatedOrder.customerEmail,
+        subject: "Payment Received",
+        react: PaymentReceivedEmail({
+          customerName: updatedOrder.customerName,
+          orderId: updatedOrder.id,
+          total: Number(updatedOrder.total),
+          paidAt: updatedOrder.paidAt
+            ? updatedOrder.paidAt.toLocaleString()
+            : new Date().toLocaleString(),
+        }),
+      });
+    } catch (emailError) {
+      console.error("Failed to send payment received email", emailError);
+    }
     return NextResponse.json(updatedOrder);
-  } catch (error) {
-    console.error(error);
+    } catch (error) {
+      console.error(error);
 
     return NextResponse.json(
       { error: "Failed to mark order as paid." },
