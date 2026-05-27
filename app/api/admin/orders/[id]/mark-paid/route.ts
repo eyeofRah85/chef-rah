@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth-guards";
-import { resend, emailFromAddress, appUrl } from "@/lib/email";
+import { sendAppEmail, appUrl } from "@/lib/email";
 import { PaymentReceivedEmail } from "@/emails/PaymentReceivedEmail";
 
 type RouteContext = {
@@ -29,12 +29,7 @@ export async function PATCH(request: Request, context: RouteContext) {
         },
       },
     });
-    try {
-      if (!resend) {
-          console.warn("Email skipped: RESEND_API_KEY is not configured.");
-        } else {
-      await resend.emails.send({
-        from: emailFromAddress,
+    await sendAppEmail({        
         to: updatedOrder.customerEmail,
         subject: "Payment Received",
         react: PaymentReceivedEmail({
@@ -47,10 +42,7 @@ export async function PATCH(request: Request, context: RouteContext) {
             orderUrl: `${appUrl}/orders/${updatedOrder.id}`,
         }),
       });
-    }
-    } catch (emailError) {
-      console.error("Failed to send payment received email", emailError);
-    }
+       
     return NextResponse.json(updatedOrder);
   } catch (error) {
     console.error(error);

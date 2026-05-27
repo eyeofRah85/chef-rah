@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { ApprovalStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth-guards";
-import { resend, emailFromAddress, appUrl } from "@/lib/email";
+import { sendAppEmail, appUrl } from "@/lib/email";
 import { CateringStatusEmail } from "@/emails/CateringStatusEmail";
 
 type RouteContext = {
@@ -38,13 +38,7 @@ export async function PATCH(request: Request, context: RouteContext) {
               : undefined,
       },
     });
-
-    try {
-  if (!resend) {
-    console.warn("Email skipped: RESEND_API_KEY is not configured.");
-  } else {
-        await resend.emails.send({
-          from: emailFromAddress,
+        await sendAppEmail({
           to: updated.email,
           subject:
             approvalStatus === "APPROVED"
@@ -64,12 +58,7 @@ export async function PATCH(request: Request, context: RouteContext) {
               : null,
               requestUrl: `${appUrl}/account/catering/${updated.id}`,
           }),
-        });
-      }
-    } catch (emailError) {
-      console.error("Failed to send catering status email", emailError);
-    }
-    
+        });    
     return NextResponse.json(updated);
   } catch (error) {
     console.error(error);

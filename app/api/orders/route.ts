@@ -7,7 +7,7 @@ import {
   calculateServerLateFee,
   validateServerRequestedDate,
 } from "@/lib/server-business-rules";
-import { resend, emailFromAddress, appUrl } from "@/lib/email";
+import { sendAppEmail, appUrl } from "@/lib/email";
 import { OrderConfirmationEmail } from "@/emails/OrderConfirmationEmail";
 
 export async function POST(request: Request) {
@@ -142,39 +142,30 @@ export async function POST(request: Request) {
     });
 
     // email section
- try {
-  if (!resend) {
-    console.warn("Email skipped: RESEND_API_KEY is not configured.");
-  } else {
-    await resend.emails.send({
-      from: emailFromAddress,
-      to: session.user.email,
-      subject: "Order Confirmation",
-      react: OrderConfirmationEmail({
-        customerName: session.user.name ?? "Customer",
-        orderId: order.id,
-        orderType: order.orderType,
-        total: Number(order.total),
-        subtotal: Number(order.subtotal),
-        deliveryFee: Number(order.deliveryFee),
-        lateFee: Number(order.lateFee),
-        tipAmount: Number(order.tipAmount),
-        paymentStatus: order.paymentStatus,
-        approvalStatus: order.approvalStatus,
-        orderUrl: `${appUrl}/orders/${order.id}`,
-        items: order.items.map((item) => ({
-          name: item.name,
-          quantity: item.quantity,
-          unitPrice: Number(item.unitPrice),
-          lineTotal: Number(item.lineTotal),
-          notes: item.notes,
-        })),
-      }),
-    });
-  }
-} catch (emailError) {
-  console.error("Failed to send order confirmation email", emailError);
-}
+      await sendAppEmail({
+        to: session.user.email,
+        subject: "Order Confirmation",
+        react: OrderConfirmationEmail({
+          customerName: session.user.name ?? "Customer",
+          orderId: order.id,
+          orderType: order.orderType,
+          total: Number(order.total),
+          subtotal: Number(order.subtotal),
+          deliveryFee: Number(order.deliveryFee),
+          lateFee: Number(order.lateFee),
+          tipAmount: Number(order.tipAmount),
+          paymentStatus: order.paymentStatus,
+          approvalStatus: order.approvalStatus,
+          orderUrl: `${appUrl}/orders/${order.id}`,
+          items: order.items.map((item) => ({
+            name: item.name,
+            quantity: item.quantity,
+            unitPrice: Number(item.unitPrice),
+            lineTotal: Number(item.lineTotal),
+            notes: item.notes,
+          })),
+        }),
+      });
     // end email section
     return NextResponse.json(order);
   } catch (error) {

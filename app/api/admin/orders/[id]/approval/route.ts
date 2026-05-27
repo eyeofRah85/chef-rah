@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { ApprovalStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth-guards";
-import { resend, emailFromAddress, appUrl } from "@/lib/email";
+import { sendAppEmail, appUrl } from "@/lib/email";
 import { OrderApprovalEmail } from "@/emails/OrderApprovalEmail";
 
 
@@ -63,13 +63,8 @@ export async function PATCH(request: Request, context: RouteContext) {
       },
     },
   });
-  try {
-    if (!resend) {
-      console.warn("Email skipped: RESEND_API_KEY is not configured.");
-      } else {
-      if (approvalStatus === "APPROVED" || approvalStatus === "DENIED") {
-        await resend.emails.send({
-          from: emailFromAddress,
+    if (approvalStatus === "APPROVED" || approvalStatus === "DENIED") {
+        await sendAppEmail({
           to: updated.customerEmail,
           subject:
             approvalStatus === "APPROVED"
@@ -83,11 +78,7 @@ export async function PATCH(request: Request, context: RouteContext) {
             approvalNote,
           }),
         });
-      }
-    }
-  } catch (emailError) {
-    console.error("Failed to send order approval email", emailError);
-  }
+      } 
     return NextResponse.json(updated);
   } catch (error) {
     console.error(error);
