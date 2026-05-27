@@ -10,6 +10,7 @@ import {
   Text,
   Button
 } from "react-email";
+import { emailStyles } from "@/emails/styles";
 
 type Props = {
   customerName: string;
@@ -42,19 +43,10 @@ export function CateringRequestEmail({
       </Preview>
 
       <Body
-        style={{
-          backgroundColor: "#f5f5f5",
-          fontFamily: "Arial, sans-serif",
-          padding: "40px 0",
-        }}
+        style={emailStyles.body}
       >
         <Container
-          style={{
-            backgroundColor: "#ffffff",
-            borderRadius: "12px",
-            padding: "40px",
-            maxWidth: "600px",
-          }}
+          style={emailStyles.container}
         >
           <Heading>Catering Request Received</Heading>
 
@@ -98,15 +90,7 @@ export function CateringRequestEmail({
 
             <Button
               href={requestUrl}
-              style={{
-                display: "inline-block",
-                backgroundColor: "#000000",
-                color: "#ffffff",
-                padding: "12px 20px",
-                borderRadius: "8px",
-                textDecoration: "none",
-                marginTop: "20px",
-              }}
+              style={emailStyles.button}
             >
               View Catering Request
             </Button>
@@ -126,10 +110,7 @@ export function CateringRequestEmail({
           <Hr />
 
           <Text
-            style={{
-              fontSize: "12px",
-              color: "#666666",
-            }}
+            style={emailStyles.footerText}
           >
             Chef Rah&apos;s Twisted Kitchen
           </Text>
