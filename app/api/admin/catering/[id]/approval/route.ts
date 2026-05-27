@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { ApprovalStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth-guards";
-import { resend } from "@/lib/email";
+import { resend, emailFromAddress } from "@/lib/email";
 import { CateringStatusEmail } from "@/emails/CateringStatusEmail";
 
 type RouteContext = {
@@ -40,9 +40,11 @@ export async function PATCH(request: Request, context: RouteContext) {
     });
 
     try {
-      if (approvalStatus === "APPROVED" || approvalStatus === "DENIED") {
+  if (!resend) {
+    console.warn("Email skipped: RESEND_API_KEY is not configured.");
+  } else {
         await resend.emails.send({
-          from: "Chef Rah's Twisted Kitchen <orders@yourdomain.com>",
+          from: emailFromAddress,
           to: updated.email,
           subject:
             approvalStatus === "APPROVED"

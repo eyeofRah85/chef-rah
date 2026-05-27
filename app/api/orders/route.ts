@@ -7,7 +7,7 @@ import {
   calculateServerLateFee,
   validateServerRequestedDate,
 } from "@/lib/server-business-rules";
-import { resend } from "@/lib/email";
+import { resend, emailFromAddress } from "@/lib/email";
 import { OrderConfirmationEmail } from "@/emails/OrderConfirmationEmail";
 
 export async function POST(request: Request) {
@@ -142,9 +142,12 @@ export async function POST(request: Request) {
     });
 
     // email section
-    try {
-      await resend.emails.send({
-        // from: "Chef Rah's Twisted Kitchen <orders@yourdomain.com>",
+   try {
+  if (!resend) {
+    console.warn("Email skipped: RESEND_API_KEY is not configured.");
+  } else {
+    await resend.emails.send({
+        // from: emailFromAddress,
         from: "Chef Rah's Twisted Kitchen <preston.s.butler@rcndev.com>",
         to: session.user.email,
         // cc: "preston.butler@live.com",
@@ -156,7 +159,7 @@ export async function POST(request: Request) {
           orderType: order.orderType,
         }),
       });
-      
+    }
     } catch (emailError) {
       console.error("Failed to send order confirmation email", emailError);
     }

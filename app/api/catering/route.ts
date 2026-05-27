@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
-import { resend } from "@/lib/email";
+import { resend, emailFromAddress } from "@/lib/email";
 import { CateringRequestEmail } from "@/emails/CateringRequestEmail";
 
 
@@ -50,8 +50,11 @@ export async function POST(request: Request) {
     },
   });
 try {
-  await resend.emails.send({
-    from: "Chef Rah's Twisted Kitchen <orders@yourdomain.com>",
+  if (!resend) {
+    console.warn("Email skipped: RESEND_API_KEY is not configured.");
+  } else {
+    await resend.emails.send({
+    from: emailFromAddress,
     to: email,
     subject: "Catering Request Received",
     react: CateringRequestEmail({
@@ -63,6 +66,7 @@ try {
         : null,
     }),
   });
+}
 } catch (emailError) {
   console.error(
     "Failed to send catering confirmation email",

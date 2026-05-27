@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth-guards";
-import { resend } from "@/lib/email";
+import { resend, emailFromAddress } from "@/lib/email";
 import { CateringDepositPaidEmail } from "@/emails/CateringDepositPaidEmail";
 
 type RouteContext = {
@@ -23,9 +23,12 @@ export async function PATCH(request: Request, context: RouteContext) {
         depositPaidAt: new Date(),
       },
     });
-      try {
+   try {
+  if (!resend) {
+    console.warn("Email skipped: RESEND_API_KEY is not configured.");
+  } else {
         await resend.emails.send({
-          from: "Chef Rah's Twisted Kitchen <orders@yourdomain.com>",
+          from: emailFromAddress,
           to: updated.email,
           subject: "Catering Deposit Received",
           react: CateringDepositPaidEmail({
@@ -39,6 +42,7 @@ export async function PATCH(request: Request, context: RouteContext) {
               : new Date().toLocaleString(),
           }),
         });
+      }
       } catch (emailError) {
         console.error("Failed to send catering deposit email", emailError);
       }

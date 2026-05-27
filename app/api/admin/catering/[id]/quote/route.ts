@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth-guards";
 import { calculateServerCateringDeposit } from "@/lib/server-business-rules";
-import { resend } from "@/lib/email";
+import { resend, emailFromAddress } from "@/lib/email";
 import { CateringStatusEmail } from "@/emails/CateringStatusEmail";
 
 type RouteContext = {
@@ -58,9 +58,12 @@ export async function PATCH(request: Request, context: RouteContext) {
         status: estimatedTotal ? "QUOTED" : undefined,
       },
     });
-    try {
-      await resend.emails.send({
-        from: "Chef Rah's Twisted Kitchen <orders@yourdomain.com>",
+try {
+  if (!resend) {
+    console.warn("Email skipped: RESEND_API_KEY is not configured.");
+  } else {
+    await resend.emails.send({
+        from: emailFromAddress,
         to: updated.email,
         subject: "Your catering quote has been updated",
         react: CateringStatusEmail({
@@ -77,6 +80,7 @@ export async function PATCH(request: Request, context: RouteContext) {
             : null,
         }),
       });
+    }
     } catch (emailError) {
       console.error("Failed to send catering quote email", emailError);
     }
