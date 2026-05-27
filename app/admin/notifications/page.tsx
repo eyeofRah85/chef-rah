@@ -10,6 +10,8 @@ export default async function AdminNotificationsPage() {
     redirect("/");
   }
 
+  const emailConfigured = Boolean(process.env.RESEND_API_KEY);
+  
   const [pendingOrders, unpaidOrders, cateringRequests] = await Promise.all([
     prisma.order.count({
       where: { status: "PENDING" },
@@ -35,27 +37,51 @@ export default async function AdminNotificationsPage() {
   const notificationGroups = [
     {
       title: "Order Confirmations",
-      status: "Planned",
+      status: "Active",
       description:
-        "Send customers an email after an order is submitted.",
+        "Customers receive an email after an order is submitted.",
+    },
+    {
+      title: "Order Approval Updates",
+      status: "Active",
+      description:
+        "Customers receive an email when an approval-required order is approved or denied.",
+    },
+    {
+      title: "Payment Received Notices",
+      status: "Active",
+      description:
+        "Customers receive an email when manual/offline payment is marked as paid.",
+    },
+    {
+      title: "Catering Request Confirmations",
+      status: "Active",
+      description:
+        "Customers receive an email after submitting a catering request.",
+    },
+    {
+      title: "Catering Approval / Quote Updates",
+      status: "Active",
+      description:
+        "Customers receive an email when catering approval or quote details are updated.",
+    },
+    {
+      title: "Catering Deposit Received",
+      status: "Active",
+      description:
+        "Customers receive an email when a catering deposit is marked as paid.",
     },
     {
       title: "Kitchen Status Updates",
       status: "Planned",
       description:
-        "Notify customers when an order is accepted, preparing, ready, or completed.",
+        "Notify customers when an order is preparing, ready, or completed.",
     },
     {
       title: "Payment Reminders",
       status: "Planned",
       description:
         "Send reminders for manual invoices, offline payments, and pay-by-date orders.",
-    },
-    {
-      title: "Catering Follow-ups",
-      status: "Planned",
-      description:
-        "Notify customers when catering requests are reviewed, quoted, approved, or require deposit.",
     },
   ];
 
@@ -118,6 +144,24 @@ export default async function AdminNotificationsPage() {
           </div>
         </section>
 
+        <section className="mt-8 rounded-2xl border bg-white p-6 shadow-sm">
+          <h2 className="text-2xl font-semibold">Email System</h2>
+
+          <div className="mt-5 rounded-xl bg-neutral-100 p-5">
+            <p className="text-sm text-neutral-500">Resend Configuration</p>
+
+            <p className="mt-2 text-lg font-semibold">
+              {emailConfigured ? "Configured" : "Not Configured"}
+            </p>
+
+            <p className="mt-2 text-sm text-neutral-600">
+              {emailConfigured
+                ? "Customer notification emails are enabled."
+                : "Emails are currently skipped because RESEND_API_KEY is not configured."}
+            </p>
+          </div>
+        </section>
+        
         <section className="mt-8 rounded-2xl border bg-white p-6 shadow-sm">
           <h2 className="text-2xl font-semibold">Recommended Providers</h2>
 

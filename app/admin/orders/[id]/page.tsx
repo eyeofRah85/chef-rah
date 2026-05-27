@@ -5,6 +5,7 @@ import { UpdateOrderStatusForm } from "@/components/admin/UpdateOrderStatusForm"
 import { MarkOrderPaidButton } from "@/components/admin/MarkOrderPaidButton";
 import { OrderApprovalForm } from "@/components/admin/OrderApprovalForm";
 import Link from "next/link";
+import { PrintButton } from "@/components/admin/PrintButton";
 
 type PageProps = {
   params: Promise<{
@@ -38,19 +39,21 @@ export default async function AdminOrderDetailsPage({ params }: PageProps) {
   }
 
   return (
-    <main className="min-h-screen bg-neutral-50 px-6 py-12">
+    <main className="min-h-screen bg-neutral-50 px-6 py-12 print:bg-white print:px-0 print:py-0">
       <div className="mx-auto max-w-5xl">
         <div className="mb-8">
            <Link className="text-sm font-medium underline" href="/admin/orders">
-                      &larr;  Back to Orders
-                    </Link>
+              &larr;  Back to Orders
+            </Link>
           <p className="text-sm font-semibold uppercase tracking-[0.3em] text-amber-700">
             Admin Order
           </p>
           <h1 className="mt-3 text-4xl font-bold">Order Details</h1>
           <p className="mt-3 text-sm text-neutral-600">{order.id}</p>
         </div>
-
+        <div className="mt-4 print:hidden">
+          <PrintButton label="Print Kitchen Ticket" />
+        </div>
         <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
           <section className="space-y-6">
             <div className="rounded-2xl border bg-white p-6 shadow-sm">
@@ -136,7 +139,7 @@ export default async function AdminOrderDetailsPage({ params }: PageProps) {
             </div>
           </section>
 
-          <aside className="space-y-6">
+          <aside className="space-y-6 print:hidden">
             <div className="rounded-2xl border bg-white p-6 shadow-sm">
               <h2 className="text-2xl font-semibold">Approval</h2>
 
