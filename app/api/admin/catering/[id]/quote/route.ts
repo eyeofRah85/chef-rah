@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth-guards";
 import { calculateServerCateringDeposit } from "@/lib/server-business-rules";
+import { resend } from "@/lib/email";
+import { CateringStatusEmail } from "@/emails/CateringStatusEmail";
 
 type RouteContext = {
   params: Promise<{
@@ -56,7 +58,28 @@ export async function PATCH(request: Request, context: RouteContext) {
         status: estimatedTotal ? "QUOTED" : undefined,
       },
     });
-
+    try {
+      await resend.emails.send({
+        from: "Chef Rah's Twisted Kitchen <orders@yourdomain.com>",
+        to: updated.email,
+        subject: "Your catering quote has been updated",
+        react: CateringStatusEmail({
+          customerName: updated.name,
+          eventType: updated.eventType ?? "Catering Request",
+          status: updated.status,
+          approvalStatus: updated.approvalStatus,
+          approvalNote: updated.approvalNote,
+          estimatedTotal: updated.estimatedTotal
+            ? Number(updated.estimatedTotal)
+            : null,
+          depositAmount: updated.depositAmount
+            ? Number(updated.depositAmount)
+            : null,
+        }),
+      });
+    } catch (emailError) {
+      console.error("Failed to send catering quote email", emailError);
+    }
     return NextResponse.json(updated);
   } catch (error) {
     console.error(error);

@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { ApprovalStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth-guards";
+import { resend } from "@/lib/email";
+import { CateringStatusEmail } from "@/emails/CateringStatusEmail";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -37,6 +39,34 @@ export async function PATCH(request: Request, context: RouteContext) {
       },
     });
 
+    try {
+      if (approvalStatus === "APPROVED" || approvalStatus === "DENIED") {
+        await resend.emails.send({
+          from: "Chef Rah's Twisted Kitchen <orders@yourdomain.com>",
+          to: updated.email,
+          subject:
+            approvalStatus === "APPROVED"
+              ? "Your catering request has been approved"
+              : "Your catering request was not approved",
+          react: CateringStatusEmail({
+            customerName: updated.name,
+            eventType: updated.eventType ?? "Catering Request",
+            status: updated.status,
+            approvalStatus: updated.approvalStatus,
+            approvalNote,
+            estimatedTotal: updated.estimatedTotal
+              ? Number(updated.estimatedTotal)
+              : null,
+            depositAmount: updated.depositAmount
+              ? Number(updated.depositAmount)
+              : null,
+          }),
+        });
+      }
+    } catch (emailError) {
+      console.error("Failed to send catering status email", emailError);
+    }
+    
     return NextResponse.json(updated);
   } catch (error) {
     console.error(error);
