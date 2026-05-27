@@ -144,9 +144,10 @@ export async function POST(request: Request) {
     // email section
     try {
       await resend.emails.send({
-        from: "Chef Rah's Twisted Kitchen <orders@yourdomain.com>",
-        /*from: "Chef Rah's Twisted Kitchen <preston.s.butler@rcndev.com>",*/
+        // from: "Chef Rah's Twisted Kitchen <orders@yourdomain.com>",
+        from: "Chef Rah's Twisted Kitchen <preston.s.butler@rcndev.com>",
         to: session.user.email,
+        // cc: "preston.butler@live.com",
         subject: "Order Confirmation",
         react: OrderConfirmationEmail({
           customerName: session.user.name ?? "Customer",
