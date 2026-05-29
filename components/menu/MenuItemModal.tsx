@@ -15,7 +15,7 @@ export function MenuItemModal({ item, open, onClose }: Props) {
   const addItem = useCartStore((state) => state.addItem);
   const [selected, setSelected] = useState<Record<string, string[]>>({});
   const [customerInstructions, setCustomerInstructions] = useState("");
-
+  const [showRequiredErrors, setShowRequiredErrors] = useState(false);
 
   if (!open) return null;
 
@@ -27,21 +27,27 @@ export function MenuItemModal({ item, open, onClose }: Props) {
     setSelected((prev) => {
       const current = prev[groupId] ?? [];
 
-      if (!multiple) {
-        return {
-          ...prev,
-          [groupId]: [choiceId],
-        };
+      const nextSelected = !multiple
+        ? {
+            ...prev,
+            [groupId]: [choiceId],
+          }
+        : {
+            ...prev,
+            [groupId]: current.includes(choiceId)
+              ? current.filter((id) => id !== choiceId)
+              : [...current, choiceId],
+          };
+
+      const stillMissingRequired = item.optionGroups?.some(
+        (group) => group.required && !(nextSelected[group.id]?.length > 0),
+      );
+
+      if (!stillMissingRequired) {
+        setShowRequiredErrors(false);
       }
 
-      const exists = current.includes(choiceId);
-
-      return {
-        ...prev,
-        [groupId]: exists
-          ? current.filter((id) => id !== choiceId)
-          : [...current, choiceId],
-      };
+      return nextSelected;
     });
   }
 
@@ -51,6 +57,7 @@ export function MenuItemModal({ item, open, onClose }: Props) {
     );
 
     if (requiredMissing) {
+      setShowRequiredErrors(true);
       alert("Please choose all required options.");
       return;
     }
@@ -77,6 +84,7 @@ export function MenuItemModal({ item, open, onClose }: Props) {
     addItem(item, selectedOptions, customerInstructions);
     setSelected({});
     setCustomerInstructions("");
+    setShowRequiredErrors(false);
     onClose();
   }
 
@@ -95,19 +103,27 @@ export function MenuItemModal({ item, open, onClose }: Props) {
   const displayTotal = item.price + selectedOptionsTotal;
 
   return (
+    
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 px-4">
-      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-6 shadow-xl">
+      <div className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl bg-white p-6 shadow-xl">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.3em] text-amber-700">
-              Customize
+            Customize
             </p>
 
-            <h2 className="mt-2 text-3xl font-bold">{item.name}</h2>
+          <h2 className="mt-2 text-3xl font-bold">{item.name}</h2>
 
-            <p className="mt-2 text-neutral-600">{item.description}</p>
+          <p className="mt-2 text-neutral-600">{item.description}</p>
+
+          {item.type === "MEAL_PLAN" && (
+            <div className="mt-5 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+              Meal plans are package-based. Choose your plan length, meal count, and
+              preferred meal components. Pork and beef are available by request only and
+              pricing may vary.
+            </div>
+          )}
           </div>
-
           <button
             onClick={onClose}
             className="rounded-full border px-3 py-1 text-sm"
@@ -123,19 +139,42 @@ export function MenuItemModal({ item, open, onClose }: Props) {
           </div>
         ) : null}
 
-        <div className="mt-6 space-y-6">
-          {item.optionGroups?.map((group) => (
-            <section key={group.id} className="rounded-xl border p-4">
-              <div className="mb-3">
-                <h3 className="font-semibold">{group.name}</h3>
-                <p className="text-xs text-neutral-500">
-                  {group.required ? "Required" : "Optional"} ·{" "}
-                  {group.multiple ? "Choose multiple" : "Choose one"}
-                </p>
-              </div>
+        <div className="mt-4 grid gap-3 md:grid-cols-2">
+          {item.optionGroups?.map((group) => {
+  const missingRequired =
+    showRequiredErrors &&
+    group.required &&
+    !(selected[group.id]?.length > 0);
 
-              <div className="space-y-2">
-                {group.choices.map((choice) => {
+  return (
+    <section
+      key={group.id}
+      className={`rounded-2xl border p-5 ${
+        missingRequired ? "border-red-400 bg-red-50" : ""
+      }`}
+    >
+      <div className="flex flex-wrap items-center gap-2">
+        <h3 className="text-lg font-semibold">{group.name}</h3>
+
+        {group.required && (
+          <span className="rounded-full bg-red-100 px-2 py-1 text-xs font-medium text-red-700">
+            Required
+          </span>
+        )}
+      </div>
+
+      <p className="mt-1 text-sm text-neutral-500">
+        {group.multiple ? "Choose one or more" : "Choose one"}
+      </p>
+
+      {missingRequired && (
+        <p className="mt-3 rounded-xl bg-red-100 p-3 text-sm text-red-800">
+          Please make a selection for this required option.
+        </p>
+      )}
+
+      <div className="mt-4 space-y-2">
+        {group.choices.map((choice) => {
                   const checked = selected[group.id]?.includes(choice.id) ?? false;
 
                   return (
@@ -207,7 +246,8 @@ export function MenuItemModal({ item, open, onClose }: Props) {
                 })}
               </div>
             </section>
-          ))}
+          );
+        })}
 
           {!item.optionGroups?.length && (
             <p className="text-sm text-neutral-600">
@@ -217,7 +257,7 @@ export function MenuItemModal({ item, open, onClose }: Props) {
         </div>
 
         {item.customerInstructionsEnabled && (
-          <section className="mt-6 rounded-xl border p-4">
+          <section className="mt-6 rounded-2xl border p-5">
             <label className="block font-semibold">
               Special Instructions
             </label>

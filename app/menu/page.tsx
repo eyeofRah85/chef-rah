@@ -64,6 +64,7 @@ const categories = await prisma.menuCategory.findMany({
                     item={{
                       id: item.id,
                       name: item.name,
+                      type: item.type,
                       description: item.description,
                       price: Number(item.price),
                       category: category.name,

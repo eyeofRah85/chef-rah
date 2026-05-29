@@ -34,4 +34,5 @@ export type MenuItem = {
   optionGroups?: MenuItemOptionGroup[];
   customerInstructionsEnabled?: boolean;
   requiresApproval?: boolean;
+  type?:string;
 };
