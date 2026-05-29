@@ -307,28 +307,37 @@ export default async function AdminMenuPage({ searchParams }: PageProps) {
 
                           <div className="space-y-5">
                             {item.optionGroups.map((group) => (
-                              <div
+                              <details
                                 key={group.id}
-                                className="rounded-xl border bg-neutral-50 p-4"
+                                className="group rounded-xl border bg-neutral-50"
                               >
-                                <div className="flex flex-wrap items-start justify-between gap-3">
-                                  <div>
-                                    <p className="font-semibold">
-                                      {group.name}
-                                    </p>
+                                <summary className="cursor-pointer list-none p-4 transition hover:bg-neutral-100">
+                                  <div className="flex flex-wrap items-center justify-between gap-3">
+                                    <div>
+                                      <p className="font-semibold">{group.name}</p>
 
-                                    <p className="mt-1 text-xs text-neutral-500">
-                                      {group.required
-                                        ? "Required"
-                                        : "Optional"}{" "}
-                                      · {group.multiple ? "Multiple" : "Single"}
-                                    </p>
+                                      <p className="mt-1 text-xs text-neutral-500">
+                                        {group.required ? "Required" : "Optional"} ·{" "}
+                                        {group.multiple ? "Multiple" : "Single"} ·{" "}
+                                        {group.choices.length} choice
+                                        {group.choices.length === 1 ? "" : "s"}
+                                      </p>
+                                    </div>
+
+                                    <div className="text-xs font-medium text-neutral-500 group-open:hidden">
+                                      Open choices →
+                                    </div>
+
+                                    <div className="hidden text-xs font-medium text-neutral-500 group-open:block">
+                                      Close choices ↑
+                                    </div>
                                   </div>
+                                </summary>
 
-                                  <DeleteOptionGroupButton
-                                    optionGroupId={group.id}
-                                  />
-                                </div>
+                                <div className="border-t p-4">
+                                  <div className="mb-4 flex justify-end">
+                                    <DeleteOptionGroupButton optionGroupId={group.id} />
+                                  </div>
 
                                 <div className="mt-4 grid gap-3 md:grid-cols-2">
                                   {group.choices.map((choice) => (
@@ -396,6 +405,7 @@ export default async function AdminMenuPage({ searchParams }: PageProps) {
                                   ))}
                                 </div>
                               </div>
+                              </details>
                             ))}
                           </div>
                         </section>
