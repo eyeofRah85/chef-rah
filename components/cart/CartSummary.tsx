@@ -58,6 +58,11 @@ export function CartSummary() {
                       {option.priceDelta > 0
                         ? ` (+$${option.priceDelta.toFixed(2)})`
                         : ""}
+                        {option.requestOnly && (
+                        <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
+                          Request Only
+                        </span>
+                      )}
                     </li>
                   ))}
                 </ul>

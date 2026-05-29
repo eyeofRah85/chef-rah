@@ -68,6 +68,7 @@ export function MenuItemModal({ item, open, onClose }: Props) {
               ? `${choice.name} (Request Only)`
               : choice.name,
             priceDelta: choice.priceDelta,
+            requestOnly: choice.requestOnly,
           });
         }
       }

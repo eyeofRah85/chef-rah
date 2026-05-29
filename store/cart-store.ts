@@ -8,6 +8,7 @@ export type SelectedCartOption = {
   groupName: string;
   choiceName: string;
   priceDelta: number;
+  requestOnly?: boolean;
 };
 
 export type CartItem = {
@@ -80,6 +81,10 @@ export const useCartStore = create<CartState>()(
           0,
         );
 
+        const hasRequestOnlyOption = selectedOptions.some(
+          (option) => option.requestOnly,
+        );
+
         const cartItem: CartItem = {
           cartId: crypto.randomUUID(),
           menuItemId: item.id,
@@ -89,7 +94,7 @@ export const useCartStore = create<CartState>()(
           category: item.category,
           selectedOptions,
           customerInstructions,
-          requiresApproval: item.requiresApproval,
+          requiresApproval: item.requiresApproval || hasRequestOnlyOption,
         };
 
         set((state) => ({
