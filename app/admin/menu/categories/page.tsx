@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth-guards";
 import { MenuCategoryEditForm } from "@/components/admin/MenuCategoryEditForm";
+import Link from "next/link";
 
 export default async function MenuCategoriesPage() {
   try {
@@ -23,6 +24,9 @@ export default async function MenuCategoriesPage() {
     <main className="min-h-screen bg-neutral-50 px-6 py-12">
       <div className="mx-auto max-w-5xl">
         <div className="mb-8">
+          <Link className="text-sm font-medium underline" href="/admin/menu">
+            &larr;  Back to Menu Manager
+          </Link>
           <p className="text-sm font-semibold uppercase tracking-[0.3em] text-amber-700">
             Admin Menu
           </p>

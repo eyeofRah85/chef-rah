@@ -31,9 +31,9 @@ export function SiteHeader() {
         </Link>
 
         <nav className="flex items-center gap-5 text-sm font-medium">
-          <Link href="/menu">Menu</Link>
+          <Link href="/menu">Meal Plans</Link>
           <Link href="/catering">Catering</Link>
-
+          <Link href="/gallery">Gallery</Link>
           <Link href="/cart" className="relative">
             Cart
             {count > 0 && (

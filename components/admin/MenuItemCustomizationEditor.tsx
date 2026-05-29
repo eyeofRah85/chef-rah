@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { optionGroupTemplates } from "@/data/option-templates";
 
-
 type Allergen = {
   id: string;
   name: string;
@@ -12,8 +11,13 @@ type Allergen = {
 
 type OptionChoiceInput = {
   name: string;
+  description?: string;
+  dietaryInfo?: string;
+  imageUrl?: string;
+  requestOnly?: boolean;
   priceDelta: string;
 };
+
 
 type Props = {
   menuItemId: string;
@@ -32,7 +36,14 @@ export function MenuItemCustomizationEditor({
   const [required, setRequired] = useState(false);
   const [multiple, setMultiple] = useState(false);
   const [choices, setChoices] = useState<OptionChoiceInput[]>([
-    { name: "", priceDelta: "0" },
+    {
+      name: "",
+      description: "",
+      dietaryInfo: "",
+      imageUrl: "",
+      requestOnly: false,
+      priceDelta: "0",
+    },
   ]);
 
   async function saveAllergens() {
@@ -60,6 +71,10 @@ export function MenuItemCustomizationEditor({
       .filter((choice) => choice.name.trim())
       .map((choice) => ({
         name: choice.name.trim(),
+        description: choice.description?.trim() || null,
+        dietaryInfo: choice.dietaryInfo?.trim() || null,
+        imageUrl: choice.imageUrl?.trim() || null,
+        requestOnly: Boolean(choice.requestOnly),
         priceDelta: Number(choice.priceDelta || 0),
       }));
 
@@ -239,7 +254,17 @@ export function MenuItemCustomizationEditor({
           <button
             type="button"
             onClick={() =>
-              setChoices((prev) => [...prev, { name: "", priceDelta: "0" }])
+              setChoices((prev) => [
+                ...prev,
+                {
+                  name: "",
+                  description: "",
+                  dietaryInfo: "",
+                  imageUrl: "",
+                  requestOnly: false,
+                  priceDelta: "0",
+                },
+              ])
             }
             className="rounded-xl border px-4 py-2 text-sm font-medium"
           >

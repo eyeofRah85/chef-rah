@@ -33,6 +33,10 @@ export async function POST(request: Request, context: RouteContext) {
         choices: {
           create: choices.map((choice: any) => ({
             name: choice.name,
+            description: choice.description || null,
+            dietaryInfo: choice.dietaryInfo || null,
+            imageUrl: choice.imageUrl || null,
+            requestOnly: Boolean(choice.requestOnly),
             priceDelta: choice.priceDelta ?? 0,
           })),
         },

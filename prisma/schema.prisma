@@ -222,15 +222,20 @@ model MenuItemOptionGroup {
 }
 
 model MenuItemOptionChoice {
-  id              String                 @id @default(cuid())
+  id              String              @id @default(cuid())
 
   optionGroupId   String
-  optionGroup     MenuItemOptionGroup   @relation(fields: [optionGroupId], references: [id], onDelete: Cascade)
+  optionGroup     MenuItemOptionGroup @relation(fields: [optionGroupId], references: [id], onDelete: Cascade)
 
   name            String
-  priceDelta      Decimal                @db.Decimal(10,2) @default(0)
+  description     String?
+  dietaryInfo     String?
+  imageUrl        String?
+  requestOnly     Boolean             @default(false)
 
-  createdAt       DateTime @default(now())
+  priceDelta      Decimal             @db.Decimal(10, 2) @default(0)
+
+  createdAt       DateTime            @default(now())
 }
 
 model Order {
