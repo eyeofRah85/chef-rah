@@ -7,6 +7,7 @@ type PageProps = {
   searchParams: Promise<{
     status?: string;
     approval?: string;
+    type?:string;
   }>;
 };
 
@@ -20,6 +21,7 @@ export default async function AdminCateringPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const statusFilter = params.status;
   const approvalFilter = params.approval;
+  const typeFilter = params.type;
 
   const requests = await prisma.cateringRequest.findMany({
    where: {
@@ -29,6 +31,10 @@ export default async function AdminCateringPage({ searchParams }: PageProps) {
 
         ...(approvalFilter && approvalFilter !== "ALL"
           ? { approvalStatus: approvalFilter as any }
+          : {}),
+
+        ...(typeFilter && typeFilter !== "ALL"
+          ? { requestType: typeFilter as any }
           : {}),
       },
 
@@ -47,11 +53,31 @@ export default async function AdminCateringPage({ searchParams }: PageProps) {
             Admin
           </p>
 
-          <h1 className="mt-3 text-4xl font-bold">Catering Requests</h1>
+          <h1 className="mt-3 text-4xl font-bold">Service Requests</h1>
 
           <p className="mt-3 text-neutral-700">
-            Review catering inquiries, quote requests, deposits, and event details.
+            Review catering inquiries, personal chef requests, quotes, deposits, and event details.
           </p>
+        </div>
+
+        <div className="mb-6 rounded-2xl border bg-white p-5 shadow-sm">
+          <p className="mb-4 font-semibold">Request Type</p>
+
+          <div className="flex flex-wrap gap-3">
+            {[
+              { label: "All", href: "/admin/catering" },
+              { label: "Catering", href: "/admin/catering?type=CATERING" },
+              { label: "Personal Chef", href: "/admin/catering?type=PERSONAL_CHEF" },
+            ].map((filter) => (
+              <Link
+                key={filter.href}
+                href={filter.href}
+                className="rounded-full border px-4 py-2 text-sm font-medium transition hover:bg-neutral-100"
+              >
+                {filter.label}
+              </Link>
+            ))}
+          </div>
         </div>
 
         <div className="mb-6 rounded-2xl border bg-white p-5 shadow-sm">
@@ -88,6 +114,7 @@ export default async function AdminCateringPage({ searchParams }: PageProps) {
             <thead className="bg-neutral-100">
               <tr>
                 <th className="p-4">Customer</th>
+                <th className="p-4">Type</th>
                 <th className="p-4">Event</th>
                 <th className="p-4">Guests</th>
                 <th className="p-4">Status</th>
@@ -103,6 +130,14 @@ export default async function AdminCateringPage({ searchParams }: PageProps) {
                   <td className="p-4">
                     <div className="font-medium">{request.name}</div>
                     <div className="text-xs text-neutral-500">{request.email}</div>
+                  </td>
+
+                  <td className="p-4">
+                    <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium">
+                      {request.requestType === "PERSONAL_CHEF"
+                        ? "Personal Chef"
+                        : "Catering"}
+                    </span>
                   </td>
 
                   <td className="p-4">
@@ -145,7 +180,7 @@ export default async function AdminCateringPage({ searchParams }: PageProps) {
 
               {requests.length === 0 && (
                 <tr>
-                  <td className="p-6 text-center text-neutral-500" colSpan={7}>
+                  <td className="p-6 text-center text-neutral-500" colSpan={8}>
                     No catering requests yet.
                   </td>
                 </tr>

@@ -41,7 +41,9 @@ export default async function AdminCateringDetailsPage({ params }: PageProps) {
             Admin
           </p>
           <p className="text-sm font-semibold uppercase tracking-[0.3em] text-amber-700">
-            Catering Request
+            {request.requestType === "PERSONAL_CHEF"
+              ? "Personal Chef Request"
+              : "Catering Request"}
           </p>
 
           <h1 className="mt-3 text-4xl font-bold">{request.name}</h1>
