@@ -39,12 +39,17 @@ export default async function AccountCateringDetailsPage({ params }: PageProps) 
         </Link>
 
         <div className="mt-8 rounded-2xl border bg-white p-8 shadow-sm">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-amber-700">
-            Catering Request
+         <p className="text-sm font-semibold uppercase tracking-[0.3em] text-amber-700">
+            {request.requestType === "PERSONAL_CHEF"
+              ? "Personal Chef Request"
+              : "Catering Request"}
           </p>
 
           <h1 className="mt-3 text-4xl font-bold">
-            {request.eventType ?? "Catering Request"}
+            {request.eventType ??
+            (request.requestType === "PERSONAL_CHEF"
+              ? "Personal Chef Request"
+              : "Catering Request")}
           </h1>
 
           <div className="mt-6 grid gap-4 md:grid-cols-3">

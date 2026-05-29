@@ -144,9 +144,9 @@ export default async function AccountPage() {
             href="/catering"
             className="rounded-2xl border bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
           >
-            <h2 className="text-xl font-semibold">Catering Requests</h2>
+            <h2 className="text-xl font-semibold">Service Requests</h2>
             <p className="mt-2 text-sm text-neutral-600">
-              Request catering for events, gatherings, and custom meals.
+              Track catering and personal chef inquiries, quotes, approvals, and deposits.
             </p>
           </Link>
         </section>

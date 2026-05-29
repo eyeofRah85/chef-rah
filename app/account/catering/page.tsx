@@ -36,11 +36,11 @@ export default async function AccountCateringPage() {
           </p>
 
           <h1 className="mt-3 text-4xl font-bold">
-            Catering Requests
+            Service Requests
           </h1>
 
           <p className="mt-3 text-neutral-700">
-            Track event requests, quotes, approvals, and deposit status.
+            Track catering and personal chef requests, quotes, approvals, and deposit status.
           </p>
         </div>
 
@@ -52,9 +52,18 @@ export default async function AccountCateringPage() {
             >
               <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
                 <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.2em] text-amber-700">
-                    {request.eventType ?? "Catering Request"}
-                  </p>
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="text-sm font-semibold uppercase tracking-[0.2em] text-amber-700">
+                      {request.eventType ?? "Service Request"}
+                    </p>
+
+                    <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-700">
+                      {request.requestType === "PERSONAL_CHEF"
+                        ? "Personal Chef"
+                        : "Catering"}
+                    </span>
+                  </div>
 
                   <h2 className="mt-2 text-2xl font-bold">
                     Submitted {request.createdAt.toLocaleDateString()}
@@ -114,19 +123,28 @@ export default async function AccountCateringPage() {
           {user.cateringRequests.length === 0 && (
             <div className="rounded-2xl border bg-white p-8 text-center shadow-sm">
               <h2 className="text-2xl font-semibold">
-                No catering requests yet
+                No service requests yet
               </h2>
 
               <p className="mt-2 text-neutral-600">
-                Catering requests will appear here after submission.
+                Catering and personal chef requests will appear here after submission.
               </p>
 
-              <Link
-                href="/catering"
-                className="mt-6 inline-flex rounded-xl bg-black px-5 py-3 font-medium text-white"
-              >
-                Start Catering Request
-              </Link>
+              <div className="mt-6 flex flex-wrap justify-center gap-3">
+                <Link
+                  href="/catering"
+                  className="inline-flex rounded-xl bg-black px-5 py-3 font-medium text-white"
+                >
+                  Start Catering Request
+                </Link>
+
+                <Link
+                  href="/personal-chef"
+                  className="inline-flex rounded-xl border px-5 py-3 font-medium"
+                >
+                  Request Personal Chef
+                </Link>
+              </div>
             </div>
           )}
         </div>

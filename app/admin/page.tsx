@@ -61,7 +61,23 @@ export default async function AdminPage() {
         items: true,
       },
     }),
+
+    serviceRequests: prisma.cateringRequest.count(),
+
+    cateringRequests: prisma.cateringRequest.count({
+      where: {
+        requestType: "CATERING",
+      },
+    }),
+
+    personalChefRequests: prisma.cateringRequest.count({
+      where: {
+        requestType: "PERSONAL_CHEF",
+      },
+    }),
+
     businessSettings: getBusinessSettings(),
+
   };
 
   const [
@@ -73,6 +89,9 @@ export default async function AdminPage() {
     pendingCateringApprovals,
     recentOrders,
     businessSettings,
+    serviceRequests,
+    cateringRequests,
+    personalChefRequests,
   ] = await Promise.all([
     metrics.pendingOrders,
     metrics.activeOrders,
@@ -82,6 +101,9 @@ export default async function AdminPage() {
     metrics.pendingCateringApprovals,
     metrics.recentOrders,
     metrics.businessSettings,
+    metrics.serviceRequests,
+    metrics.cateringRequests,
+    metrics.personalChefRequests,
   ]);
 
   const totalRevenueResult = await prisma.order.aggregate({
@@ -133,13 +155,28 @@ export default async function AdminPage() {
       value: `$${totalRevenue.toFixed(2)}`,
       href: "/admin/reports",
     },
+    {
+      label: "Service Requests",
+      value: serviceRequests,
+      href: "/admin/catering",
+    },
+    {
+      label: "Catering Requests",
+      value: cateringRequests,
+      href: "/admin/catering?type=CATERING",
+    },
+    {
+      label: "Personal Chef Requests",
+      value: personalChefRequests,
+      href: "/admin/catering?type=PERSONAL_CHEF",
+    },
   ];
 
   const sections = [
     { label: "Orders", href: "/admin/orders" },
     { label: "Kitchen View", href: "/admin/kitchen" },
     { label: "Menu Manager", href: "/admin/menu" },
-    { label: "Catering Requests", href: "/admin/catering" },
+    { label: "Service Requests", href: "/admin/catering" },
     { label: "Customers", href: "/admin/customers" },
     { label: "Reports", href: "/admin/reports" },
     { label: "Business Settings", href: "/admin/settings" },
