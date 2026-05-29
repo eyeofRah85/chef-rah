@@ -9,6 +9,7 @@ import { MenuItemEditForm } from "@/components/admin/MenuItemEditForm";
 import { DeleteOptionGroupButton } from "@/components/admin/DeleteOptionGroupButton";
 import { ArchiveMenuItemButton } from "@/components/admin/ArchiveMenuItemButton";
 import { EditOptionChoiceForm } from "@/components/admin/EditOptionChoiceForm";
+import { ApplyMealPlanTemplateButton } from "@/components/admin/ApplyMealPlanTemplateButton";
 
 type PageProps = {
   searchParams: Promise<{
@@ -287,7 +288,7 @@ export default async function AdminMenuPage({ searchParams }: PageProps) {
                                     item.customerInstructionsEnabled,
                                 }}
                               />
-
+                              <ApplyMealPlanTemplateButton menuItemId={item.id} />
                               <ArchiveMenuItemButton menuItemId={item.id} />
                             </div>
                           </div>
