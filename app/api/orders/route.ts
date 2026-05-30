@@ -61,6 +61,25 @@ export async function POST(request: Request) {
       }
     }
 
+    if (checkout.orderType === "delivery") {
+      if (
+        !checkout.name ||
+        !checkout.phone ||
+        !checkout.addressLine1 ||
+        !checkout.city ||
+        !checkout.state ||
+        !checkout.postalCode
+      ) {
+        return NextResponse.json(
+          {
+            error:
+              "Delivery orders require name, phone number, address, city, state, and postal code.",
+          },
+          { status: 400 },
+        );
+      }
+    }
+
     const order = await prisma.order.create({
       data: {
         user: {
@@ -69,7 +88,7 @@ export async function POST(request: Request) {
           },
         },
 
-        customerName: session.user.name ?? "Customer",
+        customerName: checkout.name || session.user.name || "Customer",
         customerEmail: session.user.email,
 
         orderType: checkout.orderType.toUpperCase(),

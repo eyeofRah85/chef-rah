@@ -1,5 +1,4 @@
 "use client";
-
 import { useCheckoutStore } from "@/store/checkout-store";
 import { useCartStore } from "@/store/cart-store";
 import { calculateTip } from "@/lib/order-calculations";
@@ -31,6 +30,50 @@ export default function CheckoutPage() {
     useEffect(() => {
       setMounted(true);
     }, []);
+
+  useEffect(() => {
+    async function loadProfile() {
+      const response = await fetch("/api/account/profile");
+
+      if (!response.ok) return;
+
+      const profile = await response.json();
+
+      if (!details.name && profile.name) {
+        updateField("name", profile.name);
+      }
+
+      if (!details.phone && profile.phone) {
+        updateField("phone", profile.phone);
+      }
+
+      if (!details.addressLine1 && profile.addressLine1) {
+        updateField("addressLine1", profile.addressLine1);
+      }
+
+      if (!details.addressLine2 && profile.addressLine2) {
+        updateField("addressLine2", profile.addressLine2);
+      }
+
+      if (!details.city && profile.city) {
+        updateField("city", profile.city);
+      }
+
+      if (!details.state && profile.state) {
+        updateField("state", profile.state);
+      }
+
+      if (!details.postalCode && profile.postalCode) {
+        updateField("postalCode", profile.postalCode);
+      }
+
+      if (!details.deliveryNotes && profile.deliveryNotes) {
+        updateField("deliveryNotes", profile.deliveryNotes);
+      }
+    }
+
+    loadProfile();
+  }, []);
 
     if (!mounted) {
       return null;
@@ -91,49 +134,7 @@ const cutoffMinute = settings.orderCutoffMinute
 
 const cutoffText = `${cutoffDayNames[settings.orderCutoffDay]} at ${cutoffHour12}:${cutoffMinute} ${cutoffAmPm}`;
 
-  useEffect(() => {
-    async function loadProfile() {
-      const response = await fetch("/api/account/profile");
 
-      if (!response.ok) return;
-
-      const profile = await response.json();
-
-      if (!details.name && profile.name) {
-        updateField("name", profile.name);
-      }
-
-      if (!details.phone && profile.phone) {
-        updateField("phone", profile.phone);
-      }
-
-      if (!details.addressLine1 && profile.addressLine1) {
-        updateField("addressLine1", profile.addressLine1);
-      }
-
-      if (!details.addressLine2 && profile.addressLine2) {
-        updateField("addressLine2", profile.addressLine2);
-      }
-
-      if (!details.city && profile.city) {
-        updateField("city", profile.city);
-      }
-
-      if (!details.state && profile.state) {
-        updateField("state", profile.state);
-      }
-
-      if (!details.postalCode && profile.postalCode) {
-        updateField("postalCode", profile.postalCode);
-      }
-
-      if (!details.deliveryNotes && profile.deliveryNotes) {
-        updateField("deliveryNotes", profile.deliveryNotes);
-      }
-    }
-
-    loadProfile();
-  }, []);
 
   return (
     <main className="min-h-screen bg-neutral-50 px-6 py-12">
@@ -165,68 +166,72 @@ const cutoffText = `${cutoffDayNames[settings.orderCutoffDay]} at ${cutoffHour12
             </select>
           </div>
           <section className="rounded-2xl border bg-white p-6 shadow-sm">
-            
+
   <h2 className="text-2xl font-semibold">Contact & Delivery Information</h2>
+        <p className="mt-2 text-sm text-neutral-600">
+          Delivery orders require contact and address information. Pickup orders only
+          require enough information for order follow-up.
+        </p>
+          <div className="mt-5 grid gap-4 md:grid-cols-2">
+            <input
+              value={details.name}
+              onChange={(e) => updateField("name", e.target.value)}
+              placeholder="Name"
+              className="rounded-xl border px-4 py-3"
+            />
 
-  <div className="mt-5 grid gap-4 md:grid-cols-2">
-    <input
-      value={details.name}
-      onChange={(e) => updateField("name", e.target.value)}
-      placeholder="Name"
-      className="rounded-xl border px-4 py-3"
-    />
+            <input
+              value={details.phone}
+              onChange={(e) => updateField("phone", e.target.value)}
+              placeholder="Phone"
+              className="rounded-xl border px-4 py-3"
+            />
 
-    <input
-      value={details.phone}
-      onChange={(e) => updateField("phone", e.target.value)}
-      placeholder="Phone"
-      className="rounded-xl border px-4 py-3"
-    />
+            <input
+              value={details.addressLine1}
+              onChange={(e) => updateField("addressLine1", e.target.value)}
+              placeholder="Address line 1"
+              className="rounded-xl border px-4 py-3 md:col-span-2"
+            />
 
-    <input
-      value={details.addressLine1}
-      onChange={(e) => updateField("addressLine1", e.target.value)}
-      placeholder="Address line 1"
-      className="rounded-xl border px-4 py-3 md:col-span-2"
-    />
+            <input
+              value={details.addressLine2}
+              onChange={(e) => updateField("addressLine2", e.target.value)}
+              placeholder="Address line 2"
+              className="rounded-xl border px-4 py-3 md:col-span-2"
+            />
 
-    <input
-      value={details.addressLine2}
-      onChange={(e) => updateField("addressLine2", e.target.value)}
-      placeholder="Address line 2"
-      className="rounded-xl border px-4 py-3 md:col-span-2"
-    />
+            <input
+              value={details.city}
+              onChange={(e) => updateField("city", e.target.value)}
+              placeholder="City"
+              className="rounded-xl border px-4 py-3"
+            />
 
-    <input
-      value={details.city}
-      onChange={(e) => updateField("city", e.target.value)}
-      placeholder="City"
-      className="rounded-xl border px-4 py-3"
-    />
+            <input
+              value={details.state}
+              onChange={(e) => updateField("state", e.target.value)}
+              placeholder="State"
+              className="rounded-xl border px-4 py-3"
+            />
 
-    <input
-      value={details.state}
-      onChange={(e) => updateField("state", e.target.value)}
-      placeholder="State"
-      className="rounded-xl border px-4 py-3"
-    />
+            <input
+              value={details.postalCode}
+              onChange={(e) => updateField("postalCode", e.target.value)}
+              placeholder="ZIP / Postal code"
+              className="rounded-xl border px-4 py-3"
+            />
 
-    <input
-      value={details.postalCode}
-      onChange={(e) => updateField("postalCode", e.target.value)}
-      placeholder="ZIP / Postal code"
-      className="rounded-xl border px-4 py-3"
-    />
-
-    <textarea
-      value={details.deliveryNotes}
-      onChange={(e) => updateField("deliveryNotes", e.target.value)}
-      placeholder="Delivery notes, gate code, parking, drop-off instructions, etc."
-      rows={3}
-      className="rounded-xl border px-4 py-3 md:col-span-2"
-    />
-  </div>
-</section>
+            <textarea
+              value={details.deliveryNotes}
+              onChange={(e) => updateField("deliveryNotes", e.target.value)}
+              placeholder="Delivery notes, gate code, parking, drop-off instructions, etc."
+              rows={3}
+              className="rounded-xl border px-4 py-3 md:col-span-2"
+            />
+          </div>
+        </section>
+        
           {details.orderType === "delivery" && settings.deliveryArea && (
             <p className="mt-2 text-xs text-neutral-500">
               Delivery area: {settings.deliveryArea}.
@@ -403,6 +408,22 @@ const cutoffText = `${cutoffDayNames[settings.orderCutoffDay]} at ${cutoffHour12
                 return;
               }
 
+              if (details.orderType === "delivery") {
+                if (
+                  !details.name ||
+                  !details.phone ||
+                  !details.addressLine1 ||
+                  !details.city ||
+                  !details.state ||
+                  !details.postalCode
+                ) {
+                  alert(
+                    "Delivery orders require name, phone number, address, city, state, and ZIP/postal code.",
+                  );
+                  return;
+                }
+              }
+              
               if (details.paymentMethod === "manual" && !details.payByDate) {
               alert("Please choose a pay-by date.");
               return;
