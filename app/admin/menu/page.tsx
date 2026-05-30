@@ -21,8 +21,8 @@ const menuTypeTabs = [
   { label: "All", value: "ALL" },
   { label: "Meal Plans", value: "MEAL_PLAN" },
   { label: "A La Carte", value: "A_LA_CARTE" },
-  { label: "Catering", value: "CATERING" },
-  { label: "Plates", value: "PLATE" },
+  { label: "Catering Related", value: "CATERING" },
+  { label: "Plate / Legacy", value: "PLATE" },
   { label: "Desserts", value: "DESSERT" },
   { label: "Sides", value: "SIDE" },
   { label: "Other", value: "OTHER" },
@@ -105,8 +105,8 @@ export default async function AdminMenuPage({ searchParams }: PageProps) {
           <h1 className="mt-3 text-4xl font-bold">Menu Manager</h1>
 
           <p className="mt-3 max-w-3xl text-neutral-700">
-            Manage meal plans, a la carte items, catering-related offerings,
-            pricing, availability, option groups, and customer customization.
+            Manage weekly meal plans, a la carte items, customer-facing options,
+            pricing, availability, substitutions, and request-only choices.
           </p>
         </div>
 
@@ -128,7 +128,9 @@ export default async function AdminMenuPage({ searchParams }: PageProps) {
 
         <div className="mb-8 rounded-2xl border bg-white p-4 shadow-sm">
           <p className="mb-3 text-sm font-semibold">Menu Type</p>
-
+          <p className="mb-4 text-sm text-neutral-600">
+            Personal chef services are handled through service requests, not menu items.
+          </p>
           <div className="flex flex-wrap gap-2">
             {menuTypeTabs.map((tab) => {
               const active = selectedType === tab.value;
