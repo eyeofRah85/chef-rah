@@ -91,6 +91,15 @@ export async function POST(request: Request) {
         tipAmount,
         total,
 
+        deliveryName: checkout.name || session.user.name || null,
+        deliveryPhone: checkout.phone || null,
+        deliveryAddressLine1: checkout.addressLine1 || null,
+        deliveryAddressLine2: checkout.addressLine2 || null,
+        deliveryCity: checkout.city || null,
+        deliveryState: checkout.state || null,
+        deliveryPostalCode: checkout.postalCode || null,
+        deliveryNotes: checkout.deliveryNotes || null,
+
         payByDate: checkout.payByDate ? new Date(checkout.payByDate) : null,
         paymentProvider: checkout.paymentMethod,
         paymentStatus:
@@ -167,6 +176,23 @@ export async function POST(request: Request) {
         }),
       });
     // end email section
+    if (checkout.orderType === "delivery") {
+      if (
+        !checkout.addressLine1 ||
+        !checkout.city ||
+        !checkout.state ||
+        !checkout.postalCode ||
+        !checkout.phone
+      ) {
+        return NextResponse.json(
+          {
+            error:
+              "Delivery orders require phone number, address, city, state, and postal code.",
+          },
+          { status: 400 },
+        );
+      }
+    }
     return NextResponse.json(order);
   } catch (error) {
     console.error(error);

@@ -25,6 +25,14 @@ const defaultCheckout: CheckoutDetails = {
 
   paymentMethod: "manual",
   payByDate: "",
+  name: "",
+  phone: "",
+  addressLine1: "",
+  addressLine2: "",
+  city: "",
+  state: "",
+  postalCode: "",
+  deliveryNotes: "",
 };
 
 export const useCheckoutStore = create<CheckoutState>()(
