@@ -94,7 +94,7 @@ export default async function AccountPage() {
             href="/account/catering"
             className="rounded-2xl border bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
           >
-            <p className="text-sm text-neutral-500">Catering Requests</p>
+            <p className="text-sm text-neutral-500">Service Requests</p>
             <p className="mt-3 text-4xl font-bold">
               {user.cateringRequests.length}
             </p>
@@ -134,9 +134,9 @@ export default async function AccountPage() {
             href="/menu"
             className="rounded-2xl border bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
           >
-            <h2 className="text-xl font-semibold">Browse Menu</h2>
+            <h2 className="text-xl font-semibold">Browse Meal Plans</h2>
             <p className="mt-2 text-sm text-neutral-600">
-              Start a new order from the seasonal menu and meal plans.
+              Start a new order from the seasonal meal plans.
             </p>
           </Link>
 

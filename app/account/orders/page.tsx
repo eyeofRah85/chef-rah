@@ -45,9 +45,9 @@ export default async function AccountOrdersPage() {
 
           <h1 className="mt-3 text-4xl font-bold">Order History</h1>
 
-          <p className="mt-3 text-neutral-700">
-            Review your previous orders, payment status, and requested delivery
-            or pickup times.
+         <p className="mt-3 text-neutral-700">
+            Review your meal plan orders, a la carte orders, payment status, approval
+            status, and order history.
           </p>
         </div>
 

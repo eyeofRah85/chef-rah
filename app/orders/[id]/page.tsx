@@ -54,7 +54,7 @@ export default async function OrderPage({ params }: OrderPageProps) {
             Order Details
           </p>
 
-          <h1 className="mt-3 text-4xl font-bold">Order Submitted</h1>
+          <h1 className="mt-3 text-4xl font-bold">Order Details</h1>
 
           <p className="mt-3 text-sm text-neutral-600">{order.id}</p>
 
