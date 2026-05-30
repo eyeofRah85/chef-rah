@@ -111,6 +111,14 @@ model User {
   passwordHash  String?
   role          UserRole  @default(CUSTOMER)
 
+  phone         String?
+  addressLine1  String?
+  addressLine2  String?
+  city          String?
+  state         String?
+  postalCode    String?
+  deliveryNotes String?
+
   accounts      Account[]
   sessions      Session[]
   orders        Order[]
