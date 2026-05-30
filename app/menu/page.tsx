@@ -37,18 +37,29 @@ const categories = await prisma.menuCategory.findMany({
       <div className="mx-auto max-w-6xl">
         <div className="mb-10">
           <p className="text-sm font-semibold uppercase tracking-[0.3em] text-amber-700">
-            Seasonal Menu
+            Meal Plans & A La Carte
           </p>
 
-          <h1 className="mt-3 text-4xl font-bold">Order Menu</h1>
+          <h1 className="mt-3 text-5xl font-bold">
+            Weekly meal plans and custom chef-prepared options.
+          </h1>
 
-          <p className="mt-3 max-w-2xl text-neutral-700">
-            Food is prepared using blended or coconut oils, minimally processed sugars and the freshest ingredients! 
-            Choose from seasonal plates, a la carte items, desserts, and
-            catering options. Allergy notes and substitutions will be collected
-            during checkout.
+          <p className="mt-4 max-w-2xl text-neutral-700">
+            Choose meal plan packages, customize meal components, select substitutions,
+            or explore a la carte options. Pork and beef are available by request only
+            for meal plans, and pricing may vary.
           </p>
-        </div>
+                  </div>
+          <div className="mt-8 rounded-2xl border border-amber-300 bg-amber-50 p-5 text-amber-950">
+            <h2 className="text-xl font-semibold">Meal Plan Notes</h2>
+
+            <p className="mt-2 text-sm leading-6">
+              Meal plans are package-based. Standard meal plans include lunch and dinner
+              options, with protein, starch, and vegetable selections. Pork and beef are
+              not included in standard meal plans and are available by request only.
+              Pricing may vary.
+            </p>
+          </div>
 
         <MenuCategoryFilter categories={categories.map((category) => category.name)} />
 
@@ -99,7 +110,7 @@ const categories = await prisma.menuCategory.findMany({
 
               {category.items.length === 0 && (
                 <p className="text-sm text-neutral-500">
-                  No items available in this category yet.
+                  No meal plan or menu items are available yet.
                 </p>
               )}
             </section>
@@ -109,7 +120,7 @@ const categories = await prisma.menuCategory.findMany({
             <div className="rounded-2xl border bg-white p-8 text-center shadow-sm">
               <h2 className="text-2xl font-semibold">Menu coming soon</h2>
               <p className="mt-2 text-neutral-600">
-                The chef has not added menu items yet.
+                No meal plan or menu items are available yet.
               </p>
             </div>
           )}

@@ -1,87 +1,89 @@
 import Link from "next/link";
-
+import Image from 'next/image'
 export default function HomePage() {
   return (
     <main className="min-h-screen bg-neutral-50">
       <section className="mx-auto flex max-w-6xl flex-col px-6 py-20">
-        <p className="mb-3 text-sm font-semibold uppercase tracking-[0.3em] text-amber-700">
-          {/* Chef Rah&apos;s Twisted Kitchen */}
-          GOURMET CHEF AT YOU DINNER TABLE
+        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-amber-700">
+          Meal Prep • Catering • Personal Chef
         </p>
 
-        <h1 className="max-w-3xl text-5xl font-bold tracking-tight text-neutral-950">
-          {/* Elegant comfort food with a creative twist. */}
-          Try our fresh and healthy meals today!
+        <h1 className="mt-4 text-5xl font-bold tracking-tight md:text-6xl">
+          Chef-prepared meals for busy weeks, special events, and private dining.
         </h1>
 
-        <p className="mt-6 max-w-2xl text-lg text-neutral-700">
-          Order seasonal meal plans, a la carte favorites, pickup, delivery, and
-          catering from Chef Rah&apos;s Twisted Kitchen.
-        </p>
-        
-        <section className="mt-10 flex flex-col items-start gap-10 md:flex-row">
-          <div> 
-            <div>
-              <img className="stock1" src="PERSONAL-CHEF.jpg" alt="PERSONAL CHEF"/>
-            </div>
-            <div className="homepage-card mt-10 rounded-2xl border bg-white p-6 shadow-sm ">
-              <ol className="mt-4 space-y-2 pl-5 text-neutral-700">
-                <span>All the best parts about dining out in the comfort of your own home! 
-                  Personal Chef services ranging from weekly family-style meal prep, special occasions, romantic date nights & more! 
-                </span>
-              </ol>
-            </div>
-          </div>
-          <div>
-                 <div>
-              <img className="stock1" src="MEAL-PREP.jpg" alt="MEAL PREP"/>
-            </div>
-            <div className="homepage-card mt-10 rounded-2xl border bg-white p-6 shadow-sm ">
-              <ol className="mt-4 space-y-2 pl-5 text-neutral-700">
-                <span>Health-focused, fully prepared meals consisting of low carb, minimally processed foods that are rich in flavor. Geared toward maintaining weight or helping reach goal weight. Offering, Low Carb, Paleo, Pescatarian, Vegetarian & Vegan. 
-                </span>
-              </ol>
-            </div>
-          </div>
+        <p className="mt-5 max-w-2xl text-lg text-neutral-700">
+          Chef Rah&apos;s Twisted Kitchen offers weekly meal plans, catering requests,
+          personal chef inquiries, and custom food service options built around real
+          schedules, dietary needs, and event goals.
+        </p>    
 
-          <div>
-                 <div>
-              <img className="stock1" src="CATERING.jpg" alt="CATERING"/>
-            </div>
-            <div className="homepage-card mt-10 rounded-2xl border bg-white p-6 shadow-sm ">
-              <ol className="mt-4 space-y-2 pl-5 text-neutral-700">
-                <span> Menu creation customized with specific needs for your event, whether big or small. Small office parties, weddings, rehearsal dinners, graduation parties & more.  
-                </span>
-              </ol>
-            </div>
-          </div>
-        </section>
-        {/* <div className="mt-8 flex gap-4">
+        <section className="mt-16 grid gap-6 md:grid-cols-3">
           <Link
             href="/menu"
-            className="rounded-xl bg-black px-6 py-3 font-medium text-white"
+            className="rounded-2xl border bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
           >
-            View Menu
+            <img className="h-48 w-full rounded-xl object-cover" src="MEAL-PREP.jpg" alt="Prepared meal prep containers"/>
+            <h2 className="text-2xl font-semibold">Meal Plans</h2>
+            <p className="mt-3 text-sm leading-6 text-neutral-600">
+              Choose 5-day or 7-day meal plan packages with lunch and dinner options,
+              meal components, substitutions, and special requests.
+            </p>
           </Link>
-          <Link
-            href="/cart"
-            className="rounded-xl border border-neutral-300 px-6 py-3 font-medium"
-          >
-            View Cart
-          </Link>
+
           <Link
             href="/catering"
-            className="rounded-xl border border-black px-6 py-3 font-medium"
+            className="rounded-2xl border bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
           >
-            Catering
+            <img className="h-48 w-full rounded-xl object-cover" src="CATERING.jpg" alt="Prepared catering containers"/>
+            <h2 className="text-2xl font-semibold">Catering</h2>
+            <p className="mt-3 text-sm leading-6 text-neutral-600">
+              Submit event details for gatherings, private events, office meals, and
+              custom catering requests.
+            </p>
           </Link>
-        </div> */}
+
+          <Link
+            href="/personal-chef"
+            className="rounded-2xl border bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"   
+        >
+            <img className="h-48 w-full rounded-xl object-cover" src="PERSONAL-CHEF.jpg" alt="Prepared person meal"/>
+            <h2 className="text-2xl font-semibold">Personal Chef</h2>
+            <p className="mt-3 text-sm leading-6 text-neutral-600">
+              Request private chef services for custom dining experiences, personal
+              meal prep, special occasions, or recurring support.
+            </p>
+          </Link>
+        </section>
+
+        <section className="mt-16 rounded-3xl border bg-white p-8 shadow-sm">
+          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-amber-700">
+            Food Gallery
+          </p>
+
+          <h2 className="mt-3 text-3xl font-bold">
+            See meal prep, catering, and chef-prepared options.
+          </h2>
+
+          <p className="mt-3 max-w-2xl text-neutral-700">
+            Browse photos of prepared meals, catering setups, seasonal offerings, and
+            menu inspiration.
+          </p>
+
+          <Link
+            href="/gallery"
+            className="mt-6 inline-flex rounded-xl bg-black px-5 py-3 text-sm font-medium text-white"
+          >
+            View Gallery
+          </Link>
+        </section>
 
         <div className="mt-12 rounded-2xl border bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-semibold">Ordering Rules</h2>
+          <h2 className="text-xl font-semibold">Ordering Notes</h2>
           <p className="mt-2 text-neutral-700">
-            Sunday delivery orders are due by Thursday at 5:00 PM. Late orders
-            may include a $10 late fee. No same-day orders.
+            Meal plan orders may be subject to scheduling cutoffs, availability, and
+            late-order fees. Final pickup, delivery, and request details are confirmed
+            during checkout or follow-up.
           </p>
         </div>
       </section>
