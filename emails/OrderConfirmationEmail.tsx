@@ -33,6 +33,15 @@ type Props = {
   approvalStatus?: string | null;
   orderUrl: string;
   items: OrderEmailItem[];
+
+  deliveryName?: string | null;
+  deliveryPhone?: string | null;
+  deliveryAddressLine1?: string | null;
+  deliveryAddressLine2?: string | null;
+  deliveryCity?: string | null;
+  deliveryState?: string | null;
+  deliveryPostalCode?: string | null;
+  deliveryNotes?: string | null;
 };
 
 export function OrderConfirmationEmail({
@@ -47,7 +56,15 @@ export function OrderConfirmationEmail({
   lateFee,
   tipAmount,
   orderUrl,
-  items
+  items,
+  deliveryName,
+  deliveryPhone,
+  deliveryAddressLine1,
+  deliveryAddressLine2,
+  deliveryCity,
+  deliveryState,
+  deliveryPostalCode,
+  deliveryNotes,
 }: Props) {
   return (
     <Html>
@@ -88,7 +105,44 @@ export function OrderConfirmationEmail({
             </Text>
 
             <Hr />
+            
+            <Hr />
 
+            <Heading as="h2">Contact / Delivery Information</Heading>
+
+            <Text>
+              <strong>Name:</strong> {deliveryName ?? customerName}
+            </Text>
+
+            <Text>
+              <strong>Phone:</strong> {deliveryPhone ?? "Not provided"}
+            </Text>
+
+            {orderType === "DELIVERY" && (
+              <>
+                <Text>
+                  <strong>Address:</strong>{" "}
+                  {deliveryAddressLine1
+                    ? `${deliveryAddressLine1}${
+                        deliveryAddressLine2 ? `, ${deliveryAddressLine2}` : ""
+                      }`
+                    : "Not provided"}
+                </Text>
+
+                <Text>
+                  <strong>City/State/ZIP:</strong>{" "}
+                  {[deliveryCity, deliveryState, deliveryPostalCode]
+                    .filter(Boolean)
+                    .join(", ") || "Not provided"}
+                </Text>
+
+                {deliveryNotes && (
+                  <Text>
+                    <strong>Delivery Notes:</strong> {deliveryNotes}
+                  </Text>
+                )}
+              </>
+            )}
             <Heading as="h2">Order Summary</Heading>
 
             {items.map((item, index) => (
