@@ -341,7 +341,8 @@ const cutoffText = `${cutoffDayNames[settings.orderCutoffDay]} at ${cutoffHour12
           )}
             {lateFee > 0 && (
               <div className="rounded-xl border border-amber-400 bg-amber-50 p-4 text-sm text-amber-900">
-                Orders placed after Thursday 5PM include a $10 late fee.
+                Orders placed after {cutoffText} include a $
+                {settings.lateFee.toFixed(2)} late-order fee.
               </div>
             )}
             <div>
@@ -463,7 +464,74 @@ const cutoffText = `${cutoffDayNames[settings.orderCutoffDay]} at ${cutoffHour12
           </button>
         </form>
 
-        <div className="mt-10 rounded-2xl bg-neutral-100 p-5">
+        <section className="mt-10 rounded-2xl border bg-neutral-50 p-6">
+          <h2 className="text-2xl font-semibold">Order Review</h2>
+
+          <div className="mt-5 space-y-3 text-sm">
+            <div className="flex justify-between">
+              <span>Subtotal</span>
+              <span>${subtotal.toFixed(2)}</span>
+            </div>
+
+            <div className="flex justify-between">
+              <span>Delivery Fee</span>
+              <span>${deliveryFee.toFixed(2)}</span>
+            </div>
+
+            <div className="flex justify-between">
+              <span>Late Fee</span>
+              <span>${lateFee.toFixed(2)}</span>
+            </div>
+
+            <div className="flex justify-between">
+              <span>Tip</span>
+              <span>${tipAmount.toFixed(2)}</span>
+            </div>
+
+            <div className="border-t pt-3 text-lg font-bold">
+              <div className="flex justify-between">
+                <span>Total</span>
+                <span>${total.toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+
+          {requiresApproval && (
+            <div className="mt-5 rounded-xl border border-blue-300 bg-blue-50 p-4 text-sm text-blue-900">
+              This order includes one or more items that require chef approval before
+              confirmation.
+            </div>
+          )}
+
+          {details.orderType === "delivery" && (
+            <div className="mt-5 rounded-xl border bg-white p-4 text-sm text-neutral-700">
+              <p className="font-semibold">Delivery To</p>
+
+              <p className="mt-2">
+                {details.name || "Name not provided"}
+              </p>
+
+              <p>
+                {details.addressLine1 || "Address not provided"}
+                {details.addressLine2 ? `, ${details.addressLine2}` : ""}
+              </p>
+
+              <p>
+                {[details.city, details.state, details.postalCode]
+                  .filter(Boolean)
+                  .join(", ") || "City, state, and ZIP not provided"}
+              </p>
+
+              {details.deliveryNotes && (
+                <p className="mt-2 text-neutral-500">
+                  Notes: {details.deliveryNotes}
+                </p>
+              )}
+            </div>
+          )}
+        </section>
+
+        {/* <div className="mt-10 rounded-2xl bg-neutral-100 p-5">
           <h2 className="font-semibold">
             Debug Checkout State
           </h2>
@@ -471,7 +539,8 @@ const cutoffText = `${cutoffDayNames[settings.orderCutoffDay]} at ${cutoffHour12
           <pre className="mt-3 overflow-auto text-xs">
             {JSON.stringify(details, null, 2)}
           </pre>
-        </div>
+        </div> */}
+
       </div>
     </main>
   );
