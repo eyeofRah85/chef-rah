@@ -184,7 +184,52 @@ export default async function OrderPage({ params }: OrderPageProps) {
               </div>
             </div>
           </section>
+<section className="mt-8 rounded-2xl border bg-white p-6 shadow-sm">
+  <h2 className="text-2xl font-semibold">Contact / Delivery Information</h2>
 
+  <div className="mt-5 space-y-2 text-sm text-neutral-700">
+    <p>
+      <strong>Name:</strong>{" "}
+      {order.deliveryName ?? order.customerName ?? "Not provided"}
+    </p>
+
+    <p>
+      <strong>Phone:</strong>{" "}
+      {order.deliveryPhone ?? "Not provided"}
+    </p>
+
+    {order.orderType === "DELIVERY" && (
+      <>
+        <p>
+          <strong>Address:</strong>{" "}
+          {order.deliveryAddressLine1
+            ? `${order.deliveryAddressLine1}${
+                order.deliveryAddressLine2
+                  ? `, ${order.deliveryAddressLine2}`
+                  : ""
+              }`
+            : "Not provided"}
+        </p>
+
+        <p>
+          <strong>City/State/ZIP:</strong>{" "}
+          {[
+            order.deliveryCity,
+            order.deliveryState,
+            order.deliveryPostalCode,
+          ]
+            .filter(Boolean)
+            .join(", ") || "Not provided"}
+        </p>
+
+        <p>
+          <strong>Delivery Notes:</strong>{" "}
+          {order.deliveryNotes ?? "None"}
+        </p>
+      </>
+    )}
+  </div>
+</section>
           <section className="mt-8">
             <h2 className="text-2xl font-semibold">Items</h2>
 
