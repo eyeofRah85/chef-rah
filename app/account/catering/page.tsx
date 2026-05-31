@@ -2,7 +2,11 @@ import Link from "next/link";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import { formatServiceRequestType } from "@/lib/format-labels";
+import {
+  formatServiceRequestType,
+  formatServiceRequestStatus,
+  formatApprovalStatus,
+} from "@/lib/format-labels";
 
 export default async function AccountCateringPage() {
   const session = await auth();
@@ -82,13 +86,13 @@ export default async function AccountCateringPage() {
                   </p>
 
                   <p className="mt-1 text-sm text-neutral-600">
-                    Approval: {request.approvalStatus}
+                    Approval: {formatApprovalStatus(request.approvalStatus)}
                   </p>
                 </div>
 
                 <div className="text-left md:text-right">
                   <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium">
-                    {request.status}
+                    {formatServiceRequestStatus(request.status)}
                   </span>
 
                   {request.estimatedTotal && (

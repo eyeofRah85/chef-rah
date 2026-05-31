@@ -103,3 +103,39 @@ export function formatServiceRequestType(type: string | null | undefined) {
         : "Service Request";
   }
 }
+
+export function formatServiceRequestStatus(
+  status: string | null | undefined,
+) {
+  switch (status) {
+    case "PENDING":
+      return "Pending";
+
+    case "REVIEWING":
+      return "Reviewing";
+
+    case "QUOTED":
+      return "Quoted";
+
+    case "APPROVED":
+      return "Approved";
+
+    case "DENIED":
+      return "Denied";
+
+    case "CANCELLED":
+      return "Cancelled";
+
+    case "COMPLETED":
+      return "Completed";
+
+    default:
+      return status
+        ? status
+            .toLowerCase()
+            .replaceAll("_", " ")
+            .replace(/\b\w/g, (char) => char.toUpperCase())
+        : "Not set";
+  }
+}
+

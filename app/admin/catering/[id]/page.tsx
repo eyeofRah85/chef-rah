@@ -6,7 +6,11 @@ import { CateringApprovalForm } from "@/components/admin/CateringApprovalForm";
 import Link from "next/link";
 import { CateringQuoteForm } from "@/components/admin/CateringQuoteForm";
 import { MarkDepositPaidButton } from "@/components/admin/MarkDepositPaidButton";
-import { formatServiceRequestType } from "@/lib/format-labels";
+import {
+  formatServiceRequestType,
+  formatServiceRequestStatus,
+  formatApprovalStatus,
+} from "@/lib/format-labels";
 
 type PageProps = {
   params: Promise<{
@@ -125,7 +129,7 @@ export default async function AdminCateringDetailsPage({ params }: PageProps) {
                 <div className="mt-6">
                   <CateringApprovalForm
                     requestId={request.id}
-                    currentApprovalStatus={request.approvalStatus}
+                    currentApprovalStatus={formatApprovalStatus(request.approvalStatus)}
                   />
                 </div>
 
@@ -138,13 +142,13 @@ export default async function AdminCateringDetailsPage({ params }: PageProps) {
               <h2 className="text-2xl font-semibold">Status</h2>
 
               <p className="mt-3 rounded-full bg-neutral-100 px-3 py-2 text-center text-sm font-medium">
-                {request.status}
+                {formatServiceRequestStatus(request.status)}
               </p>
 
               <div className="mt-6">
                 <UpdateCateringStatusForm
                   requestId={request.id}
-                  currentStatus={request.status}
+                  currentStatus={formatServiceRequestStatus(request.status)}
                 />
               </div>
             </div>

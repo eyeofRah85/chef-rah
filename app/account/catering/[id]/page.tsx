@@ -2,7 +2,11 @@ import Link from "next/link";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { notFound, redirect } from "next/navigation";
-import { formatServiceRequestType } from "@/lib/format-labels";
+import {
+  formatServiceRequestType,
+  formatServiceRequestStatus,
+  formatApprovalStatus,
+} from "@/lib/format-labels";
 
 type PageProps = {
   params: Promise<{
@@ -56,12 +60,12 @@ export default async function AccountCateringDetailsPage({ params }: PageProps) 
           <div className="mt-6 grid gap-4 md:grid-cols-3">
             <div className="rounded-xl bg-neutral-100 p-4">
               <p className="text-sm text-neutral-500">Status</p>
-              <p className="mt-2 font-semibold">{request.status}</p>
+              <p className="mt-2 font-semibold">{formatServiceRequestStatus(request.status)}</p>
             </div>
 
             <div className="rounded-xl bg-neutral-100 p-4">
               <p className="text-sm text-neutral-500">Approval</p>
-              <p className="mt-2 font-semibold">{request.approvalStatus}</p>
+              <p className="mt-2 font-semibold">{formatApprovalStatus(request.approvalStatus)}</p>
             </div>
 
             <div className="rounded-xl bg-neutral-100 p-4">
