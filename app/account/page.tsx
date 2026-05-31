@@ -2,7 +2,7 @@ import Link from "next/link";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import { AccountProfileForm } from "@/components/account/AccountProfileForm";
+import { getMissingProfileFields } from "@/lib/profile-completeness";
 import { AccountProfileModal } from "@/components/account/AccountProfileModal";
 export default async function AccountPage() {
   const session = await auth();
@@ -48,6 +48,8 @@ export default async function AccountPage() {
     ["PAY_BY_DATE", "OFFLINE_PAYMENT_DUE"].includes(order.paymentStatus ?? ""),
   );
 
+  const missingProfileFields = getMissingProfileFields(user);
+
   return (
     <main className="min-h-screen bg-neutral-50 px-6 py-12">
       <div className="mx-auto max-w-6xl">
@@ -56,6 +58,33 @@ export default async function AccountPage() {
             Account Dashboard
           </p>
 
+          {missingProfileFields.length > 0 && (
+            <div className="mb-8 rounded-2xl border border-amber-300 bg-amber-50 p-5 text-amber-950">
+              <h2 className="text-xl font-semibold">Complete Your Account Information</h2>
+
+              <p className="mt-2 text-sm leading-6">
+                Add your {missingProfileFields.join(", ")} to make checkout, delivery,
+                catering, and personal chef requests easier.
+              </p>
+
+              <div className="mt-4">
+                <AccountProfileModal
+                  user={{
+                    name: user.name,
+                    email: user.email,
+                    phone: user.phone,
+                    addressLine1: user.addressLine1,
+                    addressLine2: user.addressLine2,
+                    city: user.city,
+                    state: user.state,
+                    postalCode: user.postalCode,
+                    deliveryNotes: user.deliveryNotes,
+                  }}
+                />
+              </div>
+            </div>
+          )}
+          
           <h1 className="mt-3 text-4xl font-bold">
             Welcome, {user.name ?? "Customer"}
           </h1>
