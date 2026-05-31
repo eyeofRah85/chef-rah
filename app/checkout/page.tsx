@@ -483,7 +483,9 @@ const cutoffText = `${cutoffDayNames[settings.orderCutoffDay]} at ${cutoffHour12
               });
 
               if (!response.ok) {
-                alert("Failed to submit order.");
+                const errorData = await response.json().catch(() => null);
+
+                alert(errorData?.error ?? "Failed to submit order.");
                 return;
               }
 
