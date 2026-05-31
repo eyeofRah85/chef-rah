@@ -16,7 +16,7 @@ export default function CheckoutPage() {
   const settings = useBusinessSettings();
   const details = useCheckoutStore((state) => state.details);
   const updateField = useCheckoutStore((state) => state.updateField);
-
+  const [submitting, setSubmitting] = useState(false);
   const router = useRouter();
 
   const items = useCartStore((state) => state.items);
@@ -414,9 +414,14 @@ const cutoffText = `${cutoffDayNames[settings.orderCutoffDay]} at ${cutoffHour12
                   </div>
                 </section>
                 
-            <button            
+            <button
               type="button"
+              disabled={submitting}
               onClick={async () => {
+                if (submitting) return;
+
+                setSubmitting(true);
+                  try{
                 if (!details.requestedDateTime) {
                   alert("Please choose a requested date and time.");
                   return;
@@ -495,10 +500,13 @@ const cutoffText = `${cutoffDayNames[settings.orderCutoffDay]} at ${cutoffHour12
               resetCheckout();
 
               router.push(`/orders/${order.id}`);
+              } finally {
+                setSubmitting(false);
+              }
             }}
             className="w-full rounded-xl bg-black px-5 py-3 font-medium text-white"
           >
-            Submit Order
+            {submitting ? "Submitting..." : "Submit Order"}
           </button>
         </form>
 
