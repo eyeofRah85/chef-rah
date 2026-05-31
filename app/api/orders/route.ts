@@ -79,7 +79,14 @@ export async function POST(request: Request) {
         );
       }
     }
+      const allowedOrderTypes = ["delivery", "pickup"];
 
+      if (!allowedOrderTypes.includes(checkout.orderType)) {
+        return NextResponse.json(
+          { error: "Invalid order type." },
+          { status: 400 },
+        );
+      }
     const order = await prisma.order.create({
       data: {
         user: {

@@ -1,4 +1,4 @@
-export type OrderType = "delivery" | "pickup" | "catering";
+export type OrderType = "delivery" | "pickup";
 
 export type TipType =
   | "none"

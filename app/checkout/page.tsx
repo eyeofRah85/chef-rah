@@ -169,12 +169,6 @@ const cutoffText = `${cutoffDayNames[settings.orderCutoffDay]} at ${cutoffHour12
               <option value="delivery">Delivery</option>
               <option value="pickup">Pickup</option>
             </select>
-
-            {/* {details.orderType === "delivery" && settings.deliveryArea && (
-              <p className="mt-2 text-xs text-neutral-500">
-                Delivery area: {settings.deliveryArea}.
-              </p>
-            )} */}
           </section>
           <section className="rounded-2xl border bg-white p-6 shadow-sm">
 
