@@ -176,6 +176,28 @@ export async function POST(request: Request) {
       },
     });
 
+    try {
+      if (checkout.saveContactInfo) {
+        await prisma.user.update({
+          where: {
+            email: session.user.email,
+          },
+          data: {
+            name: checkout.name || session.user.name || null,
+            phone: checkout.phone || null,
+            addressLine1: checkout.addressLine1 || null,
+            addressLine2: checkout.addressLine2 || null,
+            city: checkout.city || null,
+            state: checkout.state || null,
+            postalCode: checkout.postalCode || null,
+            deliveryNotes: checkout.deliveryNotes || null,
+          },
+        });
+      }
+    } catch (profileError) {
+      console.error("Failed to save checkout contact info to profile", profileError);
+    }
+
     // email section
       await sendAppEmail({
         to: session.user.email,

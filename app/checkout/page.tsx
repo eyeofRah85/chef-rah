@@ -234,6 +234,17 @@ const cutoffText = `${cutoffDayNames[settings.orderCutoffDay]} at ${cutoffHour12
               rows={3}
               className="rounded-xl border px-4 py-3 md:col-span-2"
             />
+            
+            <label className="flex items-center gap-2 text-sm md:col-span-2">              
+            <input
+              type="checkbox"
+              checked={details.saveContactInfo}
+              onChange={(e) =>
+                updateField("saveContactInfo", e.target.checked)
+              }
+            />
+            Save this contact and delivery information to my account
+          </label>
           </div>
         </section>
         

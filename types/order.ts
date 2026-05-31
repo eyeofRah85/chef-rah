@@ -16,6 +16,7 @@ export type CheckoutDetails = {
   substitutionPreference: string;
   tipType: TipType;
   customTipAmount?: number;
+  saveContactInfo: boolean;
 
   name:string;
   phone: string;

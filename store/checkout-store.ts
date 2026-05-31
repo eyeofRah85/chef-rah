@@ -22,9 +22,9 @@ const defaultCheckout: CheckoutDetails = {
   substitutionPreference: "",
   tipType: "none",
   customTipAmount: 0,
-
   paymentMethod: "manual",
   payByDate: "",
+
   name: "",
   phone: "",
   addressLine1: "",
@@ -33,6 +33,8 @@ const defaultCheckout: CheckoutDetails = {
   state: "",
   postalCode: "",
   deliveryNotes: "",
+
+  saveContactInfo: false,
 };
 
 export const useCheckoutStore = create<CheckoutState>()(
