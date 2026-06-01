@@ -55,6 +55,45 @@ export default async function OrderPage({ params }: OrderPageProps) {
             Order Details
           </p>
 
+          {order.approvalStatus === "PENDING" && (
+            <div className="mt-6 rounded-2xl border border-blue-300 bg-blue-50 p-5 text-blue-950">
+              <h2 className="text-xl font-semibold">Chef Review Needed</h2>
+
+              <p className="mt-2 text-sm leading-6">
+                Your order has been received and is waiting for chef review. You will
+                receive an update once the order is approved or if changes are needed.
+              </p>
+            </div>
+          )}
+
+          {order.approvalStatus === "DENIED" && (
+            <div className="mt-6 rounded-2xl border border-red-300 bg-red-50 p-5 text-red-950">
+              <h2 className="text-xl font-semibold">Order Not Approved</h2>
+
+              <p className="mt-2 text-sm leading-6">
+                This order was not approved. Please review any notes from the business or
+                contact Chef Rah&apos;s Twisted Kitchen for next steps.
+              </p>
+
+              {order.approvalNote && (
+                <p className="mt-3 text-sm">
+                  <span className="font-semibold">Note:</span> {order.approvalNote}
+                </p>
+              )}
+            </div>
+          )}
+          
+          {order.approvalStatus === "APPROVED" && (
+            <div className="mt-6 rounded-2xl border border-green-300 bg-green-50 p-5 text-green-950">
+              <h2 className="text-xl font-semibold">Order Approved</h2>
+
+              <p className="mt-2 text-sm leading-6">
+                This order has been approved and can continue through preparation,
+                pickup, or delivery.
+              </p>
+            </div>
+          )}
+
           <h1 className="mt-3 text-4xl font-bold">Order Details</h1>
 
           <p className="mt-3 text-sm text-neutral-600">{order.id}</p>
