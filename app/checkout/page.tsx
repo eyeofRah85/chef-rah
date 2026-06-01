@@ -173,15 +173,32 @@ export default function CheckoutPage() {
                       {item.selectedOptions && item.selectedOptions.length > 0 && (
                         <ul className="mt-3 space-y-1 text-sm text-neutral-600">
                           {item.selectedOptions.map((option, index) => (
-                            <li key={`${option.groupName}-${option.choiceName}-${index}`}>
-                              <span className="font-medium">{option.groupName}:</span>{" "}
-                              {option.choiceName}
-                              {option.priceDelta > 0
-                                ? ` (+$${option.priceDelta.toFixed(2)})`
-                                : ""}
+                            <li
+                              key={`${option.groupName}-${option.choiceName}-${index}`}
+                              className="flex flex-wrap items-center gap-2"
+                            >
+                              <span>
+                                <span className="font-medium">{option.groupName}:</span>{" "}
+                                {option.choiceName}
+                                {option.priceDelta > 0
+                                  ? ` (+$${option.priceDelta.toFixed(2)})`
+                                  : ""}
+                              </span>
+
+                              {option.requestOnly && (
+                                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
+                                  Request Only
+                                </span>
+                              )}
                             </li>
                           ))}
+                          {item.requiresApproval && (
+                            <div className="mt-3 rounded-xl border border-blue-300 bg-blue-50 p-3 text-sm text-blue-900">
+                              This item requires chef approval before the order is confirmed.
+                            </div>
+                          )}
                         </ul>
+                        
                       )}
 
                       {item.customerInstructions && (
@@ -472,8 +489,8 @@ export default function CheckoutPage() {
                 )}
                 {requiresApproval && (
                   <div className="rounded-xl border border-blue-300 bg-blue-50 p-4 text-sm text-blue-900">
-                    One or more items in this order require chef approval. Your order may need
-                    review before final confirmation.
+                    One or more items in this order require chef approval. You will receive an
+                    update once the order has been reviewed.
                   </div>
                 )}
                 </div>
