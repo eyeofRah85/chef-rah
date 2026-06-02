@@ -226,14 +226,7 @@ export default async function AdminOrderDetailsPage({ params }: PageProps) {
           </section>
 
           <aside className="space-y-6 print:hidden">
-            <div className="rounded-2xl border bg-white p-6 shadow-sm">
-              <h2 className="text-2xl font-semibold">Approval Decision</h2>
-
-              <p className="mt-2 text-sm text-neutral-600">
-                Approve the order to move it into the kitchen workflow, or deny it if the
-                selected options cannot be fulfilled.
-              </p>
-              
+            <div className="rounded-2xl border bg-white p-6 shadow-sm">         
               <div className="mt-6">
                   <OrderApprovalForm
                     orderId={order.id}
@@ -246,7 +239,6 @@ export default async function AdminOrderDetailsPage({ params }: PageProps) {
                     <strong>Note:</strong> {order.approvalNote}
                   </p>
                   )}
-                  
               </div>
               
             <div className="rounded-2xl border bg-white p-6 shadow-sm">

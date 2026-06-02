@@ -23,6 +23,34 @@ export async function PATCH(request: Request, context: RouteContext) {
       return NextResponse.json({ error: "Invalid approval status." }, { status: 400 });
     }
 
+
+    const existingRequest = await prisma.cateringRequest.findUnique({
+      where: { id },
+      select: {
+        approvalStatus: true,
+      },
+    });
+
+    if (!existingRequest) {
+      return NextResponse.json(
+        { error: "Service request not found." },
+        { status: 404 },
+      );
+    }
+
+    if (
+      existingRequest.approvalStatus === "APPROVED" ||
+      existingRequest.approvalStatus === "DENIED"
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "This service request has already received a final approval decision.",
+        },
+        { status: 400 },
+      );
+    }
+
     const updated = await prisma.cateringRequest.update({
       where: { id },
       data: {
