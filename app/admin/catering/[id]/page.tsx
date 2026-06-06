@@ -9,6 +9,7 @@ import { MarkDepositPaidButton } from "@/components/admin/MarkDepositPaidButton"
 import {
   formatServiceRequestType,
   formatServiceRequestStatus,
+  formatApprovalStatus,
 } from "@/lib/format-labels";
 
 type PageProps = {
@@ -128,7 +129,7 @@ export default async function AdminCateringDetailsPage({ params }: PageProps) {
                 <div className="mt-6">
                   <CateringApprovalForm
                     requestId={request.id}
-                    currentApprovalStatus={request.approvalStatus}
+                    currentApprovalStatus={formatApprovalStatus(request.approvalStatus)}
                   />
                 </div>
 
@@ -147,7 +148,7 @@ export default async function AdminCateringDetailsPage({ params }: PageProps) {
               <div className="mt-6">
                 <UpdateCateringStatusForm
                   requestId={request.id}
-                  currentStatus={request.status}
+                  currentStatus={formatServiceRequestStatus(request.status)}
                 />
               </div>
             </div>

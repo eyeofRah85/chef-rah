@@ -92,6 +92,13 @@ export const useCheckoutStore = create<CheckoutState>()(
     {
       name: "chef-rahs-checkout",
       version: 2,
+      partialize: (state) => ({
+        ...state,
+        details: {
+          ...state.details,
+          ...emptyContactDetails,
+        },
+      }),
       merge: (persisted, current) => {
         const persistedState = persisted as Partial<CheckoutState>;
 

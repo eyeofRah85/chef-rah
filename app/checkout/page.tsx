@@ -221,9 +221,9 @@ export default function CheckoutPage() {
                             </li>
                           ))}
                           {item.requiresApproval && (
-                            <li className="mt-3 rounded-xl border border-blue-300 bg-blue-50 p-3 text-sm text-blue-900">
+                            <div className="mt-3 rounded-xl border border-blue-300 bg-blue-50 p-3 text-sm text-blue-900">
                               This item requires chef approval before the order is confirmed.
-                            </li>
+                            </div>
                           )}
                         </ul>
                         
@@ -383,6 +383,14 @@ export default function CheckoutPage() {
             )}
           </section>
 
+          <p className="mt-2 text-xs text-neutral-500">
+            Orders placed after {cutoffText} may include a $
+            {settings.lateFee.toFixed(2)} late-order fee.
+            {settings.noWeekendOrdering
+              ? " Weekend ordering is currently unavailable."
+              : ""}
+          </p>
+
           <section className="rounded-2xl border bg-white p-6 shadow-sm">
             <h2 className="text-2xl font-semibold">Preferences</h2>
               <div className="mt-5 space-y-5">
@@ -470,6 +478,12 @@ export default function CheckoutPage() {
                   />
                 </div>
               )}
+                {lateFee > 0 && (
+                  <div className="rounded-xl border border-amber-400 bg-amber-50 p-4 text-sm text-amber-900">
+                    Orders placed after {cutoffText} include a $
+                    {settings.lateFee.toFixed(2)} late-order fee.
+                  </div>
+                )}
                 <div>
                 <label className="block text-sm font-medium">Payment Method</label>
                 <select
@@ -485,7 +499,7 @@ export default function CheckoutPage() {
                   <option value="manual">Pay Later / Manual Invoice</option>
                   <option value="cash">Cash / Offline Payment</option>
                   <option value="stripe" disabled>
-                    Online Card Payment - Coming Soon
+                    Online Card Payment — Coming Soon
                   </option>
                 </select>
 

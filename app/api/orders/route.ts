@@ -62,13 +62,6 @@ export async function POST(request: Request) {
       );
     }
 
-    if (checkout.paymentMethod !== "manual" && checkout.paymentMethod !== "cash") {
-      return NextResponse.json(
-        { error: "Invalid payment method." },
-        { status: 400 },
-      );
-    }
-
     const contact = {
       name: String(checkout.name ?? "").trim(),
       phone: String(checkout.phone ?? "").trim(),
@@ -80,34 +73,19 @@ export async function POST(request: Request) {
       deliveryNotes: String(checkout.deliveryNotes ?? "").trim(),
     };
 
-    const allergyNotes = String(checkout.allergyNotes ?? "").trim();
-    const substitutionPreference = String(
-      checkout.substitutionPreference ?? "",
-    ).trim();
+    let requestedDate: Date | null = null;
 
-    if (!checkout.requestedDateTime) {
-      return NextResponse.json(
-        { error: "Please choose a requested date and time." },
-        { status: 400 },
-      );
-    }
+    if (checkout.requestedDateTime) {
+      requestedDate = new Date(checkout.requestedDateTime);
 
-    const requestedDate = new Date(checkout.requestedDateTime);
+      const requestedDateValidation = await validateServerRequestedDate(requestedDate);
 
-    if (Number.isNaN(requestedDate.getTime())) {
-      return NextResponse.json(
-        { error: "Please choose a valid requested date and time." },
-        { status: 400 },
-      );
-    }
-
-    const requestedDateValidation = await validateServerRequestedDate(requestedDate);
-
-    if (!requestedDateValidation.valid) {
-      return NextResponse.json(
-        { error: requestedDateValidation.error },
-        { status: 400 },
-      );
+      if (!requestedDateValidation.valid) {
+        return NextResponse.json(
+          { error: requestedDateValidation.error },
+          { status: 400 },
+        );
+      }
     }
 
     if (checkout.orderType === "delivery") {
@@ -134,26 +112,6 @@ export async function POST(request: Request) {
         { error: "Pickup orders require your name and phone number." },
         { status: 400 },
       );
-    }
-
-    let payByDate: Date | null = null;
-
-    if (checkout.paymentMethod === "manual") {
-      if (!checkout.payByDate) {
-        return NextResponse.json(
-          { error: "Please choose a pay-by date." },
-          { status: 400 },
-        );
-      }
-
-      payByDate = new Date(checkout.payByDate);
-
-      if (Number.isNaN(payByDate.getTime())) {
-        return NextResponse.json(
-          { error: "Please choose a valid pay-by date." },
-          { status: 400 },
-        );
-      }
     }
 
     const subtotal = items.reduce(
@@ -196,8 +154,8 @@ export async function POST(request: Request) {
 
         requestedDateTime: requestedDate,
 
-        allergyNotes,
-        substitutionPreference,
+        allergyNotes: checkout.allergyNotes,
+        substitutionPreference: checkout.substitutionPreference,
 
         subtotal,
         deliveryFee,
@@ -214,7 +172,7 @@ export async function POST(request: Request) {
         deliveryPostalCode: contact.postalCode || null,
         deliveryNotes: contact.deliveryNotes || null,
 
-        payByDate,
+        payByDate: checkout.payByDate ? new Date(checkout.payByDate) : null,
         paymentProvider: checkout.paymentMethod,
         paymentStatus:
           checkout.paymentMethod === "cash"
@@ -286,6 +244,7 @@ export async function POST(request: Request) {
       console.error("Failed to save checkout contact info to profile", profileError);
     }
 
+    // email section
       await sendAppEmail({
         to: session.user.email,
         subject: "Order Confirmation",
@@ -320,6 +279,7 @@ export async function POST(request: Request) {
         })),
       }),
       });
+    // end email section
 
     return NextResponse.json(order);
   } catch (error) {
