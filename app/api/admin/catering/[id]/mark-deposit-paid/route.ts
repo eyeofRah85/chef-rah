@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth-guards";
 import { sendAppEmail, appUrl } from "@/lib/email";
 import { CateringDepositPaidEmail } from "@/emails/CateringDepositPaidEmail";
+import { formatServiceRequestType } from "@/lib/format-labels";
 
 type RouteContext = {
   params: Promise<{
@@ -24,12 +25,16 @@ export async function PATCH(request: Request, context: RouteContext) {
       },
     });
 
+        const requestLabel = formatServiceRequestType(updated.requestType);
+        const requestLabelLower = requestLabel.toLowerCase();
+
         await sendAppEmail({
           to: updated.email,
-          subject: "Catering Deposit Received",
+          subject: `Your ${requestLabelLower} deposit has been received`,
           react: CateringDepositPaidEmail({
             customerName: updated.name,
-            eventType: updated.eventType ?? "Catering Request",
+            requestType: updated.requestType,
+            eventType: updated.eventType ?? `${requestLabel} Request`,
             depositAmount: updated.depositAmount
               ? Number(updated.depositAmount)
               : 0,

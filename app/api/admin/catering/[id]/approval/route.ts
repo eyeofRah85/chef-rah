@@ -5,6 +5,7 @@ import { sendAppEmail, appUrl } from "@/lib/email";
 import { CateringStatusEmail } from "@/emails/CateringStatusEmail";
 import { parseEnumValue } from "@/lib/enum-values";
 import { approvalStatuses } from "@/lib/prisma-enums";
+import { formatServiceRequestType } from "@/lib/format-labels";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -87,15 +88,19 @@ export async function PATCH(request: Request, context: RouteContext) {
     }
 
     if (approvalStatus === "APPROVED" || approvalStatus === "DENIED") {
+        const requestLabel = formatServiceRequestType(updated.requestType);
+        const requestLabelLower = requestLabel.toLowerCase();
+
         await sendAppEmail({
           to: updated.email,
           subject:
             approvalStatus === "APPROVED"
-              ? "Your catering request has been approved"
-              : "Your catering request was not approved",
+              ? `Your ${requestLabelLower} request has been approved`
+              : `Your ${requestLabelLower} request was not approved`,
           react: CateringStatusEmail({
             customerName: updated.name,
-            eventType: updated.eventType ?? "Catering Request",
+            requestType: updated.requestType,
+            eventType: updated.eventType ?? `${requestLabel} Request`,
             status: updated.status,
             approvalStatus: updated.approvalStatus,
             approvalNote,

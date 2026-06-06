@@ -92,3 +92,6 @@ Progress update - June 6, 2026:
 - Email label polish:
   - Order confirmation emails now format order type, payment status, and approval status with customer-friendly labels.
   - Catering/service request status emails now format request status and approval status with customer-friendly labels.
+- Service request email terminology:
+  - Shared service request emails now use `requestType` so Personal Chef messages are not labeled as Catering.
+  - Approval, quote, deposit, catering, and personal chef request email senders pass the request type into their email templates.
