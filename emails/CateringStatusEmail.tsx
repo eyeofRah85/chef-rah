@@ -10,6 +10,10 @@ import {
   Button
 } from "react-email";
 import { emailStyles } from "@/emails/styles";
+import {
+  formatApprovalStatus,
+  formatServiceRequestStatus,
+} from "@/lib/format-labels";
 
 type Props = {
   customerName: string;
@@ -55,11 +59,11 @@ export function CateringStatusEmail({
           </Text>
 
           <Text>
-            <strong>Status:</strong> {status}
+            <strong>Status:</strong> {formatServiceRequestStatus(status)}
           </Text>
 
           <Text>
-            <strong>Approval:</strong> {approvalStatus}
+            <strong>Approval:</strong> {formatApprovalStatus(approvalStatus)}
           </Text>
 
           {approvalNote && (

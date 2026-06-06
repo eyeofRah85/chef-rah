@@ -89,3 +89,6 @@ Progress update - June 6, 2026:
 - Admin menu customization polish:
   - Restored manual option group name entry in the customization editor.
   - Removed duplicate "Add Option Group" heading in the customization editor.
+- Email label polish:
+  - Order confirmation emails now format order type, payment status, and approval status with customer-friendly labels.
+  - Catering/service request status emails now format request status and approval status with customer-friendly labels.
