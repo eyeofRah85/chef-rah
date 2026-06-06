@@ -2,6 +2,12 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth-guards";
+import {
+  formatOrderStatus,
+  formatOrderType,
+  formatPaymentStatus,
+  formatServiceRequestStatus,
+} from "@/lib/format-labels";
 import type { DecimalLike } from "@/types/display";
 
 type PageProps = {
@@ -141,11 +147,13 @@ export default async function AdminCustomerDetailsPage({ params }: PageProps) {
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <p className="font-semibold">{order.orderType} Order</p>
+                        <p className="font-semibold">
+                          {formatOrderType(order.orderType)} Order
+                        </p>
 
                         <p className="mt-1 text-sm text-neutral-600">
                           {order.items.length} item
-                          {order.items.length === 1 ? "" : "s"} ·{" "}
+                          {order.items.length === 1 ? "" : "s"} -{" "}
                           {order.createdAt.toLocaleDateString()}
                         </p>
 
@@ -158,14 +166,14 @@ export default async function AdminCustomerDetailsPage({ params }: PageProps) {
 
                         {order.paymentStatus && (
                           <p className="mt-2 text-xs font-medium text-amber-700">
-                            Payment: {order.paymentStatus}
+                            Payment: {formatPaymentStatus(order.paymentStatus)}
                           </p>
                         )}
                       </div>
 
                       <div className="text-right">
                         <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium">
-                          {order.status}
+                          {formatOrderStatus(order.status)}
                         </span>
 
                         <p className="mt-2 font-bold">
@@ -211,7 +219,7 @@ export default async function AdminCustomerDetailsPage({ params }: PageProps) {
                       </div>
 
                       <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium">
-                        {request.status}
+                        {formatServiceRequestStatus(request.status)}
                       </span>
                     </div>
                   </Link>

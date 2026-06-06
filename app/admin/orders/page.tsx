@@ -2,7 +2,12 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth-guards";
-import { formatOrderType, formatPaymentStatus, formatApprovalStatus } from "@/lib/format-labels";
+import {
+  formatApprovalStatus,
+  formatOrderStatus,
+  formatOrderType,
+  formatPaymentStatus,
+} from "@/lib/format-labels";
 import { parseEnumValue } from "@/lib/enum-values";
 import {
   approvalStatuses,
@@ -153,7 +158,7 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
 
                   <td className="p-4">
                     <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium">
-                      {order.status}
+                      {formatOrderStatus(order.status)}
                     </span>
                   </td>
 

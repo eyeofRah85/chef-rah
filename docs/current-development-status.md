@@ -81,3 +81,8 @@ Progress update - June 6, 2026:
   - Order creation rejects submitted cart items whose menu item type is `CATERING`, protecting against stale persisted carts.
   - Admin order filters now only expose delivery and pickup order types.
   - Admin orders table columns were realigned so approval status no longer appears under the item count column.
+- Order label polish:
+  - Added a shared order status formatter for customer and admin order summaries.
+  - Account, admin, customer detail, order list, and kitchen views now show friendly order type/status/payment labels instead of raw enum values.
+  - Cleaned corrupted item quantity and separator text in summary cards.
+  - Kitchen view now passes only plain serialized order data to the client card, avoiding Prisma `Decimal` objects in client component props.

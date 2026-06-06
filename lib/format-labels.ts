@@ -18,6 +18,42 @@ export function formatOrderType(type: string | null | undefined) {
   }
 }
 
+export function formatOrderStatus(status: string | null | undefined) {
+  switch (status) {
+    case "PENDING":
+      return "Pending";
+
+    case "ACCEPTED":
+      return "Accepted";
+
+    case "PREPARING":
+      return "Preparing";
+
+    case "READY":
+      return "Ready";
+
+    case "OUT_FOR_DELIVERY":
+      return "Out for Delivery";
+
+    case "COMPLETED":
+      return "Completed";
+
+    case "CANCELLED":
+      return "Cancelled";
+
+    case "REFUNDED":
+      return "Refunded";
+
+    default:
+      return status
+        ? status
+            .toLowerCase()
+            .replaceAll("_", " ")
+            .replace(/\b\w/g, (char) => char.toUpperCase())
+        : "Not set";
+  }
+}
+
 export function formatApprovalStatus(status: string | null | undefined) {
   switch (status) {
     case "PENDING":
