@@ -29,24 +29,54 @@ export async function PATCH(request: Request, context: RouteContext) {
       return NextResponse.json({ error: "Invalid approval status." }, { status: 400 });
     }
 
-    const existingRequest = await prisma.cateringRequest.findUnique({
-      where: { id },
-      select: {
-        approvalStatus: true,
-      },
+    const nextRequestStatus =
+      approvalStatus === "APPROVED"
+        ? "APPROVED"
+        : approvalStatus === "DENIED"
+          ? "CANCELLED"
+          : undefined;
+
+    const decidedAt = new Date();
+
+    const updated = await prisma.$transaction(async (tx) => {
+      const result = await tx.cateringRequest.updateMany({
+        where: {
+          id,
+          approvalStatus: "PENDING",
+        },
+        data: {
+          approvalStatus,
+          approvalNote: approvalNote || null,
+          approvedAt: approvalStatus === "APPROVED" ? decidedAt : null,
+          deniedAt: approvalStatus === "DENIED" ? decidedAt : null,
+          status: nextRequestStatus,
+        },
+      });
+
+      if (result.count === 0) {
+        return null;
+      }
+
+      return tx.cateringRequest.findUnique({
+        where: { id },
+      });
     });
 
-    if (!existingRequest) {
-      return NextResponse.json(
-        { error: "Service request not found." },
-        { status: 404 },
-      );
-    }
+    if (!updated) {
+      const existingRequest = await prisma.cateringRequest.findUnique({
+        where: { id },
+        select: {
+          approvalStatus: true,
+        },
+      });
 
-    if (
-      existingRequest.approvalStatus === "APPROVED" ||
-      existingRequest.approvalStatus === "DENIED"
-    ) {
+      if (!existingRequest) {
+        return NextResponse.json(
+          { error: "Service request not found." },
+          { status: 404 },
+        );
+      }
+
       return NextResponse.json(
         {
           error:
@@ -56,21 +86,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       );
     }
 
-    const updated = await prisma.cateringRequest.update({
-      where: { id },
-      data: {
-        approvalStatus,
-        approvalNote: approvalNote || null,
-        approvedAt: approvalStatus === "APPROVED" ? new Date() : null,
-        deniedAt: approvalStatus === "DENIED" ? new Date() : null,
-        status:
-          approvalStatus === "APPROVED"
-            ? "APPROVED"
-            : approvalStatus === "DENIED"
-              ? "CANCELLED"
-              : undefined,
-      },
-    });
+    if (approvalStatus === "APPROVED" || approvalStatus === "DENIED") {
         await sendAppEmail({
           to: updated.email,
           subject:
@@ -92,6 +108,7 @@ export async function PATCH(request: Request, context: RouteContext) {
               requestUrl: `${appUrl}/account/catering/${updated.id}`,
           }),
         });
+      }
     return NextResponse.json(updated);
   } catch (error) {
     console.error(error);
