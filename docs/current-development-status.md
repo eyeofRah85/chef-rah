@@ -71,3 +71,8 @@ Progress update - June 6, 2026:
 - Validation:
   - `npm run lint` passes with existing `@next/next/no-img-element` warnings.
   - `npm run build` passes with the current Next.js/Prisma setup.
+- Service request and order detail polish:
+  - Personal Chef requests now use the raw `requestType` value for branching, so they are labeled as Personal Chef instead of falling back to Catering.
+  - Admin service request status updates now receive the raw status enum instead of a formatted label.
+  - Admin service request approval and status controls are split into separate cards.
+  - Customer order detail pages now show one approval notice instead of duplicated pending/denied/approved messaging.

@@ -94,45 +94,6 @@ export default async function OrderPage({ params }: OrderPageProps) {
             Order Details
           </p>
 
-          {order.approvalStatus === "PENDING" && (
-            <div className="mt-6 rounded-2xl border border-blue-300 bg-blue-50 p-5 text-blue-950">
-              <h2 className="text-xl font-semibold">Chef Review Needed</h2>
-
-              <p className="mt-2 text-sm leading-6">
-                Your order has been received and is waiting for chef review. You will
-                receive an update once the order is approved or if changes are needed.
-              </p>
-            </div>
-          )}
-
-          {order.approvalStatus === "DENIED" && (
-            <div className="mt-6 rounded-2xl border border-red-300 bg-red-50 p-5 text-red-950">
-              <h2 className="text-xl font-semibold">Order Not Approved</h2>
-
-              <p className="mt-2 text-sm leading-6">
-                This order was not approved. Please review any notes from the business or
-                contact Chef Rah&apos;s Twisted Kitchen for next steps.
-              </p>
-
-              {order.approvalNote && (
-                <p className="mt-3 text-sm">
-                  <span className="font-semibold">Note:</span> {order.approvalNote}
-                </p>
-              )}
-            </div>
-          )}
-          
-          {order.approvalStatus === "APPROVED" && (
-            <div className="mt-6 rounded-2xl border border-green-300 bg-green-50 p-5 text-green-950">
-              <h2 className="text-xl font-semibold">Order Approved</h2>
-
-              <p className="mt-2 text-sm leading-6">
-                This order has been approved and can continue through preparation,
-                pickup, or delivery.
-              </p>
-            </div>
-          )}
-
           <h1 className="mt-3 text-4xl font-bold">Order Details</h1>
 
           <p className="mt-3 text-sm text-neutral-600">{order.id}</p>
@@ -155,43 +116,54 @@ export default async function OrderPage({ params }: OrderPageProps) {
               </p>
             </div>
           </section>
-{order.approvalStatus === "PENDING" && (
-  <section className="mt-6 rounded-2xl border border-blue-300 bg-blue-50 p-5 text-blue-950">
-    <h2 className="text-xl font-semibold">Waiting for Chef Approval</h2>
 
-    <p className="mt-2 text-sm">
-      This order includes one or more items that need to be reviewed before it
-      is confirmed. You will be able to track the order status here.
-    </p>
-  </section>
-  )}
+          {order.approvalStatus === "PENDING" && (
+            <section className="mt-6 rounded-2xl border border-blue-300 bg-blue-50 p-5 text-blue-950">
+              <h2 className="text-xl font-semibold">Waiting for Chef Approval</h2>
 
-  {order.approvalStatus === "DENIED" && (
-    <section className="mt-6 rounded-2xl border border-red-300 bg-red-50 p-5 text-red-950">
-      <h2 className="text-xl font-semibold">Order Not Approved</h2>
+              <p className="mt-2 text-sm leading-6">
+                Your order has been received and is waiting for chef review.
+                You will receive an update once the order is approved or if
+                changes are needed.
+              </p>
+            </section>
+          )}
 
-      <p className="mt-2 text-sm">
-        This order was not approved. Please review any notes below or contact the
-        business for more details.
-      </p>
+          {order.approvalStatus === "DENIED" && (
+            <section className="mt-6 rounded-2xl border border-red-300 bg-red-50 p-5 text-red-950">
+              <h2 className="text-xl font-semibold">Order Not Approved</h2>
 
-      {order.approvalNote && (
-        <p className="mt-3 text-sm">
-          <strong>Note:</strong> {order.approvalNote}
-        </p>
-      )}
-    </section>
-  )}
+              <p className="mt-2 text-sm leading-6">
+                This order was not approved. Please review any notes from the
+                business or contact Chef Rah&apos;s Twisted Kitchen for next
+                steps.
+              </p>
 
-  {order.approvalStatus === "APPROVED" && order.approvalNote && (
-    <section className="mt-6 rounded-2xl border bg-neutral-50 p-5">
-      <h2 className="text-xl font-semibold">Approval Note</h2>
+              {order.approvalNote && (
+                <p className="mt-3 text-sm">
+                  <strong>Note:</strong> {order.approvalNote}
+                </p>
+              )}
+            </section>
+          )}
 
-      <p className="mt-2 whitespace-pre-wrap text-sm text-neutral-700">
-        {order.approvalNote}
-      </p>
-    </section>
-  )}
+          {order.approvalStatus === "APPROVED" && (
+            <section className="mt-6 rounded-2xl border border-green-300 bg-green-50 p-5 text-green-950">
+              <h2 className="text-xl font-semibold">Order Approved</h2>
+
+              <p className="mt-2 text-sm leading-6">
+                This order has been approved and can continue through
+                preparation, pickup, or delivery.
+              </p>
+
+              {order.approvalNote && (
+                <p className="mt-3 text-sm">
+                  <strong>Note:</strong> {order.approvalNote}
+                </p>
+              )}
+            </section>
+          )}
+
           {paymentDue && (
             <section className="mt-6 rounded-2xl border border-amber-300 bg-amber-50 p-5 text-amber-950">
               <h2 className="text-xl font-semibold">Payment Due</h2>
