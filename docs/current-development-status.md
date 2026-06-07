@@ -125,3 +125,7 @@ Progress update - June 6, 2026:
   - Replaced remaining malformed/non-ASCII expand/collapse markers, separators, and service tagline text with plain ASCII display copy.
 - Admin menu customization entry:
   - Manual option-group creation now captures choice description, dietary info, image URL, request-only status, and price delta in one pass.
+- Order creation server validation:
+  - Live cart items are now repriced from the current menu item and option records before order totals are created.
+  - Required option groups, single-choice limits, unavailable/archived items, catering item submissions, and request-only approval flags are enforced by the order API.
+  - Reorder submissions carry the prior order item ID, and the order API verifies it belongs to the signed-in customer before using the historical snapshot price.

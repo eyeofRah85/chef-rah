@@ -157,6 +157,7 @@ export default async function AccountOrdersPage() {
                 </div>
                   <ReorderButton
                     items={order.items.map((item) => ({
+                        id: item.id,
                         menuItemId: item.menuItemId,
                         name: item.name,
                         quantity: item.quantity,
