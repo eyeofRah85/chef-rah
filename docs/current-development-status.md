@@ -119,3 +119,5 @@ Progress update - June 6, 2026:
 - Service request settings terminology:
   - Business settings now label the shared deposit percentage as a service request deposit instead of catering-only copy.
   - Service request approval API failures now use service request terminology.
+- Admin menu API cleanup:
+  - Removed stale commented category/type mapping code from the menu creation API so category display names and menu item enum values stay clearly separated.
