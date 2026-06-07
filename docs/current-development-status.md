@@ -110,3 +110,6 @@ Progress update - June 6, 2026:
 - Service request deposit guard:
   - Marking a service request deposit as paid now requires an unpaid request with a deposit amount.
   - Duplicate deposit-paid calls are rejected before sending another receipt email.
+- Order payment guard:
+  - Marking an order as paid now only succeeds for unpaid orders with payment due.
+  - Duplicate order payment calls are rejected before sending another payment received email.

@@ -85,6 +85,10 @@ export default async function AdminOrderDetailsPage({ params }: PageProps) {
     notFound();
   }
 
+  const paymentDue = ["PAY_BY_DATE", "OFFLINE_PAYMENT_DUE"].includes(
+    order.paymentStatus ?? "",
+  );
+
   return (
     <main className="min-h-screen bg-neutral-50 px-6 py-12 print:bg-white print:px-0 print:py-0">
       <div className="mx-auto max-w-5xl">
@@ -361,7 +365,7 @@ export default async function AdminOrderDetailsPage({ params }: PageProps) {
                     ? order.paidAt.toLocaleString()
                     : "Not paid"}
                 </p>
-                {order.paymentStatus !== "PAID" && (
+                {paymentDue && (
                   <div className="mt-5">
                     <MarkOrderPaidButton orderId={order.id} />
                   </div>
