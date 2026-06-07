@@ -101,3 +101,6 @@ Progress update - June 6, 2026:
 - Lint warning cleanup:
   - Replaced remaining plain image elements with `next/image` on the home page, menu cards, menu customization modal choice images, and admin menu item preview.
   - `npm run lint` now completes without the prior `@next/next/no-img-element` warnings.
+- Admin status label polish:
+  - Admin order and service request status dropdowns now show friendly status labels instead of raw enum values.
+  - Service request status formatting explicitly covers new, deposit due, and deposit paid states.

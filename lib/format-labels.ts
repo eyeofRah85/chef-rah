@@ -144,6 +144,9 @@ export function formatServiceRequestStatus(
   status: string | null | undefined,
 ) {
   switch (status) {
+    case "NEW":
+      return "New";
+
     case "PENDING":
       return "Pending";
 
@@ -155,6 +158,12 @@ export function formatServiceRequestStatus(
 
     case "APPROVED":
       return "Approved";
+
+    case "DEPOSIT_DUE":
+      return "Deposit Due";
+
+    case "DEPOSIT_PAID":
+      return "Deposit Paid";
 
     case "DENIED":
       return "Denied";
