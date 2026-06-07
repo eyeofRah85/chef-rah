@@ -541,11 +541,10 @@ export async function POST(request: Request) {
       console.error("Failed to save checkout contact info to profile", profileError);
     }
 
-    // email section
-      await sendAppEmail({
-        to: session.user.email,
-        subject: "Order Confirmation",
-        react: OrderConfirmationEmail({
+    await sendAppEmail({
+      to: session.user.email,
+      subject: "Order Confirmation",
+      react: OrderConfirmationEmail({
         customerName: order.customerName,
         orderId: order.id,
         orderType: order.orderType,
@@ -575,8 +574,7 @@ export async function POST(request: Request) {
           notes: item.notes,
         })),
       }),
-      });
-    // end email section
+    });
 
     return NextResponse.json(order);
   } catch (error) {

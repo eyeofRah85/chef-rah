@@ -134,3 +134,5 @@ Progress update - June 6, 2026:
 - Admin order snapshot route hardening:
   - Disabled unused admin order allergen/option endpoints that were incorrectly pointed at menu customization tables using an order ID.
   - Those routes now return an authenticated unsupported-operation response and direct edits back to the menu manager.
+- Stale comment cleanup:
+  - Removed leftover commented-out order history markup and empty email-section comments from the order creation route.

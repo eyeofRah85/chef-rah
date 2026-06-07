@@ -127,7 +127,6 @@ export default async function AccountOrdersPage() {
                   </p>
 
                 <div className="mt-3 gap-2 md:justify-end">
-                  {/* <div className="mt-3 flex flex-wrap gap-2 md:justify-end"> */}
                     <Link
                         href={`/orders/${order.id}`}
                         className="inline-flex rounded-xl bg-black px-5 py-2 text-sm font-medium text-white"
