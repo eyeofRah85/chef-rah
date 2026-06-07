@@ -16,35 +16,87 @@ export async function PATCH(request: Request, context: RouteContext) {
     await requireAdmin();
 
     const { id } = await context.params;
+    const paidAt = new Date();
 
-    const updated = await prisma.cateringRequest.update({
-      where: { id },
-      data: {
-        status: "DEPOSIT_PAID",
-        depositPaidAt: new Date(),
-      },
+    const updated = await prisma.$transaction(async (tx) => {
+      const result = await tx.cateringRequest.updateMany({
+        where: {
+          id,
+          depositAmount: {
+            not: null,
+          },
+          depositPaidAt: null,
+        },
+        data: {
+          status: "DEPOSIT_PAID",
+          depositPaidAt: paidAt,
+        },
+      });
+
+      if (result.count === 0) {
+        return null;
+      }
+
+      return tx.cateringRequest.findUnique({
+        where: { id },
+      });
     });
 
-        const requestLabel = formatServiceRequestType(updated.requestType);
-        const requestLabelLower = requestLabel.toLowerCase();
+    if (!updated) {
+      const existingRequest = await prisma.cateringRequest.findUnique({
+        where: { id },
+        select: {
+          depositAmount: true,
+          depositPaidAt: true,
+        },
+      });
 
-        await sendAppEmail({
-          to: updated.email,
-          subject: `Your ${requestLabelLower} deposit has been received`,
-          react: CateringDepositPaidEmail({
-            customerName: updated.name,
-            requestType: updated.requestType,
-            eventType: updated.eventType ?? `${requestLabel} Request`,
-            depositAmount: updated.depositAmount
-              ? Number(updated.depositAmount)
-              : 0,
-            paidAt: updated.depositPaidAt
-              ? updated.depositPaidAt.toLocaleString()
-              : new Date().toLocaleString(),
-              requestUrl: `${appUrl}/account/catering/${updated.id}`,
-          }),
-        });
-     return NextResponse.json(updated);
+      if (!existingRequest) {
+        return NextResponse.json(
+          { error: "Service request not found." },
+          { status: 404 },
+        );
+      }
+
+      if (!existingRequest.depositAmount) {
+        return NextResponse.json(
+          { error: "Set a deposit amount before marking it as paid." },
+          { status: 400 },
+        );
+      }
+
+      if (existingRequest.depositPaidAt) {
+        return NextResponse.json(
+          { error: "This deposit has already been marked as paid." },
+          { status: 409 },
+        );
+      }
+
+      return NextResponse.json(
+        { error: "Failed to mark deposit as paid." },
+        { status: 409 },
+      );
+    }
+
+    const requestLabel = formatServiceRequestType(updated.requestType);
+    const requestLabelLower = requestLabel.toLowerCase();
+
+    await sendAppEmail({
+      to: updated.email,
+      subject: `Your ${requestLabelLower} deposit has been received`,
+      react: CateringDepositPaidEmail({
+        customerName: updated.name,
+        requestType: updated.requestType,
+        eventType: updated.eventType ?? `${requestLabel} Request`,
+        depositAmount: updated.depositAmount ? Number(updated.depositAmount) : 0,
+        paidAt: updated.depositPaidAt
+          ? updated.depositPaidAt.toLocaleString()
+          : paidAt.toLocaleString(),
+        requestUrl: `${appUrl}/account/catering/${updated.id}`,
+      }),
+    });
+
+    return NextResponse.json(updated);
   } catch (error) {
     console.error(error);
 

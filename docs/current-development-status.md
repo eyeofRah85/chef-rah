@@ -107,3 +107,6 @@ Progress update - June 6, 2026:
 - Account service request navigation:
   - The account dashboard Service Requests card now links to the account service request history instead of the public catering request form.
   - Account profile copy now describes contact, delivery, and service-location information for orders and service requests.
+- Service request deposit guard:
+  - Marking a service request deposit as paid now requires an unpaid request with a deposit amount.
+  - Duplicate deposit-paid calls are rejected before sending another receipt email.
