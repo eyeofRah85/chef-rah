@@ -65,6 +65,8 @@ type ServerRecoveredOrderItem = {
   notes: string | null;
   menuItem: {
     type: string;
+    available: boolean;
+    archived: boolean;
     requiresApproval: boolean;
   } | null;
 };
@@ -233,6 +235,8 @@ export async function POST(request: Request) {
         menuItem: {
           select: {
             type: true,
+            available: true,
+            archived: true,
             requiresApproval: true,
           },
         },
@@ -287,6 +291,16 @@ export async function POST(request: Request) {
         if (recoveredItem.menuItem?.type === "CATERING") {
           return NextResponse.json(
             { error: "Catering items must be submitted as service requests." },
+            { status: 400 },
+          );
+        }
+
+        if (
+          recoveredItem.menuItem &&
+          (!recoveredItem.menuItem.available || recoveredItem.menuItem.archived)
+        ) {
+          return NextResponse.json(
+            { error: `${name} is no longer available for reorder.` },
             { status: 400 },
           );
         }

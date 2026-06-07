@@ -139,3 +139,5 @@ Progress update - June 6, 2026:
 - Reorder approval validation:
   - Reorder snapshot pricing remains historical, but linked current menu item approval rules now still require chef approval when applicable.
   - Reorders are blocked if the linked current menu item is now a catering/service item.
+- Reorder availability validation:
+  - Reorders are blocked when the linked current menu item has been archived or marked unavailable, while still using snapshot pricing for valid linked items.
