@@ -123,3 +123,5 @@ Progress update - June 6, 2026:
   - Removed stale commented category/type mapping code from the menu creation API so category display names and menu item enum values stay clearly separated.
 - Admin menu display cleanup:
   - Replaced remaining malformed/non-ASCII expand/collapse markers, separators, and service tagline text with plain ASCII display copy.
+- Admin menu customization entry:
+  - Manual option-group creation now captures choice description, dietary info, image URL, request-only status, and price delta in one pass.
