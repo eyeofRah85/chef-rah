@@ -179,7 +179,7 @@ export default async function AccountOrdersPage() {
                     >
                       <div>
                         <p className="font-medium">
-                          {item.quantity}× {item.name}
+                          {item.quantity} x {item.name}
                         </p>
 
                         {item.notes && (

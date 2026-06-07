@@ -129,3 +129,5 @@ Progress update - June 6, 2026:
   - Live cart items are now repriced from the current menu item and option records before order totals are created.
   - Required option groups, single-choice limits, unavailable/archived items, catering item submissions, and request-only approval flags are enforced by the order API.
   - Reorder submissions carry the prior order item ID, and the order API verifies it belongs to the signed-in customer before using the historical snapshot price.
+- Account order history display cleanup:
+  - Replaced the remaining corrupted quantity separator in account order history with the plain ASCII `x` used on order detail surfaces.
