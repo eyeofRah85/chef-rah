@@ -6,7 +6,11 @@ import { MarkOrderPaidButton } from "@/components/admin/MarkOrderPaidButton";
 import { OrderApprovalForm } from "@/components/admin/OrderApprovalForm";
 import Link from "next/link";
 import { PrintButton } from "@/components/admin/PrintButton";
-import { formatOrderType } from "@/lib/format-labels";
+import {
+  formatOrderStatus,
+  formatOrderType,
+  formatPaymentStatus,
+} from "@/lib/format-labels";
 import type { DecimalLike } from "@/types/display";
 
 type PageProps = {
@@ -226,7 +230,7 @@ export default async function AdminOrderDetailsPage({ params }: PageProps) {
                       <div>
                         <h3 className="font-semibold">{item.name}</h3>
                         <p className="text-sm text-neutral-600">
-                          Qty: {item.quantity} × $
+                          Qty: {item.quantity} x $
                           {Number(item.unitPrice).toFixed(2)}
                         </p>
                         {item.notes && (
@@ -294,7 +298,7 @@ export default async function AdminOrderDetailsPage({ params }: PageProps) {
             <div className="rounded-2xl border bg-white p-6 shadow-sm">
               <h2 className="text-2xl font-semibold">Status</h2>
               <p className="mt-3 rounded-full bg-neutral-100 px-3 py-2 text-center text-sm font-medium">
-                {order.status}
+                {formatOrderStatus(order.status)}
               </p>
 
               <div className="mt-6">
@@ -349,7 +353,7 @@ export default async function AdminOrderDetailsPage({ params }: PageProps) {
 
                 <p>
                   <strong>Status:</strong>{" "}
-                  {order.paymentStatus ?? "Not set"}
+                  {formatPaymentStatus(order.paymentStatus)}
                 </p>
 
                 <p>
@@ -379,7 +383,9 @@ export default async function AdminOrderDetailsPage({ params }: PageProps) {
               <div className="mt-5 space-y-3">
                 {order.statusHistory.map((history) => (
                   <div key={history.id} className="border-l-2 pl-3 text-sm">
-                    <p className="font-medium">{history.status}</p>
+                    <p className="font-medium">
+                      {formatOrderStatus(history.status)}
+                    </p>
                     <p className="text-xs text-neutral-500">
                       {history.createdAt.toLocaleString()}
                     </p>

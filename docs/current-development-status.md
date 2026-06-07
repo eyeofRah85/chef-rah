@@ -113,3 +113,6 @@ Progress update - June 6, 2026:
 - Order payment guard:
   - Marking an order as paid now only succeeds for unpaid orders with payment due.
   - Duplicate order payment calls are rejected before sending another payment received email.
+- Order detail label polish:
+  - Customer and admin order detail pages now show friendly order and payment status labels.
+  - Cleaned remaining corrupted quantity separators and aligned the admin payments table columns.

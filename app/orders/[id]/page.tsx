@@ -2,7 +2,12 @@ import Link from "next/link";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { notFound, redirect } from "next/navigation";
-import { formatOrderType, formatPaymentStatus, formatApprovalStatus } from "@/lib/format-labels";
+import {
+  formatOrderStatus,
+  formatOrderType,
+  formatPaymentStatus,
+  formatApprovalStatus,
+} from "@/lib/format-labels";
 import type { DecimalLike } from "@/types/display";
 
 type OrderPageProps = {
@@ -86,7 +91,7 @@ export default async function OrderPage({ params }: OrderPageProps) {
     <main className="min-h-screen bg-neutral-50 px-6 py-12">
       <div className="mx-auto max-w-4xl">
         <Link href="/account/orders" className="text-sm font-medium underline">
-          ← Back to Order History
+          &larr; Back to Order History
         </Link>
 
         <div className="mt-8 rounded-2xl border bg-white p-8 shadow-sm">
@@ -101,7 +106,9 @@ export default async function OrderPage({ params }: OrderPageProps) {
           <section className="mt-8 grid gap-4 md:grid-cols-3">
             <div className="rounded-xl bg-neutral-100 p-4">
               <p className="text-sm text-neutral-500">Status</p>
-              <p className="mt-2 font-semibold">{order.status}</p>
+              <p className="mt-2 font-semibold">
+                {formatOrderStatus(order.status)}
+              </p>
             </div>
 
             <div className="rounded-xl bg-neutral-100 p-4">
@@ -218,7 +225,7 @@ export default async function OrderPage({ params }: OrderPageProps) {
                 </p>
 
                 <p>
-                  <strong>Status:</strong> {order.paymentStatus ?? "Not set"}
+                  <strong>Status:</strong> {formatPaymentStatus(order.paymentStatus)}
                 </p>
 
                 <p>
@@ -290,7 +297,7 @@ export default async function OrderPage({ params }: OrderPageProps) {
                   <div className="flex justify-between gap-4">
                     <div>
                       <h3 className="font-semibold">
-                        {item.quantity}× {item.name}
+                        {item.quantity} x {item.name}
                       </h3>
 
                       <p className="mt-1 text-sm text-neutral-600">
