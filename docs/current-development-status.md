@@ -168,6 +168,12 @@ Progress update - June 6, 2026:
   - Non-browser/API validation failures still receive JSON error responses.
   - Both forms include helper text for event date, guest count, location, and requested menu/service details.
   - Catering and Personal Chef continue to share the `CateringRequest` workflow while keeping distinct customer-facing copy.
+- Admin service request workflow polish:
+  - Admin service request status controls now lock completed, cancelled, and denied requests.
+  - Deposit due and deposit paid status transitions are guarded in both the admin UI and API.
+  - Quote editing is locked after final states, denied approvals, or paid deposits.
+  - Zero-dollar quotes and zero-dollar deposits display as explicit `$0.00` values instead of looking unset.
+  - Zero-dollar deposits are treated as no deposit due, so the mark-deposit-paid action is hidden and rejected by the API.
 
 Review notes from main branch inspection - June 8, 2026:
 - `package.json` exposes `dev`, `build`, `start`, `lint`, `typecheck`, `prisma:generate`, and `check` scripts.
@@ -203,11 +209,13 @@ Next work items - June 8, 2026:
    - Catering and Personal Chef forms include helper text for event date, guest count, location, and requested menu/service details.
    - Both workflows still route through `CateringRequest` while keeping distinct customer-facing copy.
 
-5. Admin service request workflow polish
-   - Review admin service request detail actions after approval, quote, deposit due, deposit paid, completed, and cancelled states.
-   - Ensure actions that should be final or one-way are hidden or disabled after they are no longer valid.
-   - Ensure quote/deposit forms display current values clearly and do not make zero-dollar quote values look missing.
-   - Add customer-facing notes/history later if the client needs more transparent communication.
+5. Admin service request workflow polish - completed June 8, 2026
+   - Admin service request status controls lock completed, cancelled, and denied requests.
+   - Deposit due requires a positive deposit amount.
+   - Deposit paid must go through the mark-deposit-paid action so `depositPaidAt` and customer email behavior stay consistent.
+   - Quote editing is locked after final states, denied approvals, or paid deposits.
+   - Admin and customer detail pages display zero-dollar quote and deposit values as `$0.00`.
+   - Zero-dollar deposits are treated as no deposit due instead of a payable deposit.
 
 6. Weekly meal plan modeling discovery
    - Do not implement the full weekly menu schema yet.
@@ -239,4 +247,4 @@ Next work items - June 8, 2026:
    - Prefer user-facing label cleanup over model/route renames until production behavior is stable.
 
 10. Suggested next Codex prompt
-   - Inspect the current main branch and complete work item 5 only: admin service request workflow polish. Keep routes stable, keep Catering and Personal Chef on `CateringRequest`, run `npm run check`, and report results.
+   - Inspect the current main branch and start work item 6 only: weekly meal plan modeling discovery. Do not implement schema changes yet; document the desired admin/customer workflow first, keep routes stable, run validation only if code changes are made, and report results.
