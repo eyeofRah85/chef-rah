@@ -26,6 +26,58 @@ type CreatedOrderItem = {
   notes: string | null;
 };
 
+type ServerMenuItem = {
+  id: string;
+  name: string;
+  price: DecimalLike;
+  type: string;
+  available: boolean;
+  archived: boolean;
+  requiresApproval: boolean;
+  customerInstructionsEnabled: boolean;
+  optionGroups: {
+    name: string;
+    required: boolean;
+    multiple: boolean;
+    choices: {
+      name: string;
+      priceDelta: DecimalLike;
+      requestOnly: boolean;
+    }[];
+  }[];
+};
+
+type ValidatedOrderItem = {
+  menuItemId: string | null;
+  name: string;
+  quantity: number;
+  unitPrice: number;
+  lineTotal: number;
+  requiresApproval: boolean;
+  notes: string | null;
+};
+
+type ServerRecoveredOrderItem = {
+  id: string;
+  menuItemId: string | null;
+  name: string;
+  unitPrice: DecimalLike;
+  notes: string | null;
+  menuItem: {
+    type: string;
+    available: boolean;
+    archived: boolean;
+    requiresApproval: boolean;
+  } | null;
+};
+
+function normalizeSubmittedChoiceName(choiceName: string) {
+  return choiceName.replace(/\s+\(Request Only\)$/i, "").trim();
+}
+
+const allowedTipTypes = new Set(["none", "10", "15", "20", "custom"]);
+const allowedPaymentMethods = new Set(["manual", "cash"]);
+
 export async function POST(request: Request) {
   try {
     const session = await auth();
@@ -73,19 +125,30 @@ export async function POST(request: Request) {
       deliveryNotes: String(checkout.deliveryNotes ?? "").trim(),
     };
 
-    let requestedDate: Date | null = null;
+    if (!checkout.requestedDateTime) {
+      return NextResponse.json(
+        { error: "Please choose a requested date and time." },
+        { status: 400 },
+      );
+    }
 
-    if (checkout.requestedDateTime) {
-      requestedDate = new Date(checkout.requestedDateTime);
+    const requestedDate = new Date(checkout.requestedDateTime);
 
-      const requestedDateValidation = await validateServerRequestedDate(requestedDate);
+    if (Number.isNaN(requestedDate.getTime())) {
+      return NextResponse.json(
+        { error: "Please choose a valid requested date and time." },
+        { status: 400 },
+      );
+    }
 
-      if (!requestedDateValidation.valid) {
-        return NextResponse.json(
-          { error: requestedDateValidation.error },
-          { status: 400 },
-        );
-      }
+    const requestedDateValidation =
+      await validateServerRequestedDate(requestedDate);
+
+    if (!requestedDateValidation.valid) {
+      return NextResponse.json(
+        { error: requestedDateValidation.error },
+        { status: 400 },
+      );
     }
 
     if (checkout.orderType === "delivery") {
@@ -114,32 +177,348 @@ export async function POST(request: Request) {
       );
     }
 
-    const submittedMenuItemIds = Array.from(
-      new Set(items.map((item) => item.menuItemId).filter(Boolean)),
-    );
+    if (!allowedTipTypes.has(checkout.tipType)) {
+      return NextResponse.json(
+        { error: "Invalid tip selection." },
+        { status: 400 },
+      );
+    }
 
-    if (submittedMenuItemIds.length > 0) {
-      const submittedMenuItems = await prisma.menuItem.findMany({
-        where: {
-          id: {
-            in: submittedMenuItemIds,
-          },
-        },
-        select: {
-          type: true,
-        },
-      });
+    const customTipAmount =
+      checkout.tipType === "custom" ? Number(checkout.customTipAmount ?? 0) : 0;
 
-      if (submittedMenuItems.some((item) => item.type === "CATERING")) {
+    if (!Number.isFinite(customTipAmount) || customTipAmount < 0) {
+      return NextResponse.json(
+        { error: "Custom tip amount must be zero or greater." },
+        { status: 400 },
+      );
+    }
+
+    if (!allowedPaymentMethods.has(checkout.paymentMethod)) {
+      return NextResponse.json(
+        { error: "Invalid or unavailable payment method." },
+        { status: 400 },
+      );
+    }
+
+    let payByDate: Date | null = null;
+
+    if (checkout.paymentMethod === "manual") {
+      if (!checkout.payByDate) {
         return NextResponse.json(
-          { error: "Catering items must be submitted as service requests." },
+          { error: "Manual payment orders require a pay-by date." },
+          { status: 400 },
+        );
+      }
+
+      payByDate = new Date(checkout.payByDate);
+
+      if (Number.isNaN(payByDate.getTime())) {
+        return NextResponse.json(
+          { error: "Manual payment orders require a valid pay-by date." },
           { status: 400 },
         );
       }
     }
 
-    const subtotal = items.reduce(
-      (sum, item) => sum + item.price * item.quantity,
+    const liveMenuItemIds = Array.from(
+      new Set(
+        items
+          .filter((item) => item.category !== "Reorder")
+          .map((item) => item.menuItemId)
+          .filter((id): id is string => Boolean(id)),
+      ),
+    );
+
+    const liveMenuItems = (await prisma.menuItem.findMany({
+      where: {
+        id: {
+          in: liveMenuItemIds,
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        price: true,
+        type: true,
+        available: true,
+        archived: true,
+        requiresApproval: true,
+        customerInstructionsEnabled: true,
+        optionGroups: {
+          select: {
+            name: true,
+            required: true,
+            multiple: true,
+            choices: {
+              select: {
+                name: true,
+                priceDelta: true,
+                requestOnly: true,
+              },
+            },
+          },
+        },
+      },
+    })) as ServerMenuItem[];
+
+    const liveMenuItemById = new Map(
+      liveMenuItems.map((item) => [item.id, item]),
+    );
+
+    const recoveredOrderItemIds = Array.from(
+      new Set(
+        items
+          .filter((item) => item.category === "Reorder")
+          .map((item) => item.recoveredOrderItemId)
+          .filter((id): id is string => Boolean(id)),
+      ),
+    );
+
+    const recoveredOrderItems = (await prisma.orderItem.findMany({
+      where: {
+        id: {
+          in: recoveredOrderItemIds,
+        },
+        order: {
+          customerEmail: session.user.email,
+        },
+      },
+      select: {
+        id: true,
+        menuItemId: true,
+        name: true,
+        unitPrice: true,
+        notes: true,
+        menuItem: {
+          select: {
+            type: true,
+            available: true,
+            archived: true,
+            requiresApproval: true,
+          },
+        },
+      },
+    })) as ServerRecoveredOrderItem[];
+
+    const recoveredOrderItemById = new Map(
+      recoveredOrderItems.map((item) => [item.id, item]),
+    );
+
+    const validatedItems: ValidatedOrderItem[] = [];
+
+    for (const item of items) {
+      const quantity = Number(item.quantity);
+
+      if (!Number.isInteger(quantity) || quantity < 1) {
+        return NextResponse.json(
+          { error: "Order item quantities must be whole numbers greater than zero." },
+          { status: 400 },
+        );
+      }
+
+      if (item.category === "Reorder") {
+        if (!item.recoveredOrderItemId) {
+          return NextResponse.json(
+            { error: "Reorder items must include a valid previous order item." },
+            { status: 400 },
+          );
+        }
+
+        const recoveredItem = recoveredOrderItemById.get(
+          item.recoveredOrderItemId,
+        );
+
+        if (!recoveredItem) {
+          return NextResponse.json(
+            { error: "One or more reorder items could not be verified." },
+            { status: 400 },
+          );
+        }
+
+        const unitPrice = Number(recoveredItem.unitPrice);
+        const name = recoveredItem.name.trim();
+
+        if (!name || !Number.isFinite(unitPrice) || unitPrice < 0) {
+          return NextResponse.json(
+            { error: "Reorder items must include a valid saved name and price." },
+            { status: 400 },
+          );
+        }
+
+        if (recoveredItem.menuItem?.type === "CATERING") {
+          return NextResponse.json(
+            { error: "Catering items must be submitted as service requests." },
+            { status: 400 },
+          );
+        }
+
+        if (
+          recoveredItem.menuItem &&
+          (!recoveredItem.menuItem.available || recoveredItem.menuItem.archived)
+        ) {
+          return NextResponse.json(
+            { error: `${name} is no longer available for reorder.` },
+            { status: 400 },
+          );
+        }
+
+        validatedItems.push({
+          menuItemId: recoveredItem.menuItemId,
+          name,
+          quantity,
+          unitPrice,
+          lineTotal: unitPrice * quantity,
+          requiresApproval:
+            Boolean(recoveredItem.menuItem?.requiresApproval) ||
+            (recoveredItem.notes?.includes("(Request Only)") ?? false),
+          notes:
+            [
+              recoveredItem.notes,
+              item.customerInstructions
+                ? `Special Instructions: ${item.customerInstructions}`
+                : null,
+            ]
+              .filter(Boolean)
+              .join("\n") || null,
+        });
+
+        continue;
+      }
+
+      if (!item.menuItemId) {
+        return NextResponse.json(
+          { error: "Cart items must include a valid menu item." },
+          { status: 400 },
+        );
+      }
+
+      const menuItem = liveMenuItemById.get(item.menuItemId);
+
+      if (!menuItem) {
+        return NextResponse.json(
+          { error: "One or more cart items are no longer available." },
+          { status: 400 },
+        );
+      }
+
+      if (menuItem.type === "CATERING") {
+        return NextResponse.json(
+          { error: "Catering items must be submitted as service requests." },
+          { status: 400 },
+        );
+      }
+
+      if (!menuItem.available || menuItem.archived) {
+        return NextResponse.json(
+          { error: `${menuItem.name} is no longer available.` },
+          { status: 400 },
+        );
+      }
+
+      const selectedOptions = item.selectedOptions ?? [];
+      const selectedByGroup = new Map<string, string[]>();
+      const seenSelections = new Set<string>();
+      let unitPrice = Number(menuItem.price);
+      let itemRequiresApproval = menuItem.requiresApproval;
+      const optionNotes: string[] = [];
+
+      for (const option of selectedOptions) {
+        const groupName = String(option.groupName ?? "").trim();
+        const choiceName = normalizeSubmittedChoiceName(
+          String(option.choiceName ?? ""),
+        );
+
+        const group = menuItem.optionGroups.find(
+          (entry) => entry.name === groupName,
+        );
+
+        const choice = group?.choices.find(
+          (entry) => entry.name === choiceName,
+        );
+
+        if (!group || !choice) {
+          return NextResponse.json(
+            { error: "One or more selected options are no longer available." },
+            { status: 400 },
+          );
+        }
+
+        const selectionKey = `${group.name}:${choice.name}`;
+
+        if (seenSelections.has(selectionKey)) {
+          return NextResponse.json(
+            { error: "Duplicate option selections are not allowed." },
+            { status: 400 },
+          );
+        }
+
+        seenSelections.add(selectionKey);
+        selectedByGroup.set(group.name, [
+          ...(selectedByGroup.get(group.name) ?? []),
+          choice.name,
+        ]);
+
+        const priceDelta = Number(choice.priceDelta);
+
+        unitPrice += priceDelta;
+        itemRequiresApproval = itemRequiresApproval || choice.requestOnly;
+        optionNotes.push(
+          `${group.name}: ${
+            choice.requestOnly ? `${choice.name} (Request Only)` : choice.name
+          }${priceDelta > 0 ? ` (+$${priceDelta.toFixed(2)})` : ""}`,
+        );
+      }
+
+      for (const group of menuItem.optionGroups) {
+        const selectedChoices = selectedByGroup.get(group.name) ?? [];
+
+        if (group.required && selectedChoices.length === 0) {
+          return NextResponse.json(
+            { error: `Please select an option for ${group.name}.` },
+            { status: 400 },
+          );
+        }
+
+        if (!group.multiple && selectedChoices.length > 1) {
+          return NextResponse.json(
+            { error: `${group.name} allows only one selection.` },
+            { status: 400 },
+          );
+        }
+      }
+
+      if (Math.abs(Number(item.price) - unitPrice) > 0.01) {
+        return NextResponse.json(
+          {
+            error:
+              "Your cart prices have changed. Please refresh your cart and try again.",
+          },
+          { status: 400 },
+        );
+      }
+
+      validatedItems.push({
+        menuItemId: menuItem.id,
+        name: menuItem.name,
+        quantity,
+        unitPrice,
+        lineTotal: unitPrice * quantity,
+        requiresApproval: itemRequiresApproval,
+        notes:
+          [
+            ...optionNotes,
+            menuItem.customerInstructionsEnabled && item.customerInstructions
+              ? `Special Instructions: ${item.customerInstructions}`
+              : null,
+          ]
+            .filter(Boolean)
+            .join("\n") || null,
+      });
+    }
+
+    const subtotal = validatedItems.reduce(
+      (sum, item) => sum + item.lineTotal,
       0,
     );
 
@@ -149,11 +528,13 @@ export async function POST(request: Request) {
     const tipAmount = calculateTip(
       subtotal,
       checkout.tipType,
-      checkout.customTipAmount,
+      customTipAmount,
     );
 
     const total = subtotal + deliveryFee + lateFee + tipAmount;
-    const requiresApproval = items.some((item) => item.requiresApproval);
+    const requiresApproval = validatedItems.some(
+      (item) => item.requiresApproval,
+    );
 
     const order = await prisma.order.create({
       data: {
@@ -196,7 +577,7 @@ export async function POST(request: Request) {
         deliveryPostalCode: contact.postalCode || null,
         deliveryNotes: contact.deliveryNotes || null,
 
-        payByDate: checkout.payByDate ? new Date(checkout.payByDate) : null,
+        payByDate,
         paymentProvider: checkout.paymentMethod,
         paymentStatus:
           checkout.paymentMethod === "cash"
@@ -204,30 +585,13 @@ export async function POST(request: Request) {
             : "PAY_BY_DATE",
 
         items: {
-          create: items.map((item) => ({
+          create: validatedItems.map((item) => ({
             menuItemId: item.menuItemId,
             name: item.name,
             quantity: item.quantity,
-            unitPrice: item.price,
-            lineTotal: item.price * item.quantity,
-            notes:
-              [
-                ...(item.selectedOptions?.length
-                  ? item.selectedOptions.map(
-                      (option) =>
-                        `${option.groupName}: ${option.choiceName}${
-                          option.priceDelta > 0
-                            ? ` (+$${option.priceDelta.toFixed(2)})`
-                            : ""
-                        }`,
-                    )
-                  : []),
-                item.customerInstructions
-                  ? `Special Instructions: ${item.customerInstructions}`
-                  : null,
-              ]
-                .filter(Boolean)
-                .join("\n") || null,
+            unitPrice: item.unitPrice,
+            lineTotal: item.lineTotal,
+            notes: item.notes,
           })),
         },
 
@@ -268,11 +632,10 @@ export async function POST(request: Request) {
       console.error("Failed to save checkout contact info to profile", profileError);
     }
 
-    // email section
-      await sendAppEmail({
-        to: session.user.email,
-        subject: "Order Confirmation",
-        react: OrderConfirmationEmail({
+    await sendAppEmail({
+      to: session.user.email,
+      subject: "Order Confirmation",
+      react: OrderConfirmationEmail({
         customerName: order.customerName,
         orderId: order.id,
         orderType: order.orderType,
@@ -302,8 +665,7 @@ export async function POST(request: Request) {
           notes: item.notes,
         })),
       }),
-      });
-    // end email section
+    });
 
     return NextResponse.json(order);
   } catch (error) {

@@ -18,6 +18,14 @@ type OptionChoiceInput = {
   priceDelta: string;
 };
 
+const blankChoice = (): OptionChoiceInput => ({
+  name: "",
+  description: "",
+  dietaryInfo: "",
+  imageUrl: "",
+  requestOnly: false,
+  priceDelta: "0",
+});
 
 type Props = {
   menuItemId: string;
@@ -35,16 +43,13 @@ export function MenuItemCustomizationEditor({
   const [groupName, setGroupName] = useState("");
   const [required, setRequired] = useState(false);
   const [multiple, setMultiple] = useState(false);
-  const [choices, setChoices] = useState<OptionChoiceInput[]>([
-    {
-      name: "",
-      description: "",
-      dietaryInfo: "",
-      imageUrl: "",
-      requestOnly: false,
-      priceDelta: "0",
-    },
-  ]);
+  const [choices, setChoices] = useState<OptionChoiceInput[]>([blankChoice()]);
+
+  function updateChoice(index: number, updates: Partial<OptionChoiceInput>) {
+    setChoices((prev) =>
+      prev.map((item, i) => (i === index ? { ...item, ...updates } : item)),
+    );
+  }
 
   async function saveAllergens() {
     const response = await fetch(`/api/admin/menu/${menuItemId}/allergens`, {
@@ -102,9 +107,10 @@ export function MenuItemCustomizationEditor({
     }
 
     setGroupName("");
+    setSelectedTemplate("");
     setRequired(false);
     setMultiple(false);
-    setChoices([{ name: "", priceDelta: "0" }]);
+    setChoices([blankChoice()]);
 
     router.refresh();
   }
@@ -206,47 +212,82 @@ export function MenuItemCustomizationEditor({
 
         <div className="mt-4 space-y-3">
           {choices.map((choice, index) => (
-            <div key={index} className="grid gap-2 sm:grid-cols-[1fr_120px_auto]">
-              <input
-                value={choice.name}
-                onChange={(e) => {
-                  setChoices((prev) =>
-                    prev.map((item, i) =>
-                      i === index ? { ...item, name: e.target.value } : item,
-                    ),
-                  );
-                }}
-                placeholder="Choice, e.g. Hot"
-                className="rounded-xl border px-4 py-3 text-sm"
-              />
+            <div key={index} className="rounded-xl border bg-white p-3">
+              <div className="grid gap-2 sm:grid-cols-[1fr_120px_auto]">
+                <input
+                  value={choice.name}
+                  onChange={(e) =>
+                    updateChoice(index, { name: e.target.value })
+                  }
+                  placeholder="Choice, e.g. Hot"
+                  className="rounded-xl border px-4 py-3 text-sm"
+                />
 
-              <input
-                value={choice.priceDelta}
-                onChange={(e) => {
-                  setChoices((prev) =>
-                    prev.map((item, i) =>
-                      i === index
-                        ? { ...item, priceDelta: e.target.value }
-                        : item,
-                    ),
-                  );
-                }}
-                type="number"
-                step="0.01"
-                min="0"
-                placeholder="+ Price"
-                className="rounded-xl border px-4 py-3 text-sm"
-              />
+                <input
+                  value={choice.priceDelta}
+                  onChange={(e) =>
+                    updateChoice(index, { priceDelta: e.target.value })
+                  }
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="+ Price"
+                  className="rounded-xl border px-4 py-3 text-sm"
+                />
 
-              <button
-                type="button"
-                onClick={() => {
-                  setChoices((prev) => prev.filter((_, i) => i !== index));
-                }}
-                className="rounded-xl border px-3 py-2 text-sm text-red-600"
-              >
-                Remove
-              </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setChoices((prev) => prev.filter((_, i) => i !== index));
+                  }}
+                  className="rounded-xl border px-3 py-2 text-sm text-red-600"
+                >
+                  Remove
+                </button>
+              </div>
+
+              <div className="mt-3 grid gap-2 md:grid-cols-2">
+                <textarea
+                  value={choice.description ?? ""}
+                  onChange={(e) =>
+                    updateChoice(index, { description: e.target.value })
+                  }
+                  rows={2}
+                  placeholder="Description"
+                  className="rounded-xl border px-4 py-3 text-sm"
+                />
+
+                <div className="grid gap-2">
+                  <input
+                    value={choice.dietaryInfo ?? ""}
+                    onChange={(e) =>
+                      updateChoice(index, { dietaryInfo: e.target.value })
+                    }
+                    placeholder="Dietary info, e.g. Lean protein"
+                    className="rounded-xl border px-4 py-3 text-sm"
+                  />
+
+                  <input
+                    value={choice.imageUrl ?? ""}
+                    onChange={(e) =>
+                      updateChoice(index, { imageUrl: e.target.value })
+                    }
+                    placeholder="Image URL, e.g. /gallery/chicken.jpg"
+                    className="rounded-xl border px-4 py-3 text-sm"
+                  />
+                </div>
+              </div>
+
+              <label className="mt-3 flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={Boolean(choice.requestOnly)}
+                  onChange={(e) =>
+                    updateChoice(index, { requestOnly: e.target.checked })
+                  }
+                />
+                Request only / pricing may vary
+              </label>
             </div>
           ))}
         </div>
@@ -255,17 +296,7 @@ export function MenuItemCustomizationEditor({
           <button
             type="button"
             onClick={() =>
-              setChoices((prev) => [
-                ...prev,
-                {
-                  name: "",
-                  description: "",
-                  dietaryInfo: "",
-                  imageUrl: "",
-                  requestOnly: false,
-                  priceDelta: "0",
-                },
-              ])
+              setChoices((prev) => [...prev, blankChoice()])
             }
             className="rounded-xl border px-4 py-2 text-sm font-medium"
           >

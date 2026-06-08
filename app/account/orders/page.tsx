@@ -127,7 +127,6 @@ export default async function AccountOrdersPage() {
                   </p>
 
                 <div className="mt-3 gap-2 md:justify-end">
-                  {/* <div className="mt-3 flex flex-wrap gap-2 md:justify-end"> */}
                     <Link
                         href={`/orders/${order.id}`}
                         className="inline-flex rounded-xl bg-black px-5 py-2 text-sm font-medium text-white"
@@ -157,6 +156,7 @@ export default async function AccountOrdersPage() {
                 </div>
                   <ReorderButton
                     items={order.items.map((item) => ({
+                        id: item.id,
                         menuItemId: item.menuItemId,
                         name: item.name,
                         quantity: item.quantity,
@@ -178,7 +178,7 @@ export default async function AccountOrdersPage() {
                     >
                       <div>
                         <p className="font-medium">
-                          {item.quantity}× {item.name}
+                          {item.quantity} x {item.name}
                         </p>
 
                         {item.notes && (

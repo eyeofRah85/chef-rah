@@ -14,6 +14,7 @@ export type SelectedCartOption = {
 export type CartItem = {
   cartId: string;
   menuItemId: string;
+  recoveredOrderItemId?: string;
   name: string;
   price: number;
   quantity: number;
@@ -26,6 +27,7 @@ export type CartItem = {
 };
 
 export type RecoveredOrderItem = {
+  id: string;
   menuItemId: string | null;
   name: string;
   quantity: number;
@@ -56,6 +58,7 @@ export const useCartStore = create<CartState>()(
             ...state.items,
             {
               cartId: crypto.randomUUID(),
+              recoveredOrderItemId: item.id,
               menuItemId: item.menuItemId ?? "",
               name: item.name,
               price: item.unitPrice,

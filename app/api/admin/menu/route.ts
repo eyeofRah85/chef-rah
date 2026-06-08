@@ -20,20 +20,12 @@ export async function POST(request: Request) {
     const seasonal = formData.get("seasonal") === "on";
     const type = String(formData.get("type") ?? "PLATE");
     const requiresApproval = formData.get("requiresApproval") === "on";
-    const customerInstructionsEnabled = formData.get("customerInstructionsEnabled") === "on";
+    const customerInstructionsEnabled =
+      formData.get("customerInstructionsEnabled") === "on";
     const image = formData.get("imageUrl") as File | null;
     const menuItemType = parseEnumValue(menuItemTypes, type);
 
-// const rawCategoryName = String(formData.get("categoryName") ?? "").trim();
-
-// const categoryName =
-//   rawCategoryName === "MEAL_PLAN"
-//     ? "Meal Plans"
-//     : rawCategoryName === "A_LA_CARTE"
-//       ? "A La Carte"
-//       : rawCategoryName || "Other";
-
-     let imageUrl: string | null = null;
+    let imageUrl: string | null = null;
 
     if (image && image.size > 0) {
       const bytes = await image.arrayBuffer();
@@ -52,7 +44,6 @@ export async function POST(request: Request) {
 
       imageUrl = `/uploads/menu/${safeFileName}`;
     }
-
 
     if (!name || !description || !categoryName || price <= 0 || !menuItemType) {
       return NextResponse.json(

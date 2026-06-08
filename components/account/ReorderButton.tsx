@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useCartStore } from "@/store/cart-store";
 
 type ReorderItem = {
+  id: string;
   menuItemId: string | null;
   name: string;
   quantity: number;

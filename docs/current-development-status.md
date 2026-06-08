@@ -116,3 +116,38 @@ Progress update - June 6, 2026:
 - Order detail label polish:
   - Customer and admin order detail pages now show friendly order and payment status labels.
   - Cleaned remaining corrupted quantity separators and aligned the admin payments table columns.
+- Service request settings terminology:
+  - Business settings now label the shared deposit percentage as a service request deposit instead of catering-only copy.
+  - Service request approval API failures now use service request terminology.
+- Admin menu API cleanup:
+  - Removed stale commented category/type mapping code from the menu creation API so category display names and menu item enum values stay clearly separated.
+- Admin menu display cleanup:
+  - Replaced remaining malformed/non-ASCII expand/collapse markers, separators, and service tagline text with plain ASCII display copy.
+- Admin menu customization entry:
+  - Manual option-group creation now captures choice description, dietary info, image URL, request-only status, and price delta in one pass.
+- Order creation server validation:
+  - Live cart items are now repriced from the current menu item and option records before order totals are created.
+  - Required option groups, single-choice limits, unavailable/archived items, catering item submissions, and request-only approval flags are enforced by the order API.
+  - Reorder submissions carry the prior order item ID, and the order API verifies it belongs to the signed-in customer before using the historical snapshot price.
+- Account order history display cleanup:
+  - Replaced the remaining corrupted quantity separator in account order history with the plain ASCII `x` used on order detail surfaces.
+- Admin order snapshot route hardening:
+  - Disabled unused admin order allergen/option endpoints that were incorrectly pointed at menu customization tables using an order ID.
+  - Those routes now return an authenticated unsupported-operation response and direct edits back to the menu manager.
+- Stale comment cleanup:
+  - Removed leftover commented-out order history markup and empty email-section comments from the order creation route.
+- Reorder approval validation:
+  - Reorder snapshot pricing remains historical, but linked current menu item approval rules now still require chef approval when applicable.
+  - Reorders are blocked if the linked current menu item is now a catering/service item.
+- Reorder availability validation:
+  - Reorders are blocked when the linked current menu item has been archived or marked unavailable, while still using snapshot pricing for valid linked items.
+- Checkout payment/tip validation:
+  - Order creation now rejects invalid tip selections, negative custom tips, disabled payment methods, and manual-payment submissions without a valid pay-by date.
+- Checkout schedule validation:
+  - Order creation now requires a requested date/time and rejects invalid requested date values before applying business date rules.
+- Service request submission validation:
+  - Catering and Personal Chef request APIs now reject invalid email addresses, malformed event dates, and non-whole or non-positive guest counts before creating a request.
+  - Existing service request routes and database models remain unchanged.
+- Service request quote validation:
+  - Admin quote updates now reject non-finite or negative estimated totals and deposit amounts on both the form and API.
+  - A zero-dollar estimated total is treated as an explicit quote value instead of being ignored by status updates.
