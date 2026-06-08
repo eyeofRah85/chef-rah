@@ -156,6 +156,10 @@ Progress update - June 6, 2026:
   - Added `npm run prisma:generate` and `npm run check`.
   - `npm run check` now runs lint, Prisma generate, typecheck, and build in order.
   - Verified `npm run typecheck`, `npm run prisma:generate`, and `npm run check` on June 8, 2026.
+- Checkout empty-cart UX hardening:
+  - `/checkout` now shows a focused empty-cart state with actions to browse the menu or view the cart when no cart items exist.
+  - The checkout submit button is disabled when the cart has no items as a defensive UI guard.
+  - Contact and delivery fields now include a short note explaining account profile prefill and optional profile saving.
 
 Review notes from main branch inspection - June 8, 2026:
 - `package.json` exposes `dev`, `build`, `start`, `lint`, `typecheck`, `prisma:generate`, and `check` scripts.
@@ -174,11 +178,11 @@ Next work items - June 8, 2026:
    - `npm run check` runs lint, Prisma generate, typecheck, and build in order.
    - Keep `npm run build` as the release gate; it is included in `npm run check`.
 
-2. Finish checkout UX hardening
-   - Add a clear empty-cart redirect or call-to-action from `/checkout` when no cart items exist.
-   - Consider disabling the Submit Order button when `items.length === 0` in addition to the current alert.
-   - Add a short note that checkout contact fields are prefilled from the account profile and can be saved back to the profile with the checkbox.
-   - Keep the Stripe option disabled until the payment integration is actually wired server-side.
+2. Finish checkout UX hardening - completed June 8, 2026
+   - `/checkout` shows an empty-cart call-to-action when no cart items exist.
+   - Submit is defensively disabled if the cart has no items.
+   - Checkout contact fields explain profile prefill and optional profile saving.
+   - The Stripe option remains disabled until payment integration is wired server-side.
 
 3. Improve account/profile freshness after edits
    - After account profile modal saves, verify customer pages that depend on profile data refresh consistently.
@@ -227,4 +231,4 @@ Next work items - June 8, 2026:
    - Prefer user-facing label cleanup over model/route renames until production behavior is stable.
 
 10. Suggested next Codex prompt
-   - Inspect the current main branch and complete work item 2 only: finish checkout UX hardening. Keep routes stable, avoid payment integration work, run `npm run check`, and report results.
+   - Inspect the current main branch and complete work item 3 only: improve account/profile freshness after edits. Keep routes stable, avoid broad checkout changes, run `npm run check`, and report results.
