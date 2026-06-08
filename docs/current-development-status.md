@@ -151,9 +151,15 @@ Progress update - June 6, 2026:
 - Service request quote validation:
   - Admin quote updates now reject non-finite or negative estimated totals and deposit amounts on both the form and API.
   - A zero-dollar estimated total is treated as an explicit quote value instead of being ignored by status updates.
+- Validation/typecheck workflow:
+  - Added `npm run typecheck` using `next typegen && tsc --noEmit`.
+  - Added `npm run prisma:generate` and `npm run check`.
+  - `npm run check` now runs lint, Prisma generate, typecheck, and build in order.
+  - Verified `npm run typecheck`, `npm run prisma:generate`, and `npm run check` on June 8, 2026.
 
 Review notes from main branch inspection - June 8, 2026:
-- `package.json` currently exposes `dev`, `build`, `start`, and `lint` scripts only. There is no dedicated `typecheck` script yet, so future validation should either use `npm run build` or add a project script for TypeScript-only checks.
+- `package.json` exposes `dev`, `build`, `start`, `lint`, `typecheck`, `prisma:generate`, and `check` scripts.
+- Use `npm run typecheck` for standalone TypeScript validation, `npm run prisma:generate` when Prisma client output needs refreshing, and `npm run check` for the full local verification workflow.
 - Checkout is currently a client page with sectioned UI and profile hydration via `/api/account/profile`. It uses `resetContactDetails()` before loading the signed-in profile and uses `cache: "no-store"` when fetching profile data.
 - Checkout still allows a disabled `stripe` option in the UI, while the order API only accepts `manual` and `cash`. This is intentional for now, but should remain disabled until Stripe is fully implemented.
 - Order creation now performs the authoritative price and option validation server-side. Treat the client cart totals as display-only; do not trust them for order persistence.
@@ -162,11 +168,11 @@ Review notes from main branch inspection - June 8, 2026:
 
 Next work items - June 8, 2026:
 
-1. Add a dedicated validation/typecheck workflow
-   - Add a `typecheck` script if the project can support it, for example `tsc --noEmit` after confirming the current TypeScript/Next setup.
-   - Consider adding a `check` script that runs lint, Prisma generate, and build in the expected order.
-   - Document the exact local verification commands in this handoff once confirmed.
-   - Keep `npm run build` as the release gate until a dedicated typecheck script exists.
+1. Add a dedicated validation/typecheck workflow - completed June 8, 2026
+   - `npm run typecheck` runs `next typegen && tsc --noEmit`.
+   - `npm run prisma:generate` runs `prisma generate`.
+   - `npm run check` runs lint, Prisma generate, typecheck, and build in order.
+   - Keep `npm run build` as the release gate; it is included in `npm run check`.
 
 2. Finish checkout UX hardening
    - Add a clear empty-cart redirect or call-to-action from `/checkout` when no cart items exist.
@@ -221,4 +227,4 @@ Next work items - June 8, 2026:
    - Prefer user-facing label cleanup over model/route renames until production behavior is stable.
 
 10. Suggested next Codex prompt
-   - Inspect the current main branch and complete work item 1 only: add or document a validation/typecheck workflow. Do not change app behavior. If adding a script, run lint/build and report results. Keep changes small and commit with a clear message.
+   - Inspect the current main branch and complete work item 2 only: finish checkout UX hardening. Keep routes stable, avoid payment integration work, run `npm run check`, and report results.
