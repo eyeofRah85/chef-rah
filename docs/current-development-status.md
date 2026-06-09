@@ -3,8 +3,11 @@ You are helping continue development on a Next.js/Prisma food service web app fo
 Current business model:
 - Meal Plans / Meal Prep and A La Carte items are purchased through cart checkout.
 - Catering and Personal Chef are service request / quote workflows, not direct checkout purchases.
-- Meal plans support rich customizations such as plan length, meals per day, protein, vegetable, starch, substitutions, request-only options, descriptions, dietary info, image URLs, and price deltas.
+- Meal plans are purchased through checkout but should be treated as fixed business-created offerings, not fully customizable meals.
+- Meal plan customer-facing choices should be limited to spice level and protein substitutions.
+- Meal plan packages should support 1-meal or 2-meal package options; the 3-meal package should be removed.
 - Pork and beef are request-only for meal plans. Pricing may vary and chef approval may be required.
+- Customer accounts should include allergen preferences, and meal plans containing those allergens should show alerts before cart/checkout completion.
 - Customer accounts now include phone, delivery address fields, and delivery notes.
 - Checkout preloads account profile data and can save edited checkout contact info back to the customer profile.
 - Orders store a delivery/contact snapshot so historical orders keep the delivery info used at order time.
@@ -176,8 +179,9 @@ Progress update - June 6, 2026:
   - Zero-dollar deposits are treated as no deposit due, so the mark-deposit-paid action is hidden and rejected by the API.
 - Weekly meal plan modeling discovery:
   - Added `docs/weekly-meal-plan-discovery.md` to document the desired weekly meal plan admin and customer workflows before schema changes.
-  - Current meal plans remain `MenuItem` records with `type = MEAL_PLAN`, option groups, request-only choices, and order snapshots.
-  - Future weekly meal plans likely need a weekly period, package offerings, weekly meal choices, and order selection snapshots if customers choose meals by week.
+  - Updated the discovery on June 9, 2026 with client clarification that meal plans are fixed offerings, not truly customizable meals.
+  - Current meal plans remain `MenuItem` records with `type = MEAL_PLAN`, limited option groups, request-only choices, and order snapshots.
+  - Future weekly meal plans likely need a weekly period, package offerings, fixed meal plan offerings, limited spice/protein options, customer allergen preferences, and allergen warning acknowledgement snapshots.
   - Open business decisions are documented before any schema migration is planned.
 
 Review notes from main branch inspection - June 8, 2026:
@@ -225,7 +229,8 @@ Next work items - June 8, 2026:
 6. Weekly meal plan modeling discovery - completed June 8, 2026
    - `docs/weekly-meal-plan-discovery.md` documents the desired admin workflow for weekly menu periods, package offerings, lunch/dinner choices, publishing, and fulfillment prep.
    - The customer workflow keeps weekly meal plans inside `/menu` and cart checkout.
-   - The recommended next model is a hybrid flow where customers choose package length, meals per day, and available meal choices while still allowing preferences/flexible selections.
+   - Updated June 9, 2026: the recommended next model is a fixed-offering flow where customers choose package length, 1- or 2-meal package options, spice level, and allowed protein substitutions only.
+   - Updated June 9, 2026: customer account allergen preferences and allergen conflict alerts should be added before checkout completion.
    - Open business decisions are listed before schema implementation.
    - No schema or route changes were made.
 
