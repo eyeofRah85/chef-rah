@@ -6,11 +6,13 @@ This note captures the current image setup and the safest next direction. It is 
 
 ## Current State
 
-- Public `/gallery` is a static page backed by `data/gallery.ts`.
+- Public `/gallery` reads `GalleryImage` database records when available and falls back to `data/gallery.ts`.
 - Gallery images are served from files under `public/`.
 - `public/gallery` contains original HEIC source files.
 - `public/gallery/webp` contains optimized 1200x1600 WebP gallery images derived from the source files.
-- `data/gallery.ts` points at the optimized WebP assets for demo readiness.
+- `data/gallery.ts` remains the static fallback and category source.
+- Admin `/admin/gallery` supports uploading, editing, reordering, categorizing, and deleting gallery images.
+- The gallery upload API stores new files under `public/uploads/gallery`.
 - Admin menu item creation supports uploading an image file to `public/uploads/menu`.
 - Admin menu item editing does not currently replace an item image.
 - Option choice images are URL-based text fields.
@@ -18,12 +20,12 @@ This note captures the current image setup and the safest next direction. It is 
 
 ## Recommendation
 
-Keep the current static gallery approach for demo readiness:
+Keep the current database-backed gallery approach for demo readiness:
 
-- Continue using `data/gallery.ts` for the public gallery.
+- Use `/admin/gallery` for public gallery curation.
+- Keep `data/gallery.ts` as a fallback only.
 - Use optimized WebP copies for selected public gallery images.
 - Keep original HEIC files as source material only.
-- Keep gallery curation code-based for now instead of adding a gallery database model.
 - Do not tie gallery management to weekly meal plan modeling.
 
 For menu item and option choice images:
@@ -55,5 +57,5 @@ After deployment assumptions are confirmed, the next image patch should be small
 
 - Add menu item image replacement to the edit form.
 - Decide whether option choice image upload is needed or whether URL entry is enough.
-- Add validation for accepted image file types and maximum file size.
+- Expand validation if larger image files or other image formats are needed.
 - Revisit gallery curation once the client selects final photos and captions.

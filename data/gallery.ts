@@ -1,13 +1,18 @@
+export const galleryCategoryOptions = [
+  "Meal Prep",
+  "Meal Plans",
+  "Catering",
+  "Personal Chef",
+  "Behind the Scenes",
+] as const;
+
+export type GalleryImageCategory = (typeof galleryCategoryOptions)[number];
+
 export type GalleryImage = {
   src: string;
   alt: string;
   title: string;
-  category:
-    | "Meal Prep"
-    | "Meal Plans"
-    | "Catering"
-    | "Personal Chef"
-    | "Behind the Scenes";
+  category: GalleryImageCategory;
 };
 
 export const galleryImages: GalleryImage[] = [

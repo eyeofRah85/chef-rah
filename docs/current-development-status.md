@@ -184,11 +184,18 @@ Progress update - June 6, 2026:
   - Future weekly meal plans likely need a weekly period, package offerings, fixed meal plan offerings, limited spice/protein options, customer allergen preferences, and allergen warning acknowledgement snapshots.
   - Open business decisions are documented before any schema migration is planned.
 - Gallery and image management:
-  - Added `docs/gallery-image-management.md` to document the current static gallery and image upload direction.
+  - Added `docs/gallery-image-management.md` to document the current gallery and image upload direction.
   - Public gallery data now points at optimized WebP assets in `public/gallery/webp` for demo readiness instead of missing `/gallery/*.jpg` paths.
-  - Current gallery should remain static/code-curated for now.
   - Original HEIC gallery files should be treated as source assets, while WebP copies are used for the public page.
+  - Added a `GalleryImage` model and migration seeded with the current optimized gallery images.
+  - Public `/gallery` now reads gallery database records and falls back to `data/gallery.ts` if records are unavailable.
+  - Admin `/admin/gallery` supports creating, editing, reordering, categorizing, replacing, and deleting gallery images.
+  - Added `/api/admin/gallery` and `/api/admin/gallery/[id]` for admin gallery CRUD.
   - Runtime uploads to `public/uploads` should be treated as local/demo-only until production storage is confirmed.
+- Admin menu item deletion:
+  - Added a guarded hard-delete path for menu items.
+  - `OrderItem.menuItem` now explicitly uses `onDelete: SetNull` so historical order snapshots remain intact after menu item deletion.
+  - Active menu items expose Archive and Delete actions, and archived menu items can be restored or deleted.
 
 Review notes from main branch inspection - June 8, 2026:
 - `package.json` exposes `dev`, `build`, `start`, `lint`, `typecheck`, `prisma:generate`, and `check` scripts.
@@ -249,7 +256,16 @@ Next work items - June 8, 2026:
    - Treat `public/uploads` runtime writes as local/demo-only until production storage is confirmed.
    - Avoid tying gallery management to weekly meal plan modeling.
 
-8. Deployment readiness pass
+8. Admin gallery management and menu item deletion - completed June 9, 2026
+   - Added a `GalleryImage` Prisma model and migration seeded with the existing optimized WebP gallery.
+   - Added `/admin/gallery` and dashboard navigation for gallery image upload, edit, categorization, ordering, replacement, and deletion.
+   - Public `/gallery` reads from database records with `data/gallery.ts` as a static fallback.
+   - Gallery uploads are stored under `public/uploads/gallery` for local/demo use.
+   - Added guarded menu item hard-delete support while preserving historical order snapshots with `OrderItem.menuItem` set null on delete.
+   - Restored active menu item Archive action and added Delete action to active and archived menu item views.
+   - Applied migration `20260609210000_add_gallery_images` to the configured local development database.
+
+9. Deployment readiness pass
    - Confirm required environment variables: `DATABASE_URL`, `AUTH_SECRET`, email/Resend settings, and public app URL.
    - Review image upload assumptions for the deployment platform.
    - Confirm Prisma migrations and seed process from a clean database.
@@ -257,11 +273,11 @@ Next work items - June 8, 2026:
    - Confirm email links use the production base URL.
    - Run `npm run lint` and `npm run build` before deployment.
 
-9. Legacy cleanup later, not now
+10. Legacy cleanup later, not now
    - Do not rename `/admin/catering`, `/account/catering`, or `CateringRequest` yet.
    - Do not remove `OrderType.CATERING` until all historical data and route assumptions are reviewed.
    - Do not remove `MenuItemType.PLATE` until the client confirms it is no longer needed and existing data is migrated or archived.
    - Prefer user-facing label cleanup over model/route renames until production behavior is stable.
 
-10. Suggested next Codex prompt
-   - Inspect the current main branch and start work item 8 only: deployment readiness pass. Confirm required environment variables, review image upload/storage assumptions, confirm Prisma migration and seed process, confirm admin user creation/role assignment, confirm production email links, run `npm run check`, and report results.
+11. Suggested next Codex prompt
+   - Inspect the current main branch and start work item 9 only: deployment readiness pass. Confirm required environment variables, review image upload/storage assumptions, confirm Prisma migration and seed process, confirm admin user creation/role assignment, confirm production email links, run `npm run check`, and report results.
