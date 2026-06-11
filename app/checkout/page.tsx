@@ -12,6 +12,8 @@ import {
 } from "@/lib/business-rules";
 import { useBusinessSettings } from "@/hooks/useBusinessSettings";
 import type { CheckoutDetails } from "@/types/order";
+import { useCustomerAllergens } from "@/hooks/useCustomerAllergens";
+import { AllergenConflictWarning } from "@/components/allergens/AllergenConflictWarning";
 
 const sectionClass =
   "rounded-lg border border-neutral-200 bg-white p-6 shadow-sm";
@@ -41,6 +43,7 @@ export default function CheckoutPage() {
 
   const items = useCartStore((state) => state.items);
   const clearCart = useCartStore((state) => state.clearCart);
+  const { selectedAllergenIdSet } = useCustomerAllergens();
 
   const [mounted, setMounted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -157,6 +160,18 @@ export default function CheckoutPage() {
 
   const total = subtotal + deliveryFee + lateFee + tipAmount;
   const requiresApproval = items.some((item) => item.requiresApproval);
+
+  const checkoutAllergenConflicts = items.flatMap((item) =>
+    (item.allergens ?? []).filter((allergen) =>
+      selectedAllergenIdSet.has(allergen.id),
+    ),
+  );
+
+  const uniqueCheckoutAllergenConflicts = Array.from(
+    new Map(
+      checkoutAllergenConflicts.map((allergen) => [allergen.id, allergen]),
+    ).values(),
+  );
 
   const cutoffDayNames = [
     "Sunday",
@@ -334,6 +349,11 @@ export default function CheckoutPage() {
               </div>
 
               <div className="mt-5 divide-y divide-neutral-200">
+                {uniqueCheckoutAllergenConflicts.length > 0 && (
+                  <div className="mb-5">
+                    <AllergenConflictWarning conflicts={uniqueCheckoutAllergenConflicts} />
+                  </div>
+                )}
                 {items.map((item) => (
                   <div key={item.cartId} className="py-4 first:pt-0 last:pb-0">
                     <div className="flex flex-wrap items-start justify-between gap-4">
@@ -343,6 +363,19 @@ export default function CheckoutPage() {
                         <p className="mt-1 text-sm text-neutral-600">
                           Quantity: {item.quantity}
                         </p>
+
+                        {(item.allergens ?? []).filter((allergen) =>
+                          selectedAllergenIdSet.has(allergen.id),
+                        ).length > 0 && (
+                          <div className="mt-3">
+                            <AllergenConflictWarning
+                              conflicts={(item.allergens ?? []).filter((allergen) =>
+                                selectedAllergenIdSet.has(allergen.id),
+                              )}
+                              compact
+                            />
+                          </div>
+                        )}
 
                         {item.selectedOptions &&
                           item.selectedOptions.length > 0 && (
@@ -738,6 +771,13 @@ export default function CheckoutPage() {
                       Notes: {details.deliveryNotes}
                     </p>
                   )}
+                </div>
+              )}
+
+              {uniqueCheckoutAllergenConflicts.length > 0 && (
+                <div className="mt-5 rounded-lg border border-red-300 bg-red-50 p-4 text-sm text-red-900">
+                  This order contains allergen tags that match your account preferences.
+                  Please review the warning before submitting.
                 </div>
               )}
 
