@@ -293,6 +293,9 @@ model Order {
   allergyNotes             String?
   substitutionPreference   String?
 
+  allergenAcknowledged     Boolean     @default(false)
+  allergenAcknowledgedAt   DateTime?
+  
   subtotal                 Decimal     @db.Decimal(10, 2)
   deliveryFee              Decimal     @db.Decimal(10, 2) @default(0)
   lateFee                  Decimal     @db.Decimal(10, 2) @default(0)
