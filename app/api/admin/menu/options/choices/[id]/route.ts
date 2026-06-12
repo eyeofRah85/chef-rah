@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth-guards";
+import { revalidateMenuPages } from "@/lib/menu-revalidation";
 
 type RouteContext = {
   params: Promise<{
@@ -40,6 +41,8 @@ export async function PATCH(request: Request, context: RouteContext) {
         priceDelta,
       },
     });
+
+    revalidateMenuPages();
 
     return NextResponse.json(updated);
   } catch (error) {

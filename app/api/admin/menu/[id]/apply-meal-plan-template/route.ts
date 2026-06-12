@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth-guards";
 import { optionGroupTemplates } from "@/data/option-templates";
+import { revalidateMenuPages } from "@/lib/menu-revalidation";
 
 type RouteContext = {
   params: Promise<{
@@ -81,6 +82,8 @@ export async function POST(request: Request, context: RouteContext) {
         customerInstructionsEnabled: false,
       },
     });
+
+    revalidateMenuPages();
 
     return NextResponse.json({ success: true });
   } catch (error) {

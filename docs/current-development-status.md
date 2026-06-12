@@ -229,6 +229,8 @@ Progress update - June 6, 2026:
 - Admin allergen tagging hardening:
   - Admin menu allergen checkboxes now preload each menu item's current allergen tags.
   - Saving menu item allergens now validates menu item and allergen IDs before replacing tags, and the replacement runs transactionally.
+- Admin menu cache revalidation:
+  - Admin menu item, option, allergen, template, availability, archive/restore, delete, and category mutations now revalidate the affected public/admin menu pages.
 
 Review notes from main branch inspection - June 8, 2026:
 - `package.json` exposes `dev`, `build`, `start`, `lint`, `typecheck`, `prisma:generate`, and `check` scripts.
@@ -331,11 +333,15 @@ Next work items - June 8, 2026:
    - Invalid menu item or allergen IDs are rejected before replacing allergen tags.
    - Allergen tag replacement now happens inside a transaction and revalidates `/menu` and `/admin/menu`.
 
-15. Legacy cleanup later, not now
+15. Admin menu cache revalidation - completed June 12, 2026
+   - Added a shared menu revalidation helper for menu-related route handlers.
+   - Menu create, edit, delete, archive, restore, availability, option, allergen, template, and category mutations now invalidate the affected public/admin menu pages.
+
+16. Legacy cleanup later, not now
    - Do not rename `/admin/catering`, `/account/catering`, or `CateringRequest` yet.
    - Do not remove `OrderType.CATERING` until all historical data and route assumptions are reviewed.
    - Do not remove `MenuItemType.PLATE` until the client confirms it is no longer needed and existing data is migrated or archived.
    - Prefer user-facing label cleanup over model/route renames until production behavior is stable.
 
-16. Suggested next Codex prompt
+17. Suggested next Codex prompt
    - Inspect the current branch and confirm the next product priority: either implement direct object-storage uploads for the selected provider, or resume weekly meal plan modeling after the open business decisions are answered.
