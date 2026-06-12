@@ -56,6 +56,10 @@ type AdminMenuOptionGroup = {
   choices: AdminMenuChoice[];
 };
 
+type AdminMenuItemAllergen = {
+  allergen: AdminAllergen;
+};
+
 type AdminMenuItem = {
   id: string;
   name: string;
@@ -67,6 +71,7 @@ type AdminMenuItem = {
   seasonal: boolean;
   requiresApproval: boolean;
   customerInstructionsEnabled: boolean;
+  allergens: AdminMenuItemAllergen[];
   optionGroups: AdminMenuOptionGroup[];
 };
 
@@ -485,6 +490,9 @@ export default async function AdminMenuPage({ searchParams }: PageProps) {
                         <MenuItemCustomizationEditor
                           menuItemId={item.id}
                           allergens={allergens}
+                          selectedAllergenIds={item.allergens.map(
+                            (entry) => entry.allergen.id,
+                          )}
                         />
                       </section>
                       </div>

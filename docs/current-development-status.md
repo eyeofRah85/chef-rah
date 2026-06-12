@@ -226,6 +226,9 @@ Progress update - June 6, 2026:
   - Order creation validates meal plan submitted options against the same allowed customer-facing groups, so stale carts cannot submit old meal-count, vegetable, starch, or broad-substitution options.
 - Cart persistence reset:
   - Client-side cart persistence was bumped after the old menu items were archived so browsers with stale cart data start from an empty cart.
+- Admin allergen tagging hardening:
+  - Admin menu allergen checkboxes now preload each menu item's current allergen tags.
+  - Saving menu item allergens now validates menu item and allergen IDs before replacing tags, and the replacement runs transactionally.
 
 Review notes from main branch inspection - June 8, 2026:
 - `package.json` exposes `dev`, `build`, `start`, `lint`, `typecheck`, `prisma:generate`, and `check` scripts.
@@ -323,11 +326,16 @@ Next work items - June 8, 2026:
    - Bumped the persisted cart store version so older local browser carts are cleared on hydration.
    - Keep the cart client-side for now; revisit database-backed carts only if the product needs cross-device cart continuity.
 
-14. Legacy cleanup later, not now
+14. Admin allergen tagging hardening - completed June 12, 2026
+   - Admin menu allergen checkboxes preload the item's saved allergens.
+   - Invalid menu item or allergen IDs are rejected before replacing allergen tags.
+   - Allergen tag replacement now happens inside a transaction and revalidates `/menu` and `/admin/menu`.
+
+15. Legacy cleanup later, not now
    - Do not rename `/admin/catering`, `/account/catering`, or `CateringRequest` yet.
    - Do not remove `OrderType.CATERING` until all historical data and route assumptions are reviewed.
    - Do not remove `MenuItemType.PLATE` until the client confirms it is no longer needed and existing data is migrated or archived.
    - Prefer user-facing label cleanup over model/route renames until production behavior is stable.
 
-15. Suggested next Codex prompt
+16. Suggested next Codex prompt
    - Inspect the current branch and confirm the next product priority: either implement direct object-storage uploads for the selected provider, or resume weekly meal plan modeling after the open business decisions are answered.

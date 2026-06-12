@@ -30,16 +30,19 @@ const blankChoice = (): OptionChoiceInput => ({
 type Props = {
   menuItemId: string;
   allergens: Allergen[];
+  selectedAllergenIds: string[];
 };
 
 export function MenuItemCustomizationEditor({
   menuItemId,
   allergens,
+  selectedAllergenIds,
 }: Props) {
   const router = useRouter();
   
   const [selectedTemplate, setSelectedTemplate] = useState("");
-  const [selectedAllergens, setSelectedAllergens] = useState<string[]>([]);
+  const [selectedAllergens, setSelectedAllergens] =
+    useState<string[]>(selectedAllergenIds);
   const [groupName, setGroupName] = useState("");
   const [required, setRequired] = useState(false);
   const [multiple, setMultiple] = useState(false);
@@ -129,7 +132,9 @@ export function MenuItemCustomizationEditor({
                 checked={selectedAllergens.includes(allergen.id)}
                 onChange={(e) => {
                   if (e.target.checked) {
-                    setSelectedAllergens((prev) => [...prev, allergen.id]);
+                    setSelectedAllergens((prev) =>
+                      prev.includes(allergen.id) ? prev : [...prev, allergen.id],
+                    );
                   } else {
                     setSelectedAllergens((prev) =>
                       prev.filter((id) => id !== allergen.id),
