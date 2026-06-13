@@ -125,6 +125,36 @@ export function parseWeeklyMenuPeriodForm(formData: FormData) {
   };
 }
 
+export function parseWeeklyMenuCloneForm(formData: FormData) {
+  const startDate = parseDateInput(formData.get("startDate"), "Start date");
+  const endDate = parseDateInput(formData.get("endDate"), "End date");
+  const orderCutoffAt = parseOptionalDateInput(
+    formData.get("orderCutoffAt"),
+    "Ordering cutoff",
+  );
+
+  if (endDate < startDate) {
+    throw new WeeklyMenuValidationError(
+      "End date must be on or after the start date.",
+    );
+  }
+
+  if (orderCutoffAt && orderCutoffAt > endDate) {
+    throw new WeeklyMenuValidationError(
+      "Ordering cutoff must be before the weekly menu end date.",
+    );
+  }
+
+  return {
+    label: parseRequiredText(formData.get("label"), "Week label"),
+    startDate,
+    endDate,
+    orderCutoffAt,
+    fulfillmentNotes: parseOptionalText(formData.get("fulfillmentNotes")),
+    capacity: parseWholeNumber(formData.get("capacity"), "Capacity", 1),
+  };
+}
+
 export function parseWeeklyMealPlanPackageForm(formData: FormData) {
   const days = parseWholeNumber(formData.get("days"), "Package days", 1);
   const mealsPerDay = parseWholeNumber(

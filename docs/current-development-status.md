@@ -186,7 +186,8 @@ Progress update - June 6, 2026:
   - Added and applied migration `20260613014948_add_weekly_meal_plan_models` with weekly period, package, offering, allowed-option, weekly allergen, order weekly selection snapshot, and item-level allergen acknowledgement fields.
   - Added the first admin weekly menu management slice for listing, creating, and editing weekly periods and 1-/2-meal packages.
   - Added the admin weekly offering slice for creating/editing/deleting fixed offerings, tagging offering allergens, and managing allowed spice/protein options.
-  - The new weekly models are not wired to cloning/rotation, public `/menu`, cart, checkout, kitchen prep, or emails yet.
+  - Added admin weekly cloning/rotation controls that copy packages, offerings, allergen tags, and allowed options into a new draft weekly period.
+  - The new weekly models are not wired to public `/menu`, cart, checkout, kitchen prep, or emails yet.
 - Gallery and image management:
   - Added `docs/gallery-image-management.md` to document the current gallery and image upload direction.
   - Public gallery data now points at optimized WebP assets in `public/gallery/webp` for demo readiness instead of missing `/gallery/*.jpg` paths.
@@ -385,11 +386,19 @@ Next work items - June 8, 2026:
    - Duplicate offering names per weekly menu and duplicate option type/name pairs per offering are blocked by API validation and schema uniqueness rules.
    - This slice intentionally does not wire cloning/rotation, public `/menu`, cart, checkout, kitchen prep, or emails yet.
 
-22. Legacy cleanup later, not now
+22. Admin weekly menu cloning/rotation controls - completed June 13, 2026
+   - Added a clone action to `/admin/menu/weekly` for each weekly period.
+   - Cloning creates a new draft weekly period with fresh capacity usage and a `cloneSourceId` pointing back to the source period.
+   - The clone form defaults the new period one week after the source period and allows admins to adjust label, date range, cutoff, capacity, and fulfillment notes.
+   - Cloning copies packages, fixed offerings, offering allergen tags, and allowed spice/protein options.
+   - Cloning does not copy orders or order selections.
+   - This slice intentionally does not wire public `/menu`, cart, checkout, kitchen prep, or emails yet.
+
+23. Legacy cleanup later, not now
    - Do not rename `/admin/catering`, `/account/catering`, or `CateringRequest` yet.
    - Do not remove `OrderType.CATERING` until all historical data and route assumptions are reviewed.
    - Do not remove `MenuItemType.PLATE` until the client confirms it is no longer needed and existing data is migrated or archived.
    - Prefer user-facing label cleanup over model/route renames until production behavior is stable.
 
-23. Suggested next Codex prompt
-   - Add admin weekly menu cloning/rotation controls that copy packages, offerings, allergens, and allowed options into a new draft weekly period, without wiring public `/menu`, cart, or checkout to the weekly models yet.
+24. Suggested next Codex prompt
+   - Add the first public weekly meal plan display slice on `/menu`: show the current published weekly menu with packages, fixed offerings, allergen labels, and allowed spice/protein options, but do not add weekly items to cart or checkout yet.

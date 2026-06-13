@@ -18,6 +18,10 @@ import {
   WeeklyMenuPeriodForm,
   type WeeklyMenuPeriodFormData,
 } from "@/components/admin/WeeklyMenuPeriodForm";
+import {
+  WeeklyMenuCloneForm,
+  type WeeklyMenuCloneSource,
+} from "@/components/admin/WeeklyMenuCloneForm";
 import { WeeklyOfferingAllergenEditor } from "@/components/admin/WeeklyOfferingAllergenEditor";
 import { requireAdmin } from "@/lib/auth-guards";
 import {
@@ -53,6 +57,14 @@ function formatDisplayDate(date: Date) {
   }).format(date);
 }
 
+function addDays(date: Date, days: number) {
+  const nextDate = new Date(date);
+
+  nextDate.setUTCDate(nextDate.getUTCDate() + days);
+
+  return nextDate;
+}
+
 function toPeriodFormData(period: {
   id: string;
   label: string;
@@ -72,6 +84,33 @@ function toPeriodFormData(period: {
     fulfillmentNotes: period.fulfillmentNotes,
     status: period.status,
     capacity: period.capacity,
+  };
+}
+
+function toCloneSource(period: {
+  id: string;
+  label: string;
+  startDate: Date;
+  endDate: Date;
+  orderCutoffAt: Date | null;
+  fulfillmentNotes: string | null;
+  capacity: number;
+  packages: unknown[];
+  offerings: unknown[];
+}): WeeklyMenuCloneSource {
+  return {
+    id: period.id,
+    label: period.label,
+    suggestedLabel: `Copy of ${period.label}`,
+    suggestedStartDate: formatDateInput(addDays(period.startDate, 7)),
+    suggestedEndDate: formatDateInput(addDays(period.endDate, 7)),
+    suggestedOrderCutoffAt: formatDateTimeInput(
+      period.orderCutoffAt ? addDays(period.orderCutoffAt, 7) : null,
+    ),
+    fulfillmentNotes: period.fulfillmentNotes,
+    capacity: period.capacity,
+    packageCount: period.packages.length,
+    offeringCount: period.offerings.length,
   };
 }
 
@@ -248,6 +287,7 @@ export default async function AdminWeeklyMenuPage() {
           <section className="space-y-5">
             {periods.map((period) => {
               const periodFormData = toPeriodFormData(period);
+              const cloneSource = toCloneSource(period);
               const dateRange = `${formatDisplayDate(
                 period.startDate,
               )} - ${formatDisplayDate(period.endDate)}`;
@@ -610,8 +650,9 @@ export default async function AdminWeeklyMenuPage() {
                         </section>
                       </section>
 
-                      <aside>
+                      <aside className="space-y-5">
                         <WeeklyMenuPeriodForm period={periodFormData} />
+                        <WeeklyMenuCloneForm source={cloneSource} />
                       </aside>
                     </div>
                   </div>
