@@ -185,7 +185,8 @@ Progress update - June 6, 2026:
   - Current meal plans remain `MenuItem` records with `type = MEAL_PLAN`, limited option groups, request-only choices, and order snapshots.
   - Added and applied migration `20260613014948_add_weekly_meal_plan_models` with weekly period, package, offering, allowed-option, weekly allergen, order weekly selection snapshot, and item-level allergen acknowledgement fields.
   - Added the first admin weekly menu management slice for listing, creating, and editing weekly periods and 1-/2-meal packages.
-  - The new weekly models are not wired to weekly offerings/options/allergens, cloning, public `/menu`, cart, checkout, kitchen prep, or emails yet.
+  - Added the admin weekly offering slice for creating/editing/deleting fixed offerings, tagging offering allergens, and managing allowed spice/protein options.
+  - The new weekly models are not wired to cloning/rotation, public `/menu`, cart, checkout, kitchen prep, or emails yet.
 - Gallery and image management:
   - Added `docs/gallery-image-management.md` to document the current gallery and image upload direction.
   - Public gallery data now points at optimized WebP assets in `public/gallery/webp` for demo readiness instead of missing `/gallery/*.jpg` paths.
@@ -375,11 +376,20 @@ Next work items - June 8, 2026:
    - Published weekly menus cannot overlap another published weekly menu date range.
    - This slice intentionally does not wire weekly offerings, allergens, cloning/rotation, public `/menu`, cart, checkout, kitchen prep, or emails yet.
 
-21. Legacy cleanup later, not now
+21. Admin weekly offering/options management slice - completed June 13, 2026
+   - Extended `/admin/menu/weekly` so admins can create, edit, and delete fixed weekly meal offerings for each weekly period.
+   - Weekly offerings can be tagged with controlled allergen checkboxes using the shared allergen records.
+   - Admins can create, edit, and delete allowed spice level and protein substitution options for each offering.
+   - Weekly option validation only allows spice level and protein substitution option types.
+   - Request-only and chef approval flags are limited to protein substitutions, and request-only substitutions must require approval.
+   - Duplicate offering names per weekly menu and duplicate option type/name pairs per offering are blocked by API validation and schema uniqueness rules.
+   - This slice intentionally does not wire cloning/rotation, public `/menu`, cart, checkout, kitchen prep, or emails yet.
+
+22. Legacy cleanup later, not now
    - Do not rename `/admin/catering`, `/account/catering`, or `CateringRequest` yet.
    - Do not remove `OrderType.CATERING` until all historical data and route assumptions are reviewed.
    - Do not remove `MenuItemType.PLATE` until the client confirms it is no longer needed and existing data is migrated or archived.
    - Prefer user-facing label cleanup over model/route renames until production behavior is stable.
 
-22. Suggested next Codex prompt
-   - Build the next admin weekly menu slice: manage weekly offerings, allergens, and allowed spice/protein options for each weekly period, without wiring public `/menu`, cart, or checkout to the weekly models yet.
+23. Suggested next Codex prompt
+   - Add admin weekly menu cloning/rotation controls that copy packages, offerings, allergens, and allowed options into a new draft weekly period, without wiring public `/menu`, cart, or checkout to the weekly models yet.

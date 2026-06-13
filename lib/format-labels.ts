@@ -208,3 +208,23 @@ export function formatWeeklyMenuStatus(status: string | null | undefined) {
   }
 }
 
+export function formatWeeklyMealPlanOptionType(
+  optionType: string | null | undefined,
+) {
+  switch (optionType) {
+    case "SPICE_LEVEL":
+      return "Spice Level";
+
+    case "PROTEIN_SUBSTITUTION":
+      return "Protein Substitution";
+
+    default:
+      return optionType
+        ? optionType
+            .toLowerCase()
+            .replaceAll("_", " ")
+            .replace(/\b\w/g, (char) => char.toUpperCase())
+        : "Not set";
+  }
+}
+

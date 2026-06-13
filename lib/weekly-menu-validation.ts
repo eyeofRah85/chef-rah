@@ -1,6 +1,9 @@
 import { parseEnumValue } from "@/lib/enum-values";
+import { parsePublicImageUrl } from "@/lib/image-urls";
 import {
+  weeklyMealPlanOptionTypes,
   weeklyMenuStatuses,
+  type WeeklyMealPlanOptionTypeValue,
   type WeeklyMenuStatusValue,
 } from "@/lib/prisma-enums";
 
@@ -80,6 +83,14 @@ function parseMoney(value: FormDataEntryValue | null, fieldName: string) {
   return parsed;
 }
 
+function parseOptionalPublicImageUrl(value: FormDataEntryValue | null) {
+  try {
+    return parsePublicImageUrl(value);
+  } catch {
+    throw new WeeklyMenuValidationError("Enter a valid public image URL.");
+  }
+}
+
 export function parseWeeklyMenuPeriodForm(formData: FormData) {
   const startDate = parseDateInput(formData.get("startDate"), "Start date");
   const endDate = parseDateInput(formData.get("endDate"), "End date");
@@ -146,6 +157,74 @@ export function parseWeeklyMealPlanPackageForm(formData: FormData) {
       0,
     ),
     notes: parseOptionalText(formData.get("notes")),
+  };
+}
+
+export function parseWeeklyMealPlanOfferingForm(formData: FormData) {
+  return {
+    name: parseRequiredText(formData.get("name"), "Offering name"),
+    description: parseRequiredText(
+      formData.get("description"),
+      "Offering description",
+    ),
+    imageUrl: parseOptionalPublicImageUrl(formData.get("imageUrl")),
+    dietaryInfo: parseOptionalText(formData.get("dietaryInfo")),
+    available: formData.get("available") === "on",
+    displayOrder: parseWholeNumber(
+      formData.get("displayOrder"),
+      "Display order",
+      0,
+    ),
+  };
+}
+
+export function parseWeeklyMealPlanOptionForm(formData: FormData) {
+  const optionType = parseEnumValue(
+    weeklyMealPlanOptionTypes,
+    String(formData.get("optionType") ?? ""),
+  );
+
+  if (!optionType) {
+    throw new WeeklyMenuValidationError(
+      "Option type must be spice level or protein substitution.",
+    );
+  }
+
+  const requestOnly = formData.get("requestOnly") === "on";
+  const requiresApproval = formData.get("requiresApproval") === "on";
+
+  if (optionType === "SPICE_LEVEL" && (requestOnly || requiresApproval)) {
+    throw new WeeklyMenuValidationError(
+      "Spice level options cannot require request or approval.",
+    );
+  }
+
+  if (requiresApproval && !requestOnly) {
+    throw new WeeklyMenuValidationError(
+      "Approval-required protein substitutions must also be request-only.",
+    );
+  }
+
+  if (requestOnly && !requiresApproval) {
+    throw new WeeklyMenuValidationError(
+      "Request-only protein substitutions must require chef approval.",
+    );
+  }
+
+  return {
+    optionType: optionType as WeeklyMealPlanOptionTypeValue,
+    name: parseRequiredText(formData.get("name"), "Option name"),
+    description: parseOptionalText(formData.get("description")),
+    dietaryInfo: parseOptionalText(formData.get("dietaryInfo")),
+    priceDelta: parseMoney(formData.get("priceDelta"), "Option price delta"),
+    requestOnly,
+    requiresApproval,
+    available: formData.get("available") === "on",
+    displayOrder: parseWholeNumber(
+      formData.get("displayOrder"),
+      "Display order",
+      0,
+    ),
   };
 }
 

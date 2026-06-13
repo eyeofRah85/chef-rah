@@ -1,5 +1,15 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { DeleteWeeklyMealPlanOfferingButton } from "@/components/admin/DeleteWeeklyMealPlanOfferingButton";
+import { DeleteWeeklyMealPlanOptionButton } from "@/components/admin/DeleteWeeklyMealPlanOptionButton";
+import {
+  WeeklyMealPlanOfferingForm,
+  type WeeklyMealPlanOfferingFormData,
+} from "@/components/admin/WeeklyMealPlanOfferingForm";
+import {
+  WeeklyMealPlanOptionForm,
+  type WeeklyMealPlanAllowedOptionFormData,
+} from "@/components/admin/WeeklyMealPlanOptionForm";
 import {
   WeeklyMealPlanPackageForm,
   type WeeklyMealPlanPackageFormData,
@@ -8,9 +18,18 @@ import {
   WeeklyMenuPeriodForm,
   type WeeklyMenuPeriodFormData,
 } from "@/components/admin/WeeklyMenuPeriodForm";
+import { WeeklyOfferingAllergenEditor } from "@/components/admin/WeeklyOfferingAllergenEditor";
 import { requireAdmin } from "@/lib/auth-guards";
-import { formatWeeklyMenuStatus } from "@/lib/format-labels";
+import {
+  formatWeeklyMealPlanOptionType,
+  formatWeeklyMenuStatus,
+} from "@/lib/format-labels";
 import { prisma } from "@/lib/prisma";
+
+type AdminAllergen = {
+  id: string;
+  name: string;
+};
 
 function formatDateInput(date: Date) {
   return date.toISOString().slice(0, 10);
@@ -78,6 +97,52 @@ function toPackageFormData(pkg: {
   };
 }
 
+function toOfferingFormData(offering: {
+  id: string;
+  name: string;
+  description: string;
+  imageUrl: string | null;
+  dietaryInfo: string | null;
+  available: boolean;
+  displayOrder: number;
+}): WeeklyMealPlanOfferingFormData {
+  return {
+    id: offering.id,
+    name: offering.name,
+    description: offering.description,
+    imageUrl: offering.imageUrl,
+    dietaryInfo: offering.dietaryInfo,
+    available: offering.available,
+    displayOrder: offering.displayOrder,
+  };
+}
+
+function toOptionFormData(option: {
+  id: string;
+  optionType: string;
+  name: string;
+  description: string | null;
+  dietaryInfo: string | null;
+  priceDelta: unknown;
+  requestOnly: boolean;
+  requiresApproval: boolean;
+  available: boolean;
+  displayOrder: number;
+}): WeeklyMealPlanAllowedOptionFormData {
+  return {
+    id: option.id,
+    optionType: option.optionType,
+    name: option.name,
+    description: option.description,
+    dietaryInfo: option.dietaryInfo,
+    priceDelta: Number(option.priceDelta),
+    requestOnly: option.requestOnly,
+    requiresApproval: option.requiresApproval,
+    available: option.available,
+    displayOrder: option.displayOrder,
+  };
+}
+
 export default async function AdminWeeklyMenuPage() {
   try {
     await requireAdmin();
@@ -85,34 +150,75 @@ export default async function AdminWeeklyMenuPage() {
     redirect("/");
   }
 
-  const periods = await prisma.weeklyMenuPeriod.findMany({
-    orderBy: [
-      {
-        startDate: "desc",
-      },
-      {
-        createdAt: "desc",
-      },
-    ],
-    include: {
-      packages: {
-        orderBy: [
-          {
-            displayOrder: "asc",
+  const [periods, allergens] = await Promise.all([
+    prisma.weeklyMenuPeriod.findMany({
+      orderBy: [
+        {
+          startDate: "desc",
+        },
+        {
+          createdAt: "desc",
+        },
+      ],
+      include: {
+        packages: {
+          orderBy: [
+            {
+              displayOrder: "asc",
+            },
+            {
+              createdAt: "asc",
+            },
+          ],
+        },
+        offerings: {
+          orderBy: [
+            {
+              displayOrder: "asc",
+            },
+            {
+              createdAt: "asc",
+            },
+          ],
+          include: {
+            allergens: {
+              include: {
+                allergen: true,
+              },
+            },
+            options: {
+              orderBy: [
+                {
+                  optionType: "asc",
+                },
+                {
+                  displayOrder: "asc",
+                },
+                {
+                  createdAt: "asc",
+                },
+              ],
+            },
           },
-          {
-            createdAt: "asc",
+        },
+        _count: {
+          select: {
+            orderSelections: true,
           },
-        ],
-      },
-      _count: {
-        select: {
-          offerings: true,
-          orderSelections: true,
         },
       },
-    },
-  });
+    }),
+    prisma.allergen.findMany({
+      orderBy: {
+        name: "asc",
+      },
+      select: {
+        id: true,
+        name: true,
+      },
+    }),
+  ]);
+  const allergenOptions: AdminAllergen[] = allergens;
 
   return (
     <main className="min-h-screen bg-neutral-50 px-6 py-12">
@@ -178,7 +284,7 @@ export default async function AdminWeeklyMenuPage() {
                           </span>
 
                           <span>
-                            Offerings: {period._count.offerings}
+                            Offerings: {period.offerings.length}
                           </span>
                         </div>
                       </div>
@@ -274,6 +380,234 @@ export default async function AdminWeeklyMenuPage() {
                             No packages have been added for this weekly menu yet.
                           </div>
                         )}
+
+                        <section className="border-t pt-5">
+                          <div>
+                            <h3 className="text-lg font-semibold">
+                              Weekly Offerings
+                            </h3>
+
+                            <p className="mt-1 text-sm text-neutral-500">
+                              Offerings are the fixed meals customers will see
+                              for this weekly menu. Add allergen tags and the
+                              allowed spice or protein choices to each offering.
+                            </p>
+                          </div>
+
+                          <div className="mt-5">
+                            <WeeklyMealPlanOfferingForm periodId={period.id} />
+                          </div>
+
+                          {period.offerings.length > 0 ? (
+                            <div className="mt-5 space-y-3">
+                              {period.offerings.map((offering) => {
+                                const offeringFormData =
+                                  toOfferingFormData(offering);
+                                const selectedAllergenIds =
+                                  offering.allergens.map(
+                                    (entry) => entry.allergen.id,
+                                  );
+                                const selectedAllergenNames =
+                                  offering.allergens.map(
+                                    (entry) => entry.allergen.name,
+                                  );
+
+                                return (
+                                  <details
+                                    key={offering.id}
+                                    className="group rounded-xl border bg-neutral-50"
+                                  >
+                                    <summary className="cursor-pointer list-none p-4 transition hover:bg-neutral-100">
+                                      <div className="flex flex-col justify-between gap-3 md:flex-row md:items-start">
+                                        <div>
+                                          <div className="flex flex-wrap items-center gap-2">
+                                            <p className="font-semibold">
+                                              {offering.name}
+                                            </p>
+
+                                            <span
+                                              className={
+                                                offering.available
+                                                  ? "rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-800"
+                                                  : "rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-800"
+                                              }
+                                            >
+                                              {offering.available
+                                                ? "Available"
+                                                : "Unavailable"}
+                                            </span>
+                                          </div>
+
+                                          <p className="mt-1 line-clamp-2 text-sm text-neutral-600">
+                                            {offering.description}
+                                          </p>
+
+                                          <div className="mt-2 flex flex-wrap gap-3 text-xs text-neutral-500">
+                                            <span>
+                                              Allergens:{" "}
+                                              {selectedAllergenNames.length > 0
+                                                ? selectedAllergenNames.join(
+                                                    ", ",
+                                                  )
+                                                : "None"}
+                                            </span>
+
+                                            <span>
+                                              Options: {offering.options.length}
+                                            </span>
+                                          </div>
+                                        </div>
+
+                                        <div className="text-xs font-medium text-neutral-500 group-open:hidden">
+                                          Manage &gt;
+                                        </div>
+
+                                        <div className="hidden text-xs font-medium text-neutral-500 group-open:block">
+                                          Close ^
+                                        </div>
+                                      </div>
+                                    </summary>
+
+                                    <div className="space-y-5 border-t p-4">
+                                      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_280px]">
+                                        <WeeklyMealPlanOfferingForm
+                                          periodId={period.id}
+                                          offering={offeringFormData}
+                                        />
+
+                                        <div className="space-y-3">
+                                          {offering.imageUrl && (
+                                            <div className="rounded-xl border bg-white p-4 text-sm text-neutral-600">
+                                              <p className="font-medium text-neutral-900">
+                                                Image URL
+                                              </p>
+                                              <p className="mt-2 break-all">
+                                                {offering.imageUrl}
+                                              </p>
+                                            </div>
+                                          )}
+
+                                          <DeleteWeeklyMealPlanOfferingButton
+                                            offeringId={offering.id}
+                                            offeringName={offering.name}
+                                          />
+                                        </div>
+                                      </div>
+
+                                      <WeeklyOfferingAllergenEditor
+                                        offeringId={offering.id}
+                                        allergens={allergenOptions}
+                                        selectedAllergenIds={
+                                          selectedAllergenIds
+                                        }
+                                      />
+
+                                      <section className="space-y-4 rounded-xl border bg-white p-4">
+                                        <div>
+                                          <h4 className="font-semibold">
+                                            Spice and Protein Options
+                                          </h4>
+
+                                          <p className="mt-1 text-sm text-neutral-500">
+                                            Customers can choose spice level and
+                                            approved protein substitutions only.
+                                          </p>
+                                        </div>
+
+                                        <WeeklyMealPlanOptionForm
+                                          offeringId={offering.id}
+                                        />
+
+                                        {offering.options.length > 0 ? (
+                                          <div className="space-y-3">
+                                            {offering.options.map((option) => {
+                                              const optionFormData =
+                                                toOptionFormData(option);
+
+                                              return (
+                                                <details
+                                                  key={option.id}
+                                                  className="group rounded-xl border bg-neutral-50"
+                                                >
+                                                  <summary className="cursor-pointer list-none p-4 transition hover:bg-neutral-100">
+                                                    <div className="flex flex-col justify-between gap-3 md:flex-row md:items-start">
+                                                      <div>
+                                                        <div className="flex flex-wrap items-center gap-2">
+                                                          <p className="font-semibold">
+                                                            {option.name}
+                                                          </p>
+
+                                                          <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-neutral-700">
+                                                            {formatWeeklyMealPlanOptionType(
+                                                              option.optionType,
+                                                            )}
+                                                          </span>
+
+                                                          {option.requiresApproval && (
+                                                            <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800">
+                                                              Approval Required
+                                                            </span>
+                                                          )}
+
+                                                          {!option.available && (
+                                                            <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-800">
+                                                              Unavailable
+                                                            </span>
+                                                          )}
+                                                        </div>
+
+                                                        <p className="mt-1 text-sm text-neutral-600">
+                                                          +$
+                                                          {Number(
+                                                            option.priceDelta,
+                                                          ).toFixed(2)}
+                                                        </p>
+                                                      </div>
+
+                                                      <div className="text-xs font-medium text-neutral-500 group-open:hidden">
+                                                        Edit &gt;
+                                                      </div>
+
+                                                      <div className="hidden text-xs font-medium text-neutral-500 group-open:block">
+                                                        Close ^
+                                                      </div>
+                                                    </div>
+                                                  </summary>
+
+                                                  <div className="space-y-3 border-t p-4">
+                                                    <WeeklyMealPlanOptionForm
+                                                      offeringId={offering.id}
+                                                      option={optionFormData}
+                                                    />
+
+                                                    <DeleteWeeklyMealPlanOptionButton
+                                                      optionId={option.id}
+                                                      optionName={option.name}
+                                                    />
+                                                  </div>
+                                                </details>
+                                              );
+                                            })}
+                                          </div>
+                                        ) : (
+                                          <div className="rounded-xl border bg-neutral-50 p-4 text-sm text-neutral-600">
+                                            No spice or protein options have
+                                            been added for this offering yet.
+                                          </div>
+                                        )}
+                                      </section>
+                                    </div>
+                                  </details>
+                                );
+                              })}
+                            </div>
+                          ) : (
+                            <div className="mt-5 rounded-xl border bg-neutral-50 p-5 text-sm text-neutral-600">
+                              No offerings have been added for this weekly menu
+                              yet.
+                            </div>
+                          )}
+                        </section>
                       </section>
 
                       <aside>
