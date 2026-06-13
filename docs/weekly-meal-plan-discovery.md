@@ -183,6 +183,8 @@ The client decisions now support moving into a small schema proposal. A likely f
 
 The existing `MenuItem`, `MenuItemOptionGroup`, and `MenuItemOptionChoice` models should remain stable until this design is reviewed. Current package-style meal plans can continue to use the existing menu item workflow while the weekly model is designed.
 
+See `docs/weekly-meal-plan-schema-proposal.md` for the additive model proposal and rollout plan.
+
 ## Near-Term Recommendation
 
 The next safe step is a small schema proposal for dedicated weekly menu models. Based on the confirmed requirements, dedicated weekly menu models are preferred because the business wants current-week publishing, fixed package prices, capacity limits, cloning, rotating menus, allergen-aware fulfillment, and reporting by weekly period.

@@ -181,6 +181,7 @@ Progress update - June 6, 2026:
   - Added `docs/weekly-meal-plan-discovery.md` to document the desired weekly meal plan admin and customer workflows before schema changes.
   - Updated the discovery on June 9, 2026 with client clarification that meal plans are fixed offerings, not truly customizable meals.
   - Updated the discovery on June 13, 2026 with resolved business decisions for allergens, capacity, cloning/rotation, current-week ordering, fixed package pricing, and request-only proteins.
+  - Added `docs/weekly-meal-plan-schema-proposal.md` with an additive weekly menu schema proposal and rollout plan.
   - Current meal plans remain `MenuItem` records with `type = MEAL_PLAN`, limited option groups, request-only choices, and order snapshots.
   - Future weekly meal plans likely need a weekly period, package offerings, fixed meal plan offerings, limited spice/protein options, customer allergen preferences, and allergen warning acknowledgement snapshots.
   - A dedicated weekly menu model is now the recommended next design direction, but no schema migration has been applied yet.
@@ -350,11 +351,16 @@ Next work items - June 8, 2026:
    - Dedicated weekly menu models are now the recommended next direction, with current-week ordering, 10-order weekly capacity, cloning/rotation, fixed package prices, all-food allergen alerts, order/item allergen acknowledgement snapshots, and request-only approval for additional proteins.
    - No schema migration has been applied yet.
 
-18. Legacy cleanup later, not now
+18. Weekly meal plan schema proposal - completed June 13, 2026
+   - Added `docs/weekly-meal-plan-schema-proposal.md`.
+   - The proposal keeps the existing `MenuItem` checkout flow stable and adds dedicated weekly period, package, offering, allowed-option, allergen, capacity, clone-source, and order snapshot models as the recommended first migration direction.
+   - The first migration should be additive only and should not rewrite existing menu items, historical orders, routes, or checkout behavior.
+
+19. Legacy cleanup later, not now
    - Do not rename `/admin/catering`, `/account/catering`, or `CateringRequest` yet.
    - Do not remove `OrderType.CATERING` until all historical data and route assumptions are reviewed.
    - Do not remove `MenuItemType.PLATE` until the client confirms it is no longer needed and existing data is migrated or archived.
    - Prefer user-facing label cleanup over model/route renames until production behavior is stable.
 
-19. Suggested next Codex prompt
-   - Inspect the current branch and draft the smallest Prisma schema proposal for dedicated weekly menu models, without removing the existing `MenuItem` checkout flow yet.
+20. Suggested next Codex prompt
+   - Inspect `docs/weekly-meal-plan-schema-proposal.md`, add the first additive Prisma migration for the weekly meal plan models, run Prisma generate/typecheck/build, and do not wire checkout to the weekly models yet.
