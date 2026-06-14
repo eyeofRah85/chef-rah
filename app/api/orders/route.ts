@@ -10,6 +10,7 @@ import {
 import { filterMealPlanCustomerOptionGroups } from "@/lib/meal-plan-options";
 import { sendAppEmail, appUrl } from "@/lib/email";
 import { OrderConfirmationEmail } from "@/emails/OrderConfirmationEmail";
+import { isDateInWeeklyMenuRange } from "@/lib/weekly-menu-dates";
 import type { CartItem } from "@/store/cart-store";
 import type { CheckoutDetails } from "@/types/order";
 import type { DecimalLike } from "@/types/display";
@@ -428,7 +429,7 @@ export async function POST(request: Request) {
           );
         }
 
-        if (weeklyPeriod.startDate > now || weeklyPeriod.endDate < now) {
+        if (!isDateInWeeklyMenuRange(weeklyPeriod, now)) {
           return NextResponse.json(
             { error: "Weekly meal plans can only be ordered for the current published week." },
             { status: 400 },

@@ -31,6 +31,10 @@ import {
   formatWeeklyMenuStatus,
 } from "@/lib/format-labels";
 import { prisma } from "@/lib/prisma";
+import {
+  formatWeeklyMenuDateInput,
+  formatWeeklyMenuDisplayDate,
+} from "@/lib/weekly-menu-dates";
 
 type AdminAllergen = {
   id: string;
@@ -66,7 +70,7 @@ type FulfillmentCountRow = {
 };
 
 function formatDateInput(date: Date) {
-  return date.toISOString().slice(0, 10);
+  return formatWeeklyMenuDateInput(date);
 }
 
 function formatDateTimeInput(date: Date | null) {
@@ -80,11 +84,7 @@ function formatDateTimeInput(date: Date | null) {
 }
 
 function formatDisplayDate(date: Date) {
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(date);
+  return formatWeeklyMenuDisplayDate(date);
 }
 
 function formatDisplayDateTime(date: Date | null) {

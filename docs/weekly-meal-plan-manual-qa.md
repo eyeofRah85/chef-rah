@@ -1,6 +1,6 @@
 # Weekly Meal Plan Manual QA Checklist
 
-Use this checklist while Codex Browser verification is blocked on the local Windows helper/runtime.
+Use this checklist for local browser testing of the weekly meal plan workflow.
 
 ## Preconditions
 
@@ -13,6 +13,7 @@ Use this checklist while Codex Browser verification is blocked on the local Wind
   - At least one spice level option.
   - At least one protein substitution option marked request-only and approval-required.
   - At least one allergen tag that can match the customer account allergen preferences.
+- If `RESEND_API_KEY` is configured locally, be aware that submitting checkout can send a real email to the signed-in account.
 
 ## Customer Ordering
 

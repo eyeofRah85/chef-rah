@@ -1,6 +1,10 @@
 import { parseEnumValue } from "@/lib/enum-values";
 import { parsePublicImageUrl } from "@/lib/image-urls";
 import {
+  getWeeklyMenuEndBoundary,
+  parseWeeklyMenuDateInput,
+} from "@/lib/weekly-menu-dates";
+import {
   weeklyMealPlanOptionTypes,
   weeklyMenuStatuses,
   type WeeklyMealPlanOptionTypeValue,
@@ -29,9 +33,9 @@ function parseOptionalText(value: FormDataEntryValue | null) {
 
 function parseDateInput(value: FormDataEntryValue | null, fieldName: string) {
   const text = parseRequiredText(value, fieldName);
-  const date = new Date(text);
+  const date = parseWeeklyMenuDateInput(text);
 
-  if (Number.isNaN(date.getTime())) {
+  if (!date) {
     throw new WeeklyMenuValidationError(`${fieldName} must be a valid date.`);
   }
 
@@ -108,7 +112,7 @@ export function parseWeeklyMenuPeriodForm(formData: FormData) {
     );
   }
 
-  if (orderCutoffAt && orderCutoffAt > endDate) {
+  if (orderCutoffAt && orderCutoffAt > getWeeklyMenuEndBoundary(endDate)) {
     throw new WeeklyMenuValidationError(
       "Ordering cutoff must be before the weekly menu end date.",
     );
@@ -139,7 +143,7 @@ export function parseWeeklyMenuCloneForm(formData: FormData) {
     );
   }
 
-  if (orderCutoffAt && orderCutoffAt > endDate) {
+  if (orderCutoffAt && orderCutoffAt > getWeeklyMenuEndBoundary(endDate)) {
     throw new WeeklyMenuValidationError(
       "Ordering cutoff must be before the weekly menu end date.",
     );

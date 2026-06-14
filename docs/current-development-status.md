@@ -453,5 +453,14 @@ Next work items - June 8, 2026:
    - `npm run check` passes after the layout update.
    - Browser verification confirmed the expanded weekly offering editor has no horizontal overflow at the default desktop viewport. A narrower viewport reload was blocked by the local Browser runtime URL policy, so mobile should still be checked manually.
 
-30. Suggested next Codex prompt
-   - Run the weekly meal plan manual QA checklist locally and report any issues. If manual QA is clean, review the remaining production readiness items: durable upload storage decision, email configuration, payment instruction copy, and launch environment variables.
+30. Weekly menu date-only semantics and QA precondition audit - completed June 14, 2026
+   - Added a shared weekly menu date helper so weekly period start/end dates are treated as business date-only ranges instead of exact UTC instants.
+   - Admin weekly menu display now shows the selected start and end dates without shifting one day early in local time.
+   - Public `/menu` and checkout order validation now compare the current business date against the full selected weekly date range.
+   - Weekly menu creation and cloning now validate ordering cutoff against the full end date instead of midnight at the beginning of the end date.
+   - Added `BUSINESS_TIME_ZONE` to `.env.example`, defaulting weekly date checks to `America/New_York`.
+   - `npm run check` passes after the date semantics update.
+   - Manual QA preconditions were audited: the current local weekly menu starts June 15, 2026, has one 2-meal package, one offering, no spice/protein options, and no allergen tags. Full checkout submission was not run because `RESEND_API_KEY` is configured locally and submitting would create an order and send email.
+
+31. Suggested next Codex prompt
+   - Complete the local weekly menu test data, then run the weekly meal plan manual QA checklist. The test period should include at least one 1-meal package, one 2-meal package, one spice option, one request-only approval-required protein substitution, and one allergen tag matching a customer account. If manual QA is clean, review the remaining production readiness items: durable upload storage decision, email configuration, payment instruction copy, and launch environment variables.

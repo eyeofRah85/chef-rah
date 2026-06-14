@@ -3,6 +3,10 @@ import { MenuCard } from "@/components/menu/MenuCard";
 import { MenuCategoryFilter } from "@/components/menu/MenuCategoryFilter";
 import { WeeklyMenuSection } from "@/components/menu/WeeklyMenuSection";
 import { filterMealPlanCustomerOptionGroups } from "@/lib/meal-plan-options";
+import {
+  formatWeeklyMenuDisplayDate,
+  getWeeklyMenuQueryDateRange,
+} from "@/lib/weekly-menu-dates";
 import type { DecimalLike } from "@/types/display";
 import type { PublicWeeklyMenu } from "@/types/weekly-menu";
 
@@ -47,11 +51,7 @@ type PublicMenuCategory = {
 };
 
 function formatMenuDate(date: Date) {
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(date);
+  return formatWeeklyMenuDisplayDate(date);
 }
 
 function formatMenuDateTime(date: Date) {
@@ -155,6 +155,7 @@ function toPublicWeeklyMenu(weeklyMenu: {
 
 export default async function MenuPage() {
   const today = new Date();
+  const { dayStart, dayEnd } = getWeeklyMenuQueryDateRange(today);
 
   const [categories, weeklyMenu] = await Promise.all([
     prisma.menuCategory.findMany({
@@ -191,10 +192,10 @@ export default async function MenuPage() {
       where: {
         status: "PUBLISHED",
         startDate: {
-          lte: today,
+          lte: dayEnd,
         },
         endDate: {
-          gte: today,
+          gte: dayStart,
         },
       },
       orderBy: {
