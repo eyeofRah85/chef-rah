@@ -6,10 +6,6 @@ export const resend = process.env.RESEND_API_KEY
   ? new Resend(process.env.RESEND_API_KEY)
   : null;
 
-  export function canSendEmail() {
-  return Boolean(process.env.RESEND_API_KEY);
-}
-
 export const emailFromAddress =
   process.env.EMAIL_FROM_ADDRESS ??
   "Chef Rah's Twisted Kitchen <orders@example.com>";
@@ -17,14 +13,28 @@ export const emailFromAddress =
 export const appUrl =
   process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
-const emailDryRun = process.env.EMAIL_DRY_RUN === "true";
-const emailPreviewFiles = process.env.EMAIL_PREVIEW_FILES === "true";
+export const emailDryRun = process.env.EMAIL_DRY_RUN === "true";
+export const emailPreviewFiles = process.env.EMAIL_PREVIEW_FILES === "true";
+
+export type EmailDeliveryMode = "preview" | "dry-run" | "live" | "disabled";
+
+export function getEmailDeliveryMode(): EmailDeliveryMode {
+  if (emailDryRun) {
+    return emailPreviewFiles ? "preview" : "dry-run";
+  }
+
+  return resend ? "live" : "disabled";
+}
+
+export function canSendEmail() {
+  return getEmailDeliveryMode() === "live";
+}
 
 type SendAppEmailInput = {
   to: string;
   subject: string;
   react: ReactNode;
-  type?:string;
+  type?: string;
 };
 
 export async function sendAppEmail({

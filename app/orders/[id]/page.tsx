@@ -194,8 +194,8 @@ export default async function OrderPage({ params }: OrderPageProps) {
               </p>
 
               <p className="mt-3 text-sm">
-                Online payment is coming soon. For now, please follow the
-                business&apos;s manual payment instructions.
+                Online payment is coming soon. The business will confirm
+                invoice or cash/offline payment instructions after review.
               </p>
             </section>
           )}

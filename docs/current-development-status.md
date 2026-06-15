@@ -481,5 +481,14 @@ Next work items - June 8, 2026:
    - Fixed `UpdateOrderStatusForm` so its local status dropdown syncs when `router.refresh()` brings in a new server status after approval or status updates.
    - `npm run check` passes after the admin fulfillment QA fix.
 
-33. Suggested next Codex prompt
-   - Review remaining production readiness items: durable upload storage decision, email configuration and preview defaults, payment instruction copy, launch environment variables, and any final customer-facing copy polish before deployment.
+33. Production readiness config/copy cleanup - completed June 15, 2026
+   - Added `.codex-next-dev*.log` to `.gitignore` so local Codex/dev-server log files stay out of commits.
+   - `.env.example` now calls out that local uploads are development-only by default and production should use durable object storage unless local uploads are explicitly allowed as a temporary exception.
+   - `.env.example` now documents that production email delivery requires both `RESEND_API_KEY` and `EMAIL_DRY_RUN=false`, while local QA should keep dry-run preview files enabled.
+   - The email helper now exposes an explicit delivery mode: live, preview files, dry-run, or disabled.
+   - `/admin/notifications` now reports email preview/dry-run/live/disabled status accurately instead of treating a configured Resend key as live delivery when dry-run is enabled.
+   - Checkout, customer order details, and customer service request details now use clearer manual payment copy for invoice, cash/offline payment, and deposit instructions.
+   - No route or data model changes were made.
+
+34. Suggested next Codex prompt
+   - Finish the launch-readiness pass: choose the durable upload storage provider, confirm production environment variables, test a real email delivery with dry-run disabled in a safe production-like environment, and do a final customer-facing copy/browser smoke test.
