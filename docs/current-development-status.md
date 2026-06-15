@@ -472,5 +472,14 @@ Next work items - June 8, 2026:
    - Weekly capacity for the test period incremented once for the order, from 0 to 1, even though the order contained two weekly meal plan items.
    - The generated email preview includes contact/delivery details, allergen acknowledgement copy, weekly meal plan snapshots, the Lamb approval-required details, and the correct $217.00 total.
 
-32. Suggested next Codex prompt
-   - Continue the weekly meal plan manual QA checklist from admin fulfillment: approve the QA order if needed, verify `/admin/menu/weekly` fulfillment prep, `/admin/orders/[id]`, printable kitchen ticket, and `/admin/kitchen` weekly snapshots. Then review remaining production readiness items: durable upload storage decision, email configuration, payment instruction copy, and launch environment variables.
+32. Weekly meal plan admin fulfillment QA pass - completed June 15, 2026
+   - Browser verified `/admin/menu/weekly` fulfillment prep for the QA period shows capacity `1/10`, one active order, two weekly meal plan items, offering/package/spice/protein group counts, one request-only approval-required protein substitution, and two Wheat allergen flags.
+   - Browser verified `/admin/orders/cmqekqa1i00004gtkv9i9v8c4` shows the saved delivery/contact snapshot, both weekly meal plan snapshots, Lamb request-only approval-required details, and allergen acknowledgement.
+   - The printable kitchen ticket uses the admin order detail page, and the weekly snapshot sections are in the print-visible main content while admin action controls are hidden in print.
+   - Approved the QA order through the admin approval UI with email dry-run enabled; the order now has approval status `APPROVED`, order status `ACCEPTED`, and an approval email preview saved under `.email-previews`.
+   - Browser verified `/admin/kitchen` shows the approved QA order with both weekly snapshots, the Lamb approval-required detail, requested time, and a View / Print Ticket link.
+   - Fixed `UpdateOrderStatusForm` so its local status dropdown syncs when `router.refresh()` brings in a new server status after approval or status updates.
+   - `npm run check` passes after the admin fulfillment QA fix.
+
+33. Suggested next Codex prompt
+   - Review remaining production readiness items: durable upload storage decision, email configuration and preview defaults, payment instruction copy, launch environment variables, and any final customer-facing copy polish before deployment.

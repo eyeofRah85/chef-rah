@@ -351,6 +351,7 @@ export default async function AdminOrderDetailsPage({ params }: PageProps) {
 
               <div className="mt-6">
                 <UpdateOrderStatusForm
+                  key={order.status}
                   orderId={order.id}
                   currentStatus={order.status}
                 />
