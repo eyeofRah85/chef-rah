@@ -462,5 +462,15 @@ Next work items - June 8, 2026:
    - `npm run check` passes after the date semantics update.
    - Manual QA preconditions were audited: the current local weekly menu starts June 15, 2026, has one 2-meal package, one offering, no spice/protein options, and no allergen tags. Full checkout submission was not run because `RESEND_API_KEY` is configured locally and submitting would create an order and send email.
 
-31. Suggested next Codex prompt
-   - Complete the local weekly menu test data, then run the weekly meal plan manual QA checklist. The test period should include at least one 1-meal package, one 2-meal package, one spice option, one request-only approval-required protein substitution, and one allergen tag matching a customer account. If manual QA is clean, review the remaining production readiness items: durable upload storage decision, email configuration, payment instruction copy, and launch environment variables.
+31. Email preview and weekly checkout QA pass - completed June 14, 2026
+   - Confirmed `EMAIL_DRY_RUN=true` and `EMAIL_PREVIEW_FILES=true` are present locally so checkout QA writes `.email-previews/*.eml` instead of sending real email.
+   - `npm run check` passes after the email preview commit.
+   - Completed weekly menu QA test data in the local development database: one 1-meal package, one 2-meal package, Mild/Spicy options, a Lamb request-only approval-required protein substitution, and a Wheat allergen tag matching the QA customer account.
+   - Browser verified `/menu`, cart, and checkout surfaces show weekly package/offering/spice/protein snapshots, Lamb approval-required messaging, customer profile prefill, per-item Wheat allergen warnings, and the required allergen acknowledgement blocker.
+   - The local Browser runtime did not dispatch the final checkout form submit reliably from the sticky review column, so the order creation path was verified with an authenticated local `/api/orders` request using the same weekly payload.
+   - The verified QA order `cmqekqa1i00004gtkv9i9v8c4` stored delivery/contact snapshots, order-level and item-level allergen acknowledgements, two weekly meal plan snapshots, and a pending approval status because of the Lamb substitution.
+   - Weekly capacity for the test period incremented once for the order, from 0 to 1, even though the order contained two weekly meal plan items.
+   - The generated email preview includes contact/delivery details, allergen acknowledgement copy, weekly meal plan snapshots, the Lamb approval-required details, and the correct $217.00 total.
+
+32. Suggested next Codex prompt
+   - Continue the weekly meal plan manual QA checklist from admin fulfillment: approve the QA order if needed, verify `/admin/menu/weekly` fulfillment prep, `/admin/orders/[id]`, printable kitchen ticket, and `/admin/kitchen` weekly snapshots. Then review remaining production readiness items: durable upload storage decision, email configuration, payment instruction copy, and launch environment variables.

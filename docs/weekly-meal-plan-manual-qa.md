@@ -13,7 +13,7 @@ Use this checklist for local browser testing of the weekly meal plan workflow.
   - At least one spice level option.
   - At least one protein substitution option marked request-only and approval-required.
   - At least one allergen tag that can match the customer account allergen preferences.
-- If `RESEND_API_KEY` is configured locally, be aware that submitting checkout can send a real email to the signed-in account.
+- If `RESEND_API_KEY` is configured locally, set `EMAIL_DRY_RUN=true` and `EMAIL_PREVIEW_FILES=true` before checkout QA so order emails are written to `.email-previews/*.eml` instead of sending real email.
 
 ## Customer Ordering
 
@@ -51,6 +51,7 @@ Use this checklist for local browser testing of the weekly meal plan workflow.
 
 ## Email
 
-1. With email configured, submit a weekly order.
-2. Confirm the order confirmation email includes contact/delivery info and weekly meal plan snapshots.
-3. If email is not configured locally, confirm the server logs skip email gracefully.
+1. With email preview enabled, submit a weekly order.
+2. Confirm the server log includes `[EMAIL DRY RUN]` and `[EMAIL PREVIEW SAVED]`.
+3. Confirm the saved `.eml` preview includes contact/delivery info and weekly meal plan snapshots.
+4. If email is not configured locally, confirm the server logs skip email gracefully.
