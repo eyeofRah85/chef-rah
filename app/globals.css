@@ -1,8 +1,15 @@
 @import "tailwindcss";
 
 :root {
-  --background: #db6363;
-  --foreground: #753131;
+  --background: #fff8ee;
+  --foreground: #24130f;
+  --brand-ember: #9f2f18;
+  --brand-ember-dark: #6f1f12;
+  --brand-gold: #d99426;
+  --brand-cream: #fff8ee;
+  --brand-ink: #24130f;
+  --brand-muted: #6b5a50;
+  --brand-border: #ead8c1;
 }
 
 @theme inline {
@@ -12,17 +19,100 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #9fc4a4;
-    --foreground: #4d0e0e;
-  }
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 7.5rem;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+::selection {
+  background: #f4c46f;
+  color: var(--brand-ink);
+}
+
+:focus-visible {
+  outline: 3px solid #d99426;
+  outline-offset: 3px;
+}
+
+.brand-page {
+  min-height: 100vh;
+  background:
+    linear-gradient(180deg, rgba(255, 248, 238, 0.94), #fffaf2 38%), #fff8ee;
+  color: var(--brand-ink);
+}
+
+.brand-container {
+  margin-inline: auto;
+  max-width: 72rem;
+  padding-inline: 1.5rem;
+}
+
+.brand-card {
+  border: 1px solid var(--brand-border);
+  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 18px 45px rgba(76, 36, 18, 0.08);
+}
+
+.brand-card-soft {
+  border: 1px solid rgba(234, 216, 193, 0.9);
+  border-radius: 0.5rem;
+  background: rgba(255, 251, 245, 0.88);
+}
+
+.brand-button-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+  background: var(--brand-ink);
+  color: white;
+  font-weight: 700;
+  transition:
+    transform 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease;
+  box-shadow: 0 12px 24px rgba(36, 19, 15, 0.16);
+}
+
+.brand-button-primary:hover {
+  transform: translateY(-1px);
+  background: var(--brand-ember-dark);
+  box-shadow: 0 16px 30px rgba(111, 31, 18, 0.22);
+}
+
+.brand-button-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(36, 19, 15, 0.18);
+  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.86);
+  color: var(--brand-ink);
+  font-weight: 700;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    background-color 160ms ease;
+}
+
+.brand-button-secondary:hover {
+  transform: translateY(-1px);
+  border-color: var(--brand-ember);
+  background: white;
+}
+
+.brand-eyebrow {
+  color: var(--brand-ember);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
 }
 
 .homepage-card {

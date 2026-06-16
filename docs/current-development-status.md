@@ -523,14 +523,27 @@ Next work items - June 8, 2026:
    - Weekly meal plan manual QA now explicitly checks that capacity increments once per customer order, even when a cart contains multiple weekly plan items or quantities.
    - No transaction, route, or data model changes were made.
 
-38. Suggested next Codex prompt
+38. Customer-facing visual refresh / brand polish pass - completed June 16, 2026
+   - Added a warm customer-facing brand system with shared page, container, card, button, eyebrow, focus, and selection styling.
+   - Refreshed the public home, menu, cart, checkout, catering request, personal chef request, gallery, login, register, customer account, customer orders, and customer service request detail/list pages.
+   - Refreshed shared customer-facing components including the site header/footer, menu cards, category filters, weekly menu section, weekly order builder, cart summary, add-to-cart controls, allergen warnings, account profile/allergen forms, profile modal, and reorder button.
+   - Used existing local logo/gallery imagery for the visual pass; final client-approved hero/service imagery and final social URLs are still needed before launch polish is considered complete.
+   - Fixed the `/menu` customization modal so it renders through a document body portal instead of being clipped by the menu card layout.
+   - Fixed mobile `/menu` horizontal overflow caused by long weekly meal plan select labels in the weekly order builder.
+   - Browser smoke-tested `/`, `/menu`, `/cart`, `/checkout`, `/catering`, `/personal-chef`, `/gallery`, `/login`, and `/register` on desktop and a compact mobile viewport with no page-level horizontal overflow or browser console errors.
+   - `npm run check` passes after the visual refresh and modal/mobile fixes.
+   - No database schema, route, checkout/order business logic, payment, scheduling, allergen, approval, or validation behavior was intentionally changed.
+
+39. Suggested next Codex prompt
    - Pause code changes until production environment values, durable upload storage, admin account promotion, and the first live email test environment are ready; then run the launch checklist end to end and fix only issues found during that final deployment QA.
 
 Next work items - June 16, 2026:
 
-## Planned Visual Refresh / Brand Polish Pass
+## Completed Visual Refresh / Brand Polish Pass
 
-A future branch should perform a customer-facing visual refresh once the current functional checkout/profile/order flow work is stable.
+Completed June 16, 2026 and recorded above in item 38. The original scope is retained below as a design record.
+
+A customer-facing visual refresh should happen once the current functional checkout/profile/order flow work is stable.
 
 ### Goal
 

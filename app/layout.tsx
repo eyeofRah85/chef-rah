@@ -18,9 +18,9 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <AuthProvider>
-        <SiteHeader />
-        {children}
-        <SiteFooter />
+          <SiteHeader />
+          {children}
+          <SiteFooter />
         </AuthProvider>
       </body>
     </html>
