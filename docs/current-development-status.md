@@ -534,7 +534,18 @@ Next work items - June 8, 2026:
    - `npm run check` passes after the visual refresh and modal/mobile fixes.
    - No database schema, route, checkout/order business logic, payment, scheduling, allergen, approval, or validation behavior was intentionally changed.
 
-39. Suggested next Codex prompt
+39. Admin dashboard refresh first slice - completed June 16, 2026
+   - Added a scoped admin visual system with admin page, container, card, filter chip, table, badge, action link, and back link styles.
+   - Refreshed `/admin` with stronger dashboard hierarchy, operational metric cards, quick actions, alert cards, business rule summaries, recent orders, and quick links.
+   - Refreshed `/admin/orders` with active filter chips, clearer status/approval/payment badges, result counts, and a horizontally contained admin table for smaller screens.
+   - Refreshed `/admin/catering` with separate request-type and workflow filter groups, active filter states, clearer service request badges, result counts, and a responsive table container.
+   - Refreshed `/admin/kitchen` and kitchen order cards for better prep scanability, weekly snapshot readability, allergy alerts, and stacked action controls on narrow screens.
+   - Lightly refreshed admin order and service request detail pages plus related approval, status, quote, and paid-action controls without changing workflow behavior.
+   - Browser smoke-tested `/admin`, `/admin/orders`, `/admin/catering`, `/admin/kitchen`, one admin order detail page, and one service request detail page on desktop and compact mobile viewports with no page-level horizontal overflow or browser console errors.
+   - `npm run check` passes after the admin refresh slice.
+   - No database schema, routes, approval guards, payment tracking, quote/deposit, allergen acknowledgement, or order/status workflow logic was intentionally changed.
+
+40. Suggested next Codex prompt
    - Pause code changes until production environment values, durable upload storage, admin account promotion, and the first live email test environment are ready; then run the launch checklist end to end and fix only issues found during that final deployment QA.
 
 Next work items - June 16, 2026:
@@ -592,8 +603,8 @@ Use existing local/gallery images where possible. Avoid adding large unoptimized
 The branch should include a summary of changed pages/components, any remaining client image/content needs, and validation results.
 
 
-## Future Admin Dashboard Refresh
-After launch-critical customer-facing work is stable, perform a separate admin dashboard refresh focused on usability, workflow clarity, and operational efficiency.
+## Admin Dashboard Refresh
+First slice completed June 16, 2026 and recorded above in item 39. Remaining admin polish can continue after review, especially the deeper menu, weekly meal plan, gallery, reports, payments, customers, notifications, and settings surfaces.
 
 ### Goal
 
