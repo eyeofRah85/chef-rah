@@ -490,5 +490,14 @@ Next work items - June 8, 2026:
    - Checkout, customer order details, and customer service request details now use clearer manual payment copy for invoice, cash/offline payment, and deposit instructions.
    - No route or data model changes were made.
 
-34. Suggested next Codex prompt
-   - Finish the launch-readiness pass: choose the durable upload storage provider, confirm production environment variables, test a real email delivery with dry-run disabled in a safe production-like environment, and do a final customer-facing copy/browser smoke test.
+34. Launch readiness checklist and environment guard - completed June 15, 2026
+   - Added `docs/launch-readiness-checklist.md` with production environment variables, durable upload storage posture, email live-send test steps, manual payment notes, browser smoke coverage, and database launch commands.
+   - Added `npm run env:check` using `scripts/check-production-env.mjs` to catch production blockers such as placeholder secrets, localhost URLs, non-HTTPS app URLs, dry-run email, invalid upload flags, and incomplete core launch settings.
+   - The checker does not print secret values.
+   - Verified the checker in report-only mode against the current local `.env`; it correctly reports the local development environment as not production-ready because it uses localhost URLs, dry-run email, and lacks some production launch settings.
+   - Direct production uploads still intentionally wait on the chosen durable storage provider; current safe posture is to keep local production uploads blocked and use public image URLs for production assets.
+   - Public `/gallery` now renders dynamically so gallery database records are read at request time instead of requiring database access during production build/prerender.
+   - No route or data model changes were made.
+
+35. Suggested next Codex prompt
+   - Continue with the final customer-facing browser smoke test and copy pass, focusing on public home, `/menu`, cart, checkout, account order detail, service request forms, gallery, and admin notification/payment surfaces without changing routes or business workflows.

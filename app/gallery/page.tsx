@@ -3,6 +3,8 @@ import Link from "next/link";
 import { getPublicGalleryImages } from "@/lib/gallery-images";
 import { isRemoteImageUrl } from "@/lib/image-urls";
 
+export const dynamic = "force-dynamic";
+
 export default async function GalleryPage() {
   const galleryImages = await getPublicGalleryImages();
   const categories = Array.from(
