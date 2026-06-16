@@ -499,5 +499,14 @@ Next work items - June 8, 2026:
    - Public `/gallery` now renders dynamically so gallery database records are read at request time instead of requiring database access during production build/prerender.
    - No route or data model changes were made.
 
-35. Suggested next Codex prompt
-   - Continue with the final customer-facing browser smoke test and copy pass, focusing on public home, `/menu`, cart, checkout, account order detail, service request forms, gallery, and admin notification/payment surfaces without changing routes or business workflows.
+35. Final customer-facing smoke/copy pass - completed June 16, 2026
+   - Browser smoke-tested public home, `/menu`, cart, checkout, catering request, personal chef request, gallery, customer order detail, admin notifications, and admin payments on desktop.
+   - Browser smoke-tested the same customer-facing surfaces plus admin notification/payment pages at a compact mobile viewport.
+   - No route or workflow changes were made.
+   - Fixed mobile horizontal overflow caused by the shared header navigation by allowing the header/nav to wrap and making the cart count badge inline.
+   - Wrapped the admin payments table in its own horizontal scroll container so narrow screens do not force the whole page wider.
+   - Cleaned one home-page Personal Chef image alt text phrase.
+   - Browser verification after the fix confirmed no page-level horizontal overflow on the checked mobile pages and no console errors on the smoke-tested pages.
+
+36. Suggested next Codex prompt
+   - Run one last production-readiness review focused on non-code launch tasks: production env values, durable upload provider decision, first live email test plan, admin account promotion, and final manual QA checklist execution before deployment.

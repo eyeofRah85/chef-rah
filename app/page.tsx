@@ -67,7 +67,7 @@ export default function HomePage() {
             <div className="relative h-48 w-full overflow-hidden rounded-xl">
               <Image
                 src="/PERSONAL-CHEF.jpg"
-                alt="Prepared person meal"
+                alt="Private chef plated meal"
                 fill
                 sizes="(max-width: 768px) 100vw, 33vw"
                 className="object-cover"
