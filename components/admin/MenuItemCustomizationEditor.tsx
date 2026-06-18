@@ -27,19 +27,30 @@ const blankChoice = (): OptionChoiceInput => ({
   priceDelta: "0",
 });
 
+async function readError(response: Response, fallback: string) {
+  const data = (await response.json().catch(() => null)) as {
+    error?: string;
+  } | null;
+
+  return data?.error ?? fallback;
+}
+
 type Props = {
   menuItemId: string;
   allergens: Allergen[];
+  selectedAllergenIds: string[];
 };
 
 export function MenuItemCustomizationEditor({
   menuItemId,
   allergens,
+  selectedAllergenIds,
 }: Props) {
   const router = useRouter();
-  
+
   const [selectedTemplate, setSelectedTemplate] = useState("");
-  const [selectedAllergens, setSelectedAllergens] = useState<string[]>([]);
+  const [selectedAllergens, setSelectedAllergens] =
+    useState<string[]>(selectedAllergenIds);
   const [groupName, setGroupName] = useState("");
   const [required, setRequired] = useState(false);
   const [multiple, setMultiple] = useState(false);
@@ -63,7 +74,7 @@ export function MenuItemCustomizationEditor({
     });
 
     if (!response.ok) {
-      alert("Failed to save allergens.");
+      alert(await readError(response, "Failed to save allergens."));
       return;
     }
 
@@ -82,6 +93,15 @@ export function MenuItemCustomizationEditor({
         requestOnly: Boolean(choice.requestOnly),
         priceDelta: Number(choice.priceDelta || 0),
       }));
+
+    const hasInvalidPriceDelta = cleanedChoices.some(
+      (choice) => !Number.isFinite(choice.priceDelta) || choice.priceDelta < 0,
+    );
+
+    if (hasInvalidPriceDelta) {
+      alert("Option price deltas must be zero or more.");
+      return;
+    }
 
     if (!groupName.trim() || cleanedChoices.length === 0) {
       alert("Group name and at least one choice are required.");
@@ -102,7 +122,7 @@ export function MenuItemCustomizationEditor({
     });
 
     if (!response.ok) {
-      alert("Failed to save option group.");
+      alert(await readError(response, "Failed to save option group."));
       return;
     }
 
@@ -116,20 +136,27 @@ export function MenuItemCustomizationEditor({
   }
 
   return (
-    <div className="mt-5 space-y-5 rounded-xl border p-4">
+    <div className="admin-card-muted mt-5 space-y-5 p-4">
       <section>
-        <h4 className="font-semibold">Allergens</h4>
+        <h4 className="font-black">Allergens</h4>
 
         <div className="mt-4 grid gap-2 sm:grid-cols-2">
           {allergens.map((allergen) => (
-            <label key={allergen.id} className="flex items-center gap-2 text-sm">
+            <label
+              key={allergen.id}
+              className="flex items-center gap-2 text-sm font-medium text-[#3f2a1d]"
+            >
               <input
                 type="checkbox"
                 value={allergen.id}
                 checked={selectedAllergens.includes(allergen.id)}
                 onChange={(e) => {
                   if (e.target.checked) {
-                    setSelectedAllergens((prev) => [...prev, allergen.id]);
+                    setSelectedAllergens((prev) =>
+                      prev.includes(allergen.id)
+                        ? prev
+                        : [...prev, allergen.id],
+                    );
                   } else {
                     setSelectedAllergens((prev) =>
                       prev.filter((id) => id !== allergen.id),
@@ -146,14 +173,14 @@ export function MenuItemCustomizationEditor({
         <button
           type="button"
           onClick={saveAllergens}
-          className="mt-5 rounded-xl bg-black px-4 py-2 text-sm font-medium text-white"
+          className="admin-button-primary mt-5"
         >
           Save Allergens
         </button>
       </section>
 
-      <section className="border-t pt-5">
-        <h4 className="font-semibold">Add Option Group</h4>
+      <section className="border-t border-[#ead8c1] pt-5">
+        <h4 className="font-black">Add Option Group</h4>
 
         <select
           value={selectedTemplate}
@@ -172,7 +199,7 @@ export function MenuItemCustomizationEditor({
             setMultiple(template.multiple);
             setChoices(template.choices);
           }}
-          className="mt-4 w-full rounded-xl border px-4 py-3 text-sm"
+          className="admin-input mt-4"
         >
           <option value="">Choose an option template</option>
 
@@ -187,10 +214,10 @@ export function MenuItemCustomizationEditor({
           value={groupName}
           onChange={(e) => setGroupName(e.target.value)}
           placeholder="Group name, e.g. Spice Level"
-          className="mt-4 w-full rounded-xl border px-4 py-3 text-sm"
+          className="admin-input mt-4"
         />
 
-        <div className="mt-3 flex flex-wrap gap-4 text-sm">
+        <div className="mt-3 flex flex-wrap gap-4 text-sm font-bold text-[#3f2a1d]">
           <label className="flex items-center gap-2">
             <input
               type="checkbox"
@@ -212,7 +239,7 @@ export function MenuItemCustomizationEditor({
 
         <div className="mt-4 space-y-3">
           {choices.map((choice, index) => (
-            <div key={index} className="rounded-xl border bg-white p-3">
+            <div key={index} className="admin-row-card">
               <div className="grid gap-2 sm:grid-cols-[1fr_120px_auto]">
                 <input
                   value={choice.name}
@@ -220,7 +247,7 @@ export function MenuItemCustomizationEditor({
                     updateChoice(index, { name: e.target.value })
                   }
                   placeholder="Choice, e.g. Hot"
-                  className="rounded-xl border px-4 py-3 text-sm"
+                  className="admin-input"
                 />
 
                 <input
@@ -232,7 +259,7 @@ export function MenuItemCustomizationEditor({
                   step="0.01"
                   min="0"
                   placeholder="+ Price"
-                  className="rounded-xl border px-4 py-3 text-sm"
+                  className="admin-input"
                 />
 
                 <button
@@ -240,7 +267,7 @@ export function MenuItemCustomizationEditor({
                   onClick={() => {
                     setChoices((prev) => prev.filter((_, i) => i !== index));
                   }}
-                  className="rounded-xl border px-3 py-2 text-sm text-red-600"
+                  className="admin-button-danger"
                 >
                   Remove
                 </button>
@@ -254,7 +281,7 @@ export function MenuItemCustomizationEditor({
                   }
                   rows={2}
                   placeholder="Description"
-                  className="rounded-xl border px-4 py-3 text-sm"
+                  className="admin-input"
                 />
 
                 <div className="grid gap-2">
@@ -264,7 +291,7 @@ export function MenuItemCustomizationEditor({
                       updateChoice(index, { dietaryInfo: e.target.value })
                     }
                     placeholder="Dietary info, e.g. Lean protein"
-                    className="rounded-xl border px-4 py-3 text-sm"
+                    className="admin-input"
                   />
 
                   <input
@@ -273,12 +300,12 @@ export function MenuItemCustomizationEditor({
                       updateChoice(index, { imageUrl: e.target.value })
                     }
                     placeholder="Image URL, e.g. /gallery/chicken.jpg"
-                    className="rounded-xl border px-4 py-3 text-sm"
+                    className="admin-input"
                   />
                 </div>
               </div>
 
-              <label className="mt-3 flex items-center gap-2 text-sm">
+              <label className="mt-3 flex items-center gap-2 text-sm font-bold text-[#3f2a1d]">
                 <input
                   type="checkbox"
                   checked={Boolean(choice.requestOnly)}
@@ -292,13 +319,11 @@ export function MenuItemCustomizationEditor({
           ))}
         </div>
 
-        <div className="mt-4 flex gap-3">
+        <div className="mt-4 flex flex-wrap gap-3">
           <button
             type="button"
-            onClick={() =>
-              setChoices((prev) => [...prev, blankChoice()])
-            }
-            className="rounded-xl border px-4 py-2 text-sm font-medium"
+            onClick={() => setChoices((prev) => [...prev, blankChoice()])}
+            className="admin-button-secondary"
           >
             Add Choice
           </button>
@@ -306,7 +331,7 @@ export function MenuItemCustomizationEditor({
           <button
             type="button"
             onClick={saveOptionGroup}
-            className="rounded-xl bg-black px-4 py-2 text-sm font-medium text-white"
+            className="admin-button-primary"
           >
             Save Option Group
           </button>

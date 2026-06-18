@@ -1,7 +1,18 @@
 import { prisma } from "@/lib/prisma";
 import { MenuCard } from "@/components/menu/MenuCard";
 import { MenuCategoryFilter } from "@/components/menu/MenuCategoryFilter";
+import { WeeklyMenuSection } from "@/components/menu/WeeklyMenuSection";
+import Image from "next/image";
+import Link from "next/link";
+import { filterMealPlanCustomerOptionGroups } from "@/lib/meal-plan-options";
+import {
+  formatWeeklyMenuDisplayDate,
+  getWeeklyMenuQueryDateRange,
+} from "@/lib/weekly-menu-dates";
 import type { DecimalLike } from "@/types/display";
+import type { PublicWeeklyMenu } from "@/types/weekly-menu";
+
+export const dynamic = "force-dynamic";
 
 type PublicMenuCategory = {
   id: string;
@@ -41,126 +52,354 @@ type PublicMenuCategory = {
   }[];
 };
 
-export default async function MenuPage() {
+function formatMenuDate(date: Date) {
+  return formatWeeklyMenuDisplayDate(date);
+}
 
-const categories = (await prisma.menuCategory.findMany({
-  orderBy: {
-    sortOrder: "asc",
-  },
-  include: {
-    items: {
-         where: {
-          archived: false,
-          type: {
-            not: "CATERING",
-          },
-        },
+function formatMenuDateTime(date: Date) {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(date);
+}
+
+function toCategoryId(category: string) {
+  return category.toLowerCase().replace(/\s+/g, "-");
+}
+
+function toPublicWeeklyMenu(weeklyMenu: {
+  id: string;
+  label: string;
+  startDate: Date;
+  endDate: Date;
+  orderCutoffAt: Date | null;
+  capacity: number;
+  ordersPlaced: number;
+  packages: {
+    id: string;
+    name: string;
+    days: number;
+    mealsPerDay: number;
+    price: DecimalLike;
+    notes: string | null;
+  }[];
+  offerings: {
+    id: string;
+    name: string;
+    description: string;
+    imageUrl: string | null;
+    dietaryInfo: string | null;
+    allergens: {
+      allergen: {
+        id: string;
+        name: string;
+      };
+    }[];
+    options: {
+      id: string;
+      optionType: string;
+      name: string;
+      description: string | null;
+      dietaryInfo: string | null;
+      priceDelta: DecimalLike;
+      requestOnly: boolean;
+      requiresApproval: boolean;
+    }[];
+  }[];
+}): PublicWeeklyMenu {
+  return {
+    id: weeklyMenu.id,
+    label: weeklyMenu.label,
+    dateRange: `${formatMenuDate(weeklyMenu.startDate)} - ${formatMenuDate(
+      weeklyMenu.endDate,
+    )}`,
+    orderCutoffLabel: weeklyMenu.orderCutoffAt
+      ? formatMenuDateTime(weeklyMenu.orderCutoffAt)
+      : null,
+    orderingClosed: weeklyMenu.orderCutoffAt
+      ? weeklyMenu.orderCutoffAt < new Date()
+      : false,
+    capacity: weeklyMenu.capacity,
+    ordersPlaced: weeklyMenu.ordersPlaced,
+    packages: weeklyMenu.packages.map((pkg) => ({
+      id: pkg.id,
+      name: pkg.name,
+      days: pkg.days,
+      mealsPerDay: pkg.mealsPerDay,
+      price: Number(pkg.price),
+      notes: pkg.notes,
+    })),
+    offerings: weeklyMenu.offerings.map((offering) => ({
+      id: offering.id,
+      name: offering.name,
+      description: offering.description,
+      imageUrl: offering.imageUrl,
+      dietaryInfo: offering.dietaryInfo,
+      allergens: offering.allergens.map((entry) => ({
+        id: entry.allergen.id,
+        name: entry.allergen.name,
+      })),
+      options: offering.options.map((option) => ({
+        id: option.id,
+        optionType: option.optionType,
+        name: option.name,
+        description: option.description,
+        dietaryInfo: option.dietaryInfo,
+        priceDelta: Number(option.priceDelta),
+        requestOnly: option.requestOnly,
+        requiresApproval: option.requiresApproval,
+      })),
+    })),
+  };
+}
+
+export default async function MenuPage() {
+  const today = new Date();
+  const { dayStart, dayEnd } = getWeeklyMenuQueryDateRange(today);
+
+  const [categories, weeklyMenu] = await Promise.all([
+    prisma.menuCategory.findMany({
       orderBy: {
-        createdAt: "desc",         
+        sortOrder: "asc",
       },
       include: {
-        allergens: {
-          include: {
-            allergen: true,
+        items: {
+          where: {
+            archived: false,
+            type: {
+              not: "CATERING",
+            },
           },
-        },
-        optionGroups: {
+          orderBy: {
+            createdAt: "desc",
+          },
           include: {
-            choices: true,
+            allergens: {
+              include: {
+                allergen: true,
+              },
+            },
+            optionGroups: {
+              include: {
+                choices: true,
+              },
+            },
           },
         },
       },
-    },
-  },
-})) as PublicMenuCategory[];
+    }) as Promise<PublicMenuCategory[]>,
+    prisma.weeklyMenuPeriod.findFirst({
+      where: {
+        status: "PUBLISHED",
+        startDate: {
+          lte: dayEnd,
+        },
+        endDate: {
+          gte: dayStart,
+        },
+      },
+      orderBy: {
+        startDate: "desc",
+      },
+      include: {
+        packages: {
+          where: {
+            available: true,
+          },
+          orderBy: [
+            {
+              displayOrder: "asc",
+            },
+            {
+              createdAt: "asc",
+            },
+          ],
+        },
+        offerings: {
+          where: {
+            available: true,
+          },
+          orderBy: [
+            {
+              displayOrder: "asc",
+            },
+            {
+              createdAt: "asc",
+            },
+          ],
+          include: {
+            allergens: {
+              include: {
+                allergen: true,
+              },
+            },
+            options: {
+              where: {
+                available: true,
+              },
+              orderBy: [
+                {
+                  optionType: "asc",
+                },
+                {
+                  displayOrder: "asc",
+                },
+                {
+                  createdAt: "asc",
+                },
+              ],
+            },
+          },
+        },
+      },
+    }),
+  ]);
 
-const visibleCategories = categories.filter(
-  (category) => category.items.length > 0,
-);
+  const visibleCategories = categories.filter(
+    (category) => category.items.length > 0,
+  );
+  const publicWeeklyMenu = weeklyMenu ? toPublicWeeklyMenu(weeklyMenu) : null;
+  const filterCategories = [
+    ...(publicWeeklyMenu ? ["Weekly Meal Plans"] : []),
+    ...visibleCategories.map((category) => category.name),
+  ];
 
   return (
-    <main className="min-h-screen bg-neutral-50 px-6 py-12">
-      <div className="mx-auto max-w-6xl">
-        <div className="mb-10">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-amber-700">
+    <main className="brand-page">
+      <section className="relative isolate overflow-hidden bg-[#24130f]">
+        <Image
+          src="/menu-splash.avif"
+          alt="Chef-prepared weekly meal plan"
+          fill
+          sizes="100vw"
+          className="object-cover opacity-55"
+          priority
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#24130f] via-[#24130f]/40 to-[#24130f]/30" />
+
+        <div className="brand-container relative z-10 py-16 text-white md:py-20">
+          <p className="text-sm font-bold uppercase text-[#f4c46f]">
             Meal Plans & A La Carte
           </p>
 
-          <h1 className="mt-3 text-5xl font-bold">
-            Weekly meal plans and custom chef-prepared options.
+          <h1 className="mt-3 max-w-4xl text-5xl font-script font-black leading-tight md:text-6xl">
+            Weekly meals and chef-prepared favorites.
           </h1>
 
-          <p className="mt-4 max-w-2xl text-neutral-700">
-            Choose meal plan packages, customize meal components, select substitutions,
-            or explore a la carte options. Pork and beef are available by request only
-            for meal plans, and pricing may vary.
+          <p className="mt-5 max-w-2xl text-lg leading-8 text-[#fff1df]">
+            Choose fixed weekly meal plan offerings, select spice level and
+            allowed protein substitutions, or add a la carte favorites to your
+            order.
           </p>
-                  </div>
-          <div className="mt-8 rounded-2xl border border-amber-300 bg-amber-50 p-5 text-amber-950">
-            <h2 className="text-xl font-semibold">Meal Plan Notes</h2>
 
-            <p className="mt-2 text-sm leading-6">
-              Meal plans are package-based. Standard meal plans include lunch and dinner
-              options, with protein, starch, and vegetable selections. Pork and beef are
-              not included in standard meal plans and are available by request only.
-              Pricing may vary.
-            </p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link
+              href="#weekly-meal-plans"
+              className="brand-button-primary px-6 py-3 text-sm"
+            >
+              View Meal Plans
+            </Link>
+            <Link
+              href="#a-la-carte"
+              className="brand-button-secondary px-6 py-3 text-sm"
+            >
+              Browse A La Carte
+            </Link>
           </div>
+        </div>
+      </section>
 
-        <MenuCategoryFilter categories={visibleCategories.map((category) => category.name)} />
+      <div className="brand-container py-12">
+        <div className="brand-card-soft p-5 text-[#6f1f12]">
+          <h2 className="text-xl font-black">Meal Plan Notes</h2>
 
-        <div className="space-y-10">
+          <p className="mt-2 text-sm leading-6">
+            Meal plans are fixed offerings prepared by the business.
+            Customer-facing choices are limited to spice level and allowed
+            protein substitutions. Pork and beef are available by request only
+            and pricing may vary.
+          </p>
+        </div>
+
+        {filterCategories.length > 0 && (
+          <MenuCategoryFilter categories={filterCategories} />
+        )}
+
+        <div className="space-y-12">
+          {publicWeeklyMenu && (
+            <WeeklyMenuSection weeklyMenu={publicWeeklyMenu} />
+          )}
+
           {visibleCategories.map((category) => (
-            <section key={category.id}>
-              <h2 className="mb-4 text-2xl font-semibold">{category.name}</h2>
+            <section key={category.id} id={toCategoryId(category.name)}>
+              <div className="mb-5 flex flex-col justify-between gap-3 md:flex-row md:items-end">
+                <div>
+                  <p className="brand-eyebrow">Chef-Prepared</p>
+                  <h2 className="mt-2 text-3xl font-black">{category.name}</h2>
+                </div>
 
-              <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-                {category.items.map((item) => (
-                  <MenuCard
-                    key={item.id}
-                    item={{
-                      id: item.id,
-                      name: item.name,
-                      type: item.type,
-                      description: item.description,
-                      price: Number(item.price),
-                      category: category.name,
-                      imageUrl: item.imageUrl ?? undefined,
-                      available: item.available,
-                      seasonal: item.seasonal,
-                      allergens: item.allergens.map((entry) => ({
-                        id: entry.allergen.id,
-                        name: entry.allergen.name,
-                      })),
-                      requiresApproval: item.requiresApproval,
-                      customerInstructionsEnabled: item.customerInstructionsEnabled,
-                      optionGroups: item.optionGroups.map((group) => ({
-                        id: group.id,
-                        name: group.name,
-                        required: group.required,
-                        multiple: group.multiple,
-                        choices: group.choices.map((choice) => ({
-                          id: choice.id,
-                          name: choice.name,
-                          description: choice.description,
-                          dietaryInfo: choice.dietaryInfo,
-                          imageUrl: choice.imageUrl,
-                          requestOnly: choice.requestOnly,
-                          priceDelta: Number(choice.priceDelta),
-                        })),
-                      })),
-                    }}
-                  />
-                ))}
+                <p className="text-sm font-medium text-[#6b5a50]">
+                  {category.items.length} offering
+                  {category.items.length === 1 ? "" : "s"}
+                </p>
               </div>
 
+              <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+                {category.items.map((item) => {
+                  const optionGroups = filterMealPlanCustomerOptionGroups(
+                    item.type,
+                    item.optionGroups,
+                  );
+
+                  return (
+                    <MenuCard
+                      key={item.id}
+                      item={{
+                        id: item.id,
+                        name: item.name,
+                        type: item.type,
+                        description: item.description,
+                        price: Number(item.price),
+                        category: category.name,
+                        imageUrl: item.imageUrl ?? undefined,
+                        available: item.available,
+                        seasonal: item.seasonal,
+                        allergens: item.allergens.map((entry) => ({
+                          id: entry.allergen.id,
+                          name: entry.allergen.name,
+                        })),
+                        requiresApproval: item.requiresApproval,
+                        customerInstructionsEnabled:
+                          item.customerInstructionsEnabled,
+                        optionGroups: optionGroups.map((group) => ({
+                          id: group.id,
+                          name: group.name,
+                          required: group.required,
+                          multiple: group.multiple,
+                          choices: group.choices.map((choice) => ({
+                            id: choice.id,
+                            name: choice.name,
+                            description: choice.description,
+                            dietaryInfo: choice.dietaryInfo,
+                            imageUrl: choice.imageUrl,
+                            requestOnly: choice.requestOnly,
+                            priceDelta: Number(choice.priceDelta),
+                          })),
+                        })),
+                      }}
+                    />
+                  );
+                })}
+              </div>
             </section>
           ))}
 
-          {visibleCategories.length === 0 && (
-            <div className="rounded-2xl border bg-white p-8 text-center shadow-sm">
-              <h2 className="text-2xl font-semibold">Menu coming soon</h2>
-              <p className="mt-2 text-neutral-600">
+          {visibleCategories.length === 0 && !publicWeeklyMenu && (
+            <div className="brand-card p-8 text-center">
+              <h2 className="text-2xl font-black">Menu coming soon</h2>
+              <p className="mt-2 text-[#6b5a50]">
                 No meal plan or menu items are available yet.
               </p>
             </div>

@@ -45,115 +45,120 @@ export default async function AdminPaymentsPage() {
   );
 
   return (
-    <main className="min-h-screen bg-neutral-50 px-6 py-12">
-      <div className="mx-auto max-w-6xl">
+    <main className="admin-page">
+      <div className="admin-container">
         <div className="mb-8">
-          <Link className="text-sm font-medium underline" href="/admin">
-            &larr;  Back to Dashboard
+          <Link className="admin-back-link" href="/admin">
+            &larr; Back to Dashboard
           </Link>
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-amber-700">
-            Admin
-          </p>
+          <p className="admin-eyebrow mt-5">Admin</p>
 
-          <h1 className="mt-3 text-4xl font-bold">Payment Management</h1>
+          <h1 className="mt-3 text-4xl font-black tracking-tight md:text-5xl">
+            Payment Management
+          </h1>
 
-          <p className="mt-3 text-neutral-700">
+          <p className="mt-3 max-w-2xl text-[#6b5a50]">
             Monitor manual invoices, offline payments, deposits, and future
             online payment integrations.
           </p>
         </div>
 
         <section className="grid gap-5 md:grid-cols-3">
-          <div className="rounded-2xl border bg-white p-6 shadow-sm">
-            <p className="text-sm text-neutral-500">Payments Due</p>
-            <p className="mt-3 text-4xl font-bold">
+          <div className="admin-card p-6">
+            <p className="text-sm font-bold text-[#6b5a50]">Payments Due</p>
+            <p className="mt-3 text-4xl font-black tracking-tight">
               {paymentDueOrders.length}
             </p>
           </div>
 
-          <div className="rounded-2xl border bg-white p-6 shadow-sm">
-            <p className="text-sm text-neutral-500">Outstanding Total</p>
-            <p className="mt-3 text-4xl font-bold">
+          <div className="admin-card p-6">
+            <p className="text-sm font-bold text-[#6b5a50]">
+              Outstanding Total
+            </p>
+            <p className="mt-3 text-4xl font-black tracking-tight">
               ${totalDue.toFixed(2)}
             </p>
           </div>
 
-          <div className="rounded-2xl border bg-white p-6 shadow-sm">
-            <p className="text-sm text-neutral-500">Stripe</p>
-            <p className="mt-3 text-2xl font-bold">Coming Soon</p>
+          <div className="admin-card p-6">
+            <p className="text-sm font-bold text-[#6b5a50]">Stripe</p>
+            <p className="mt-3 text-2xl font-black">Coming Soon</p>
           </div>
         </section>
 
-        <section className="mt-10 overflow-hidden rounded-2xl border bg-white shadow-sm">
-          <div className="border-b p-6">
-            <h2 className="text-2xl font-semibold">Outstanding Payments</h2>
-            <p className="mt-2 text-sm text-neutral-600">
-              Orders that still need manual payment, offline payment, or invoice follow-up.
+        <section className="admin-card mt-10 overflow-hidden">
+          <div className="border-b border-[#ead8c1] p-6">
+            <h2 className="text-2xl font-black">Outstanding Payments</h2>
+            <p className="mt-2 text-sm text-[#6b5a50]">
+              Orders that still need manual payment, offline payment, or invoice
+              follow-up.
             </p>
           </div>
 
-          <table className="w-full text-left text-sm">
-            <thead className="bg-neutral-100">
-              <tr>
-                <th className="p-4">Customer</th>
-                <th className="p-4">Status</th>
-                <th className="p-4">Pay By</th>
-                <th className="p-4">Total</th>
-                <th className="p-4">Action</th>
-                <th className="p-4">Order</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {paymentDueOrders.map((order) => (
-                <tr key={order.id} className="border-t">
-                  <td className="p-4">
-                    <div className="font-medium">{order.customerName}</div>
-                    <div className="text-xs text-neutral-500">
-                      {order.customerEmail}
-                    </div>
-                  </td>
-
-                  <td className="p-4">
-                    <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-800">
-                      {formatPaymentStatus(order.paymentStatus)}
-                    </span>
-                  </td>
-
-                  <td className="p-4 text-neutral-600">
-                    {order.payByDate
-                      ? order.payByDate.toLocaleDateString()
-                      : "Not set"}
-                  </td>
-
-                  <td className="p-4 font-semibold">
-                    ${Number(order.total).toFixed(2)}
-                  </td>
-
-                  <td className="p-4">
-                    <MarkOrderPaidButton orderId={order.id} />
-                  </td>
-
-                  <td className="p-4">
-                    <Link
-                      href={`/admin/orders/${order.id}`}
-                      className="font-medium underline"
-                    >
-                      View Order
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-
-              {paymentDueOrders.length === 0 && (
+          <div className="overflow-x-auto">
+            <table className="admin-table min-w-[720px]">
+              <thead>
                 <tr>
-                  <td className="p-6 text-center text-neutral-500" colSpan={6}>
-                    No outstanding payments.
-                  </td>
+                  <th>Customer</th>
+                  <th>Status</th>
+                  <th>Pay By</th>
+                  <th>Total</th>
+                  <th>Action</th>
+                  <th>Order</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+
+              <tbody>
+                {paymentDueOrders.map((order) => (
+                  <tr key={order.id}>
+                    <td>
+                      <div className="font-black">{order.customerName}</div>
+                      <div className="mt-1 text-xs text-[#6b5a50]">
+                        {order.customerEmail}
+                      </div>
+                    </td>
+
+                    <td>
+                      <span className="admin-badge admin-badge-warning">
+                        {formatPaymentStatus(order.paymentStatus)}
+                      </span>
+                    </td>
+
+                    <td className="text-[#6b5a50]">
+                      {order.payByDate
+                        ? order.payByDate.toLocaleDateString()
+                        : "Not set"}
+                    </td>
+
+                    <td className="font-black">
+                      ${Number(order.total).toFixed(2)}
+                    </td>
+
+                    <td>
+                      <MarkOrderPaidButton orderId={order.id} />
+                    </td>
+
+                    <td>
+                      <Link
+                        href={`/admin/orders/${order.id}`}
+                        className="admin-action-link"
+                      >
+                        View Order
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+
+                {paymentDueOrders.length === 0 && (
+                  <tr>
+                    <td className="text-center text-[#6b5a50]" colSpan={6}>
+                      No outstanding payments.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </section>
       </div>
     </main>

@@ -3,14 +3,23 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+async function readError(response: Response, fallback: string) {
+  const data = (await response.json().catch(() => null)) as {
+    error?: string;
+  } | null;
+
+  return data?.error ?? fallback;
+}
+
 type Props = {
   item: {
     id: string;
     name: string;
     description: string;
     price: number;
+    imageUrl: string | null;
     type: string;
-    categoryName:string;
+    categoryName: string;
     seasonal: boolean;
     requiresApproval: boolean;
     customerInstructionsEnabled: boolean;
@@ -33,7 +42,7 @@ export function MenuItemEditForm({ item }: Props) {
     setSaving(false);
 
     if (!response.ok) {
-      alert("Failed to update menu item.");
+      alert(await readError(response, "Failed to update menu item."));
       return;
     }
 
@@ -46,7 +55,7 @@ export function MenuItemEditForm({ item }: Props) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="mt-3 rounded-xl border px-4 py-2 text-xs font-medium"
+        className="admin-button-secondary mt-3 px-4 py-2 text-xs"
       >
         Edit Item
       </button>
@@ -54,11 +63,14 @@ export function MenuItemEditForm({ item }: Props) {
   }
 
   return (
-    <form action={handleSubmit} className="mt-4 space-y-3 rounded-xl border p-4">
+    <form
+      action={handleSubmit}
+      className="mt-4 space-y-3 rounded-lg border border-[#ead8c1] p-4"
+    >
       <input
         name="name"
         defaultValue={item.name}
-        className="w-full rounded-xl border px-4 py-3 text-sm"
+        className="admin-input"
         required
       />
 
@@ -66,8 +78,16 @@ export function MenuItemEditForm({ item }: Props) {
         name="description"
         defaultValue={item.description}
         rows={3}
-        className="w-full rounded-xl border px-4 py-3 text-sm"
+        className="admin-input"
         required
+      />
+
+      <input
+        name="imageUrl"
+        type="text"
+        defaultValue={item.imageUrl ?? ""}
+        placeholder="Public image URL"
+        className="admin-input"
       />
 
       <input
@@ -76,17 +96,17 @@ export function MenuItemEditForm({ item }: Props) {
         min="0"
         step="0.01"
         defaultValue={item.price}
-        className="w-full rounded-xl border px-4 py-3 text-sm"
+        className="admin-input"
         required
       />
 
       <div>
-        <label className="block text-sm font-medium">Category</label>
+        <label className="block text-sm font-bold">Category</label>
 
         <select
           name="categoryName"
           defaultValue={item.categoryName}
-          className="mt-2 w-full rounded-xl border px-4 py-3 text-sm"
+          className="admin-input mt-2"
         >
           <option value="Meal Plans">Meal Plans</option>
           <option value="A La Carte">A La Carte</option>
@@ -98,12 +118,12 @@ export function MenuItemEditForm({ item }: Props) {
       </div>
 
       <div>
-        <label className="block text-sm font-medium">Item Type</label>
+        <label className="block text-sm font-bold">Item Type</label>
 
         <select
           name="type"
           defaultValue={item.type}
-          className="mt-2 w-full rounded-xl border px-4 py-3 text-sm"
+          className="admin-input mt-2"
         >
           <option value="MEAL_PLAN">Meal Plan</option>
           <option value="A_LA_CARTE">A La Carte</option>
@@ -114,15 +134,12 @@ export function MenuItemEditForm({ item }: Props) {
           <option value="OTHER">Other</option>
         </select>
       </div>
-
-      
-
-      <label className="flex items-center gap-2 text-sm">
+      <label className="flex items-center gap-2 text-sm font-bold">
         <input name="seasonal" type="checkbox" defaultChecked={item.seasonal} />
         Seasonal
       </label>
 
-      <label className="flex items-center gap-2 text-sm">
+      <label className="flex items-center gap-2 text-sm font-bold">
         <input
           name="requiresApproval"
           type="checkbox"
@@ -131,7 +148,7 @@ export function MenuItemEditForm({ item }: Props) {
         Requires chef approval
       </label>
 
-      <label className="flex items-center gap-2 text-sm">
+      <label className="flex items-center gap-2 text-sm font-bold">
         <input
           name="customerInstructionsEnabled"
           type="checkbox"
@@ -141,17 +158,14 @@ export function MenuItemEditForm({ item }: Props) {
       </label>
 
       <div className="flex gap-3">
-        <button
-          disabled={saving}
-          className="rounded-xl bg-black px-4 py-2 text-sm font-medium text-white disabled:bg-neutral-400"
-        >
+        <button disabled={saving} className="admin-button-primary px-4 py-2">
           {saving ? "Saving..." : "Save"}
         </button>
 
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="rounded-xl border px-4 py-2 text-sm font-medium"
+          className="admin-button-secondary px-4 py-2"
         >
           Cancel
         </button>
