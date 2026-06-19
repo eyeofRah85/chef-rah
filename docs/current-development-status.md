@@ -578,7 +578,12 @@ Next work items - June 8, 2026:
    - `npm run check` passes after the reports enhancement.
    - No database schema, checkout/order/payment, service request, approval, routing, or admin workflow behavior was changed.
 
-44. Suggested next Codex prompt
+44. Pre-launch QA runbook and client launch information list - completed June 19, 2026
+   - Added `docs/pre-launch-qa-runbook.md` with a practical end-to-end QA process for public pages, account/profile/allergen flows, menu/cart/checkout, order details, email previews, admin orders, kitchen, service requests, weekly menus, gallery/menu management, reports, notifications, settings, accessibility, mobile, and production smoke testing.
+   - Added `docs/client-launch-information-needed.md` with launch-blocking production details, email requirements, upload/storage decisions, business settings, launch menu data, payment policy, legal/customer policy copy, brand/content assets, QA approvers, and a suggested client message.
+   - The new docs are launch-support documentation only; no app source, schema, route, workflow, checkout, payment, approval, or email behavior was changed.
+
+45. Suggested next Codex prompt
    - Pause code changes until production environment values, durable upload storage, admin account promotion, and the first live email test environment are ready; then run the launch checklist end to end and fix only issues found during that final deployment QA.
 
 Next work items - June 16, 2026:
