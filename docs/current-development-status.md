@@ -564,7 +564,13 @@ Next work items - June 8, 2026:
    - Remaining warnings are local production uploads not explicitly configured, email preview files enabled, Stripe intentionally unset while card checkout is disabled, and `ADMIN_EMAIL` not set for admin promotion.
    - Updated `docs/launch-readiness-checklist.md` with the June 18 review status.
 
-42. Suggested next Codex prompt
+42. Admin dashboard user guide - completed June 18, 2026
+   - Added `docs/admin-dashboard-user-guide.md` as an in-depth operator guide for the admin dashboard.
+   - The guide covers admin access, daily operations, dashboard metrics, orders, kitchen workflow, service requests, menu management, weekly menus, gallery management, customer lookup, payments, reports, notifications, business settings, image uploads, allergens, approval safeguards, operating cadence, common mistakes, launch notes, and troubleshooting.
+   - The guide explicitly notes that `/admin/catering` is the shared Service Requests workflow for Catering and Personal Chef, and that menu category display names should not be confused with menu item type behavior.
+   - No app behavior, routes, schema, or business logic were changed.
+
+43. Suggested next Codex prompt
    - Pause code changes until production environment values, durable upload storage, admin account promotion, and the first live email test environment are ready; then run the launch checklist end to end and fix only issues found during that final deployment QA.
 
 Next work items - June 16, 2026:
