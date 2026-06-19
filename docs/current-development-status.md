@@ -570,7 +570,15 @@ Next work items - June 8, 2026:
    - The guide explicitly notes that `/admin/catering` is the shared Service Requests workflow for Catering and Personal Chef, and that menu category display names should not be confused with menu item type behavior.
    - No app behavior, routes, schema, or business logic were changed.
 
-43. Suggested next Codex prompt
+43. Admin reports Business Insights section - completed June 19, 2026
+   - Added an additive Business Insights section to `/admin/reports` while keeping the existing report cards, order breakdown, top ordered items, operational alerts, and revenue snapshot content in place.
+   - Added `lib/admin-report-metrics.ts` for server-side period aggregation of revenue, order count, average order value, pending approvals, manual-payment follow-up, service request counts, revenue trend, order status/type breakdowns, and top selling item quantity/revenue.
+   - Added reusable admin report components under `components/admin/reports` for KPI cards, empty chart states, responsive bar charts, revenue trend charts, top selling item summaries, and the composed Business Insights section.
+   - Business Insights supports 30-day, 90-day, and 12-month period filters and shows polished empty states when there is not enough data for a chart.
+   - `npm run check` passes after the reports enhancement.
+   - No database schema, checkout/order/payment, service request, approval, routing, or admin workflow behavior was changed.
+
+44. Suggested next Codex prompt
    - Pause code changes until production environment values, durable upload storage, admin account promotion, and the first live email test environment are ready; then run the launch checklist end to end and fix only issues found during that final deployment QA.
 
 Next work items - June 16, 2026:
