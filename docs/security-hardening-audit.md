@@ -1,5 +1,10 @@
 # Security hardening audit
 
+## Reviewed and fixed in this pass
+
+- Admin pages under `app/admin/**` now call `requireAdminPage()` directly before querying or rendering admin data. The guard redirects unauthenticated users to login and returns not found for authenticated non-admin users.
+- Admin API routes under `app/api/admin/**` call `requireAdminApi()` and immediately return the guard response when authentication or authorization fails, preventing direct non-admin API calls from continuing into business logic.
+- The manual paid-order route at `app/api/orders/[id]/mark-paid/route.ts` is an admin-only API even though it is outside the `/api/admin` path; it also immediately returns the admin guard response.
 ## Reviewed in this pass
 
 - Admin pages under `app/admin/**` call `requireAdminPage()` before querying or rendering admin data. The guard requires an authenticated session and limits access to `ADMIN` and `OWNER` roles.
