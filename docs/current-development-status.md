@@ -589,7 +589,7 @@ Next work items - June 8, 2026:
 46. Customer ownership/security review fixes - completed June 27, 2026
    - Fixed the legacy `/api/profile` update route so it returns only non-sensitive profile fields, matching the safer `/api/account/profile` response shape.
    - Restored admin mark-paid behavior in `/api/orders/[id]/mark-paid` so admin-gated payment updates are not incorrectly filtered by the admin user's customer email.
-   - Restored `/orders/[id]` to fetch by order ID and then apply the existing owner/admin authorization check, so customers remain scoped to their own orders while admin access is not accidentally blocked.
+   - Updated `/orders/[id]` to query by order ID plus the signed-in user's email so the customer detail page does not load another customer's order before authorization.
    - Cleaned account profile route formatting around the existing safe selected-field response.
    - `npm run check` passes after these fixes.
 

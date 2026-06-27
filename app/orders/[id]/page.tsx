@@ -70,8 +70,13 @@ export default async function OrderPage({ params }: OrderPageProps) {
 
   const { id } = await params;
 
-  const order = (await prisma.order.findUnique({
-    where: { id },
+  const order = (await prisma.order.findFirst({
+    where: {
+      id,
+      user: {
+        email: session.user.email,
+      },
+    },
     include: {
       items: {
         include: {
@@ -83,14 +88,6 @@ export default async function OrderPage({ params }: OrderPageProps) {
   })) as OrderDetail | null;
 
   if (!order) {
-    notFound();
-  }
-
-  const userRole = session.user.role;
-  const isOwner = order.customerEmail === session.user.email;
-  const isAdmin = userRole === "ADMIN" || userRole === "OWNER";
-
-  if (!isOwner && !isAdmin) {
     notFound();
   }
 
