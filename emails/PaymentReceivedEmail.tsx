@@ -1,14 +1,10 @@
 import {
-  Body,
-  Container,
-  Head,
-  Heading,
   Hr,
-  Html,
-  Preview,
+  Section,
   Text,
   Button
 } from "react-email";
+import { BrandedEmailLayout } from "@/emails/BrandedEmailLayout";
 import { emailStyles } from "@/emails/styles";
 
 type Props = {
@@ -27,55 +23,42 @@ export function PaymentReceivedEmail({
   orderUrl
 }: Props) {
   return (
-    <Html>
-      <Head />
+    <BrandedEmailLayout
+      preview="Your payment has been marked as received."
+      title="Payment Received"
+    >
+      <Text style={emailStyles.text}>Hello {customerName},</Text>
 
-      <Preview>Your payment has been marked as received.</Preview>
+      <Text style={emailStyles.text}>
+        Your payment has been marked as received.
+      </Text>
 
-      <Body
-        style={emailStyles.body}
-      >
-        <Container
-          style={emailStyles.container}
+      <Section style={emailStyles.card}>
+        <Text style={emailStyles.detailText}>
+          <strong>Order ID:</strong> {orderId}
+        </Text>
+
+        <Text style={emailStyles.detailText}>
+          <strong>Total Paid:</strong> ${total.toFixed(2)}
+        </Text>
+
+        <Text style={emailStyles.detailText}>
+          <strong>Paid At:</strong> {paidAt}
+        </Text>
+
+        <Button
+          href={orderUrl}
+          style={emailStyles.button}
         >
-          <Heading>Payment Received</Heading>
+          View Order Details
+        </Button>
+      </Section>
 
-          <Text>Hello {customerName},</Text>
+      <Hr style={emailStyles.divider} />
 
-          <Text>
-            Your payment has been marked as received.
-          </Text>
-
-          <Text>
-            <strong>Order ID:</strong> {orderId}
-          </Text>
-
-          <Text>
-            <strong>Total Paid:</strong> ${total.toFixed(2)}
-          </Text>
-
-          <Text>
-            <strong>Paid At:</strong> {paidAt}
-          </Text>
-
-          <Hr />
-          <Button
-            href={orderUrl}
-            style={emailStyles.button}
-          >
-            View Order Details
-          </Button>
-          <Text>
-            Thank you for your order with Chef Rah&apos;s Twisted Kitchen.
-          </Text>
-
-          <Text
-            style={emailStyles.footerText}
-          >
-            Chef Rah&apos;s Twisted Kitchen
-          </Text>
-        </Container>
-      </Body>
-    </Html>
+      <Text style={emailStyles.text}>
+        Thank you for your order with Chef Rah&apos;s Twisted Kitchen.
+      </Text>
+    </BrandedEmailLayout>
   );
 }
