@@ -14,7 +14,7 @@ import { appUrl } from "@/lib/email";
 import { emailStyles } from "@/emails/styles";
 
 const logoUrl = new URL(
-  "/business%20logo/chef-rah-logo-transparent-240w.png",
+  "/business%20logo/icon-192.png",
   appUrl,
 ).toString();
 
@@ -40,8 +40,7 @@ export function BrandedEmailLayout({
             <Img
               src={logoUrl}
               alt="Chef Rah's Twisted Kitchen"
-              width="180"
-              height="137"
+              object-fit="cover"
               style={emailStyles.logo}
             />
 

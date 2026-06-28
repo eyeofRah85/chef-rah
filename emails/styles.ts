@@ -1,6 +1,6 @@
 export const emailStyles = {
   body: {
-    backgroundColor: "#ffffff",
+    backgroundColor: "#d8ac79",
     fontFamily: "Arial, sans-serif",
     margin: "0",
     padding: "32px 12px",
@@ -26,7 +26,7 @@ export const emailStyles = {
   },
 
   brandLabel: {
-    color: "#e051bc",
+    color: "#b93f9b",
     fontSize: "12px",
     fontWeight: "700",
     letterSpacing: "0.08em",
@@ -35,7 +35,7 @@ export const emailStyles = {
   },
 
   brandName: {
-    color: "#ffffff",
+    color: "#b93f9b",
     fontSize: "22px",
     fontWeight: "700",
     lineHeight: "28px",
