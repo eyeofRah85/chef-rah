@@ -40,11 +40,12 @@ export function BrandedEmailLayout({
             <Img
               src={logoUrl}
               alt="Chef Rah's Twisted Kitchen"
-              object-fit="cover"
+              width="300"
+              height="300"
               style={emailStyles.logo}
             />
 
-            <Text style={emailStyles.brandLabel}>Chef Rah&apos;s</Text>
+            <Text style={emailStyles.brandLabel} >Chef Rah&apos;s</Text>
             <Text style={emailStyles.brandName}>Twisted Kitchen</Text>
           </Section>
 
