@@ -1,14 +1,10 @@
 import {
-  Body,
-  Container,
-  Head,
-  Heading,
   Hr,
-  Html,
-  Preview,
+  Section,
   Text,
   Button
 } from "react-email";
+import { BrandedEmailLayout } from "@/emails/BrandedEmailLayout";
 import { emailStyles } from "@/emails/styles";
 import {
   formatApprovalStatus,
@@ -43,72 +39,61 @@ export function CateringStatusEmail({
   const requestLabelLower = requestLabel.toLowerCase();
 
   return (
-    <Html>
-      <Head />
+    <BrandedEmailLayout
+      preview={`Your ${requestLabelLower} request has been updated.`}
+      title={`${requestLabel} Request Update`}
+    >
+      <Text style={emailStyles.text}>Hello {customerName},</Text>
 
-      <Preview>Your {requestLabelLower} request has been updated.</Preview>
+      <Text style={emailStyles.text}>
+        Your {requestLabelLower} request has been updated.
+      </Text>
 
-      <Body
-        style={emailStyles.body}
-      >
-        <Container
-          style={emailStyles.container}
+      <Section style={emailStyles.card}>
+        <Text style={emailStyles.detailText}>
+          <strong>Event:</strong> {eventType}
+        </Text>
+
+        <Text style={emailStyles.detailText}>
+          <strong>Status:</strong> {formatServiceRequestStatus(status)}
+        </Text>
+
+        <Text style={emailStyles.detailText}>
+          <strong>Approval:</strong> {formatApprovalStatus(approvalStatus)}
+        </Text>
+
+        {approvalNote && (
+          <Text style={emailStyles.detailText}>
+            <strong>Note:</strong> {approvalNote}
+          </Text>
+        )}
+
+        {estimatedTotal !== null && estimatedTotal !== undefined && (
+          <Text style={emailStyles.detailText}>
+            <strong>Estimated Total:</strong> ${estimatedTotal.toFixed(2)}
+          </Text>
+        )}
+
+        {depositAmount !== null && depositAmount !== undefined && (
+          <Text style={emailStyles.detailText}>
+            <strong>Deposit:</strong> ${depositAmount.toFixed(2)}
+          </Text>
+        )}
+
+        <Button
+          href={requestUrl}
+          style={emailStyles.button}
         >
-          <Heading>{requestLabel} Request Update</Heading>
+          View {requestLabel} Request
+        </Button>
+      </Section>
 
-          <Text>Hello {customerName},</Text>
+      <Hr style={emailStyles.divider} />
 
-          <Text>Your {requestLabelLower} request has been updated.</Text>
-
-          <Text>
-            <strong>Event:</strong> {eventType}
-          </Text>
-
-          <Text>
-            <strong>Status:</strong> {formatServiceRequestStatus(status)}
-          </Text>
-
-          <Text>
-            <strong>Approval:</strong> {formatApprovalStatus(approvalStatus)}
-          </Text>
-
-          {approvalNote && (
-            <Text>
-              <strong>Note:</strong> {approvalNote}
-            </Text>
-          )}
-
-          {estimatedTotal !== null && estimatedTotal !== undefined && (
-            <Text>
-              <strong>Estimated Total:</strong> ${estimatedTotal.toFixed(2)}
-            </Text>
-          )}
-
-          {depositAmount !== null && depositAmount !== undefined && (
-            <Text>
-              <strong>Deposit:</strong> ${depositAmount.toFixed(2)}
-            </Text>
-          )}
-
-          <Hr />
-            <Button
-              href={requestUrl}
-              style={emailStyles.button}
-            >
-              View {requestLabel} Request
-            </Button>
-          <Text>
-            You can log into your account to review request details,
-            quote information, and deposit status.
-          </Text>
-
-          <Text
-            style={emailStyles.footerText}
-          >
-            Chef Rah&apos;s Twisted Kitchen
-          </Text>
-        </Container>
-      </Body>
-    </Html>
+      <Text style={emailStyles.text}>
+        You can log into your account to review request details, quote
+        information, and deposit status.
+      </Text>
+    </BrandedEmailLayout>
   );
 }

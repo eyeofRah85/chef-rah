@@ -37,7 +37,7 @@ export function SiteHeader() {
         >
           <span className="relative h-20 w-20 overflow-hidden rounded-full border border-[#ead8c1] bg-white shadow-sm">
             <Image
-              src="/business logo/chef-rah-logo-transparent-180w.png"
+              src="/business logo/icon-192.png"
               alt=""
               fill
               sizes="48px"

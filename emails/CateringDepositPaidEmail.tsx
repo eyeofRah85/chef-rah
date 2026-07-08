@@ -1,14 +1,10 @@
 import {
-  Body,
-  Container,
-  Head,
-  Heading,
   Hr,
-  Html,
-  Preview,
+  Section,
   Text,
   Button
 } from "react-email";
+import { BrandedEmailLayout } from "@/emails/BrandedEmailLayout";
 import { emailStyles } from "@/emails/styles";
 import { formatServiceRequestType } from "@/lib/format-labels";
 
@@ -33,54 +29,43 @@ export function CateringDepositPaidEmail({
   const requestLabelLower = requestLabel.toLowerCase();
 
   return (
-    <Html>
-      <Head />
+    <BrandedEmailLayout
+      preview={`Your ${requestLabelLower} deposit has been received.`}
+      title={`${requestLabel} Deposit Received`}
+    >
+      <Text style={emailStyles.text}>Hello {customerName},</Text>
 
-      <Preview>Your {requestLabelLower} deposit has been received.</Preview>
+      <Text style={emailStyles.text}>
+        Your {requestLabelLower} deposit has been marked as received.
+      </Text>
 
-      <Body
-        style={emailStyles.body}
-      >
-        <Container
-          style={emailStyles.container}
+      <Section style={emailStyles.card}>
+        <Text style={emailStyles.detailText}>
+          <strong>Event:</strong> {eventType}
+        </Text>
+
+        <Text style={emailStyles.detailText}>
+          <strong>Deposit:</strong> ${depositAmount.toFixed(2)}
+        </Text>
+
+        <Text style={emailStyles.detailText}>
+          <strong>Paid At:</strong> {paidAt}
+        </Text>
+
+        <Button
+          href={requestUrl}
+          style={emailStyles.button}
         >
-          <Heading>{requestLabel} Deposit Received</Heading>
+          View {requestLabel} Request
+        </Button>
+      </Section>
 
-          <Text>Hello {customerName},</Text>
+      <Hr style={emailStyles.divider} />
 
-          <Text>Your {requestLabelLower} deposit has been marked as received.</Text>
-
-          <Text>
-            <strong>Event:</strong> {eventType}
-          </Text>
-
-          <Text>
-            <strong>Deposit:</strong> ${depositAmount.toFixed(2)}
-          </Text>
-
-          <Text>
-            <strong>Paid At:</strong> {paidAt}
-          </Text>
-
-          <Hr />
-
-          <Text>
-            Thank you. Your {requestLabelLower} request can now continue through the
-            planning process.
-          </Text>
-            <Button
-              href={requestUrl}
-              style={emailStyles.button}
-            >
-              View {requestLabel} Request
-            </Button>
-          <Text
-            style={emailStyles.footerText}
-          >
-            Chef Rah&apos;s Twisted Kitchen
-          </Text>
-        </Container>
-      </Body>
-    </Html>
+      <Text style={emailStyles.text}>
+        Thank you. Your {requestLabelLower} request can now continue through the
+        planning process.
+      </Text>
+    </BrandedEmailLayout>
   );
 }

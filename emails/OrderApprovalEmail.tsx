@@ -1,14 +1,10 @@
 import {
-  Body,
-  Container,
-  Head,
-  Heading,
   Hr,
-  Html,
-  Preview,
+  Section,
   Text,
   Button
 } from "react-email";
+import { BrandedEmailLayout } from "@/emails/BrandedEmailLayout";
 import { emailStyles } from "@/emails/styles";
 
 type Props = {
@@ -26,58 +22,43 @@ export function OrderApprovalEmail({
   approvalNote,
   orderUrl
 }: Props) {
+  const title = `Order ${approved ? "Approved" : "Not Approved"}`;
+
   return (
-    <Html>
-      <Head />
+    <BrandedEmailLayout
+      preview={`Your order has been ${approved ? "approved" : "not approved"}.`}
+      title={title}
+    >
+      <Text style={emailStyles.text}>Hello {customerName},</Text>
 
-      <Preview>
+      <Text style={emailStyles.text}>
         Your order has been {approved ? "approved" : "not approved"}.
-      </Preview>
+      </Text>
 
-      <Body
-        style={emailStyles.body}
-      >
-        <Container
-          style={emailStyles.container}
+      <Section style={emailStyles.card}>
+        <Text style={emailStyles.detailText}>
+          <strong>Order ID:</strong> {orderId}
+        </Text>
+
+        {approvalNote && (
+          <Text style={emailStyles.detailText}>
+            <strong>Note:</strong> {approvalNote}
+          </Text>
+        )}
+
+        <Button
+          href={orderUrl}
+          style={emailStyles.button}
         >
-          <Heading>
-            Order {approved ? "Approved" : "Not Approved"}
-          </Heading>
+          View Order Details
+        </Button>
+      </Section>
 
-          <Text>Hello {customerName},</Text>
+      <Hr style={emailStyles.divider} />
 
-          <Text>
-            Your order has been {approved ? "approved" : "not approved"}.
-          </Text>
-
-          <Text>
-            <strong>Order ID:</strong> {orderId}
-          </Text>
-
-          {approvalNote && (
-            <Text>
-              <strong>Note:</strong> {approvalNote}
-            </Text>
-          )}
-          <Button
-            href={orderUrl}
-            style={emailStyles.button}
-          >
-            View Order Details
-          </Button>
-          <Hr />
-
-          <Text>
-            You can log into your account to view order details and updates.
-          </Text>
-
-          <Text
-            style={emailStyles.footerText}
-          >
-            Chef Rah&apos;s Twisted Kitchen
-          </Text>
-        </Container>
-      </Body>
-    </Html>
+      <Text style={emailStyles.text}>
+        You can log into your account to view order details and updates.
+      </Text>
+    </BrandedEmailLayout>
   );
 }
