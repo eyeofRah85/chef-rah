@@ -65,6 +65,8 @@ async function upsertMenuItem(input: {
   categoryId: string;
   requiresApproval?: boolean;
   customerInstructionsEnabled?: boolean;
+  imageUrl?: string;
+  seasonal?: boolean;
 }) {
   const existing = await prisma.menuItem.findFirst({
     where: {
@@ -93,6 +95,8 @@ async function upsertMenuItem(input: {
         categoryId: input.categoryId,
         available: true,
         archived: false,
+        imageUrl: input.imageUrl,
+        seasonal: input.seasonal ?? false,
         requiresApproval: input.requiresApproval ?? false,
         customerInstructionsEnabled:
           input.customerInstructionsEnabled ?? true,
@@ -109,170 +113,744 @@ async function upsertMenuItem(input: {
       categoryId: input.categoryId,
       available: true,
       archived: false,
+      imageUrl: input.imageUrl,
+      seasonal: input.seasonal ?? false,
       requiresApproval: input.requiresApproval ?? false,
       customerInstructionsEnabled: input.customerInstructionsEnabled ?? true,
     },
   });
 }
 
+async function syncMenuItemAllergens(menuItemId: string, allergenNames: string[]) {
+  await prisma.menuItemAllergen.deleteMany({
+    where: {
+      menuItemId,
+    },
+  });
+
+  if (!allergenNames.length) {
+    return;
+  }
+
+  const allergens = await prisma.allergen.findMany({
+    where: {
+      name: {
+        in: allergenNames,
+      },
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  await prisma.menuItemAllergen.createMany({
+    data: allergens.map((allergen) => ({
+      menuItemId,
+      allergenId: allergen.id,
+    })),
+    skipDuplicates: true,
+  });
+}
+
+async function createOptionGroup(input: {
+  menuItemId: string;
+  name: string;
+  required?: boolean;
+  multiple?: boolean;
+  choices: {
+    name: string;
+    description?: string;
+    dietaryInfo?: string;
+    imageUrl?: string;
+    requestOnly?: boolean;
+    priceDelta?: string;
+  }[];
+}) {
+  return prisma.menuItemOptionGroup.create({
+    data: {
+      menuItemId: input.menuItemId,
+      name: input.name,
+      required: input.required ?? false,
+      multiple: input.multiple ?? false,
+      choices: {
+        create: input.choices.map((choice) => ({
+          name: choice.name,
+          description: choice.description,
+          dietaryInfo: choice.dietaryInfo,
+          imageUrl: choice.imageUrl,
+          requestOnly: choice.requestOnly ?? false,
+          priceDelta: choice.priceDelta ?? "0.00",
+        })),
+      },
+    },
+  });
+}
+
 async function seedDemoMenuItems() {
+  await prisma.menuItem.updateMany({
+    where: {
+      name: {
+        in: ["Blackened Salmon Bowl"],
+      },
+    },
+    data: {
+      available: false,
+      archived: true,
+    },
+  });
+
   const mealPlans = await upsertCategory("Meal Plans", 1);
-  await seedWeeklyMealPlans();
+  const plates = await upsertCategory("Plates", 2);
   const aLaCarte = await upsertCategory("A La Carte", 3);
   const catering = await upsertCategory("Catering", 4);
   const sides = await upsertCategory("Sides", 5);
   const desserts = await upsertCategory("Desserts", 6);
+  const other = await upsertCategory("Other", 7);
+
+  const images = {
+    chickenBroccoli: "/gallery/webp/IMG_1487.webp",
+    turkeyBowl: "/gallery/webp/IMG_1550.webp",
+    stirFry: "/gallery/webp/IMG_1416.webp",
+    stuffedPeppers: "/gallery/webp/IMG_1428.webp",
+    soulBowl: "/gallery/webp/IMG_1471.webp",
+    mealPrep: "/gallery/webp/IMG_1535.webp",
+    catering: "/gallery/webp/IMG_1546.webp",
+    dessert: "/gallery/webp/IMG_1491.webp",
+  };
 
   const fiveDayPlan = await upsertMenuItem({
     name: "5-Day Balanced Meal Plan",
     description:
-      "Ten prepared meals with lunch and dinner portions for five days.",
+      "Ten chef-built meals for the week: lean proteins, seasoned vegetables, and rotating starches portioned for lunch and dinner.",
     price: "165.00",
     type: "MEAL_PLAN",
     categoryId: mealPlans.id,
+    imageUrl: images.mealPrep,
     customerInstructionsEnabled: true,
   });
 
-  await prisma.menuItemOptionGroup.create({
-    data: {
-      menuItemId: fiveDayPlan.id,
-      name: "Protein Preference",
-      required: true,
-      multiple: true,
-      choices: {
-        create: [
-          {
-            name: "Chicken",
-            priceDelta: "0.00",
-            description: "Standard lean protein option.",
-          },
-          {
-            name: "Turkey",
-            priceDelta: "0.00",
-            description: "Standard lean protein option.",
-          },
-          {
-            name: "Fish",
-            priceDelta: "10.00",
-            description: "Seafood-based protein option.",
-          },
-          {
-            name: "Beef",
-            priceDelta: "18.00",
-            description:
-              "Available by request only. Not included in standard meal plans.",
-            requestOnly: true,
-          },
-          {
-            name: "Pork",
-            priceDelta: "18.00",
-            description:
-              "Available by request only. Not included in standard meal plans.",
-            requestOnly: true,
-          },
-        ],
+  await createOptionGroup({
+    menuItemId: fiveDayPlan.id,
+    name: "Weekly Flavor Direction",
+    required: true,
+    choices: [
+      {
+        name: "Southern Comfort",
+        description: "Smoky, savory plates with greens, rice, and house gravy.",
       },
-    },
+      {
+        name: "Island Heat",
+        description: "Jerk-inspired seasoning, citrus, herbs, and roasted veg.",
+      },
+      {
+        name: "Clean & Lean",
+        description: "Grilled proteins, bright vegetables, and lighter sauces.",
+      },
+    ],
   });
 
-  await prisma.menuItemOptionGroup.create({
-    data: {
-      menuItemId: fiveDayPlan.id,
-      name: "Meal Plan Style",
-      required: true,
-      multiple: false,
-      choices: {
-        create: [
-          {
-            name: "Balanced",
-            priceDelta: "0.00",
-          },
-          {
-            name: "Low Carb",
-            priceDelta: "8.00",
-          },
-          {
-            name: "Pescatarian",
-            priceDelta: "15.00",
-            requestOnly: true,
-          },
-        ],
+  await createOptionGroup({
+    menuItemId: fiveDayPlan.id,
+    name: "Protein Mix",
+    required: true,
+    multiple: true,
+    choices: [
+      {
+        name: "Chicken + Turkey",
+        description: "Standard lean-protein mix.",
       },
-    },
+      {
+        name: "Add Salmon Rotation",
+        description: "Adds seafood portions to the weekly rotation.",
+        priceDelta: "18.00",
+      },
+      {
+        name: "Beef Feature",
+        description: "Chef-approved specialty prep with market pricing.",
+        requestOnly: true,
+        priceDelta: "22.00",
+      },
+    ],
   });
 
-  await upsertMenuItem({
+  await syncMenuItemAllergens(fiveDayPlan.id, ["Fish", "Wheat"]);
+
+  const starterPlan = await upsertMenuItem({
+    name: "3-Day Starter Meal Plan",
+    description:
+      "Six meals designed as a lower-commitment intro to weekly prep, with hearty bowls, roasted vegetables, and one signature sauce.",
+    price: "99.00",
+    type: "MEAL_PLAN",
+    categoryId: mealPlans.id,
+    imageUrl: images.turkeyBowl,
+    customerInstructionsEnabled: true,
+  });
+
+  await createOptionGroup({
+    menuItemId: starterPlan.id,
+    name: "Prep Style",
+    required: true,
+    choices: [
+      {
+        name: "Balanced Bowls",
+        description: "Protein, vegetable, and starch in each meal.",
+      },
+      {
+        name: "Low-Carb Lean",
+        description: "Extra greens and vegetables instead of rice or potatoes.",
+        priceDelta: "6.00",
+      },
+      {
+        name: "No Pork or Beef",
+        description: "Keep all starter meals poultry, seafood, or vegetarian.",
+      },
+    ],
+  });
+
+  const familyPlan = await upsertMenuItem({
     name: "7-Day Family Meal Plan",
     description:
-      "Fourteen prepared meals with lunch and dinner portions for seven days.",
+      "Fourteen family-friendly prepared meals with generous portions, kid-safe spice levels, and reheating notes.",
     price: "225.00",
     type: "MEAL_PLAN",
     categoryId: mealPlans.id,
+    imageUrl: images.chickenBroccoli,
     customerInstructionsEnabled: true,
   });
 
-  await upsertMenuItem({
+  await createOptionGroup({
+    menuItemId: familyPlan.id,
+    name: "Family Add-Ons",
+    multiple: true,
+    choices: [
+      {
+        name: "Extra Vegetable Portions",
+        description: "Adds extra seasonal vegetables across the week.",
+        priceDelta: "12.00",
+      },
+      {
+        name: "Kid-Friendly Spice",
+        description: "Keep sauces and heat on the side.",
+      },
+      {
+        name: "Family Dessert Sampler",
+        description: "Mini sweets packed with the final delivery.",
+        priceDelta: "18.00",
+      },
+    ],
+  });
+
+  const wellnessPlan = await upsertMenuItem({
     name: "Custom Wellness Meal Plan",
     description:
-      "A customized meal plan request for dietary goals, substitutions, or special preferences.",
+      "A chef-reviewed plan for macro goals, training weeks, dietary restrictions, or tighter ingredient preferences.",
     price: "195.00",
     type: "MEAL_PLAN",
     categoryId: mealPlans.id,
+    imageUrl: images.soulBowl,
     requiresApproval: true,
     customerInstructionsEnabled: true,
   });
 
-  await upsertMenuItem({
-    name: "Blackened Salmon Bowl",
+  await createOptionGroup({
+    menuItemId: wellnessPlan.id,
+    name: "Wellness Goal",
+    required: true,
+    choices: [
+      {
+        name: "High Protein",
+        description: "Build meals around larger lean-protein portions.",
+      },
+      {
+        name: "Lower Sodium",
+        description: "Reduce salt and lean on herbs, acid, and aromatics.",
+      },
+      {
+        name: "Ingredient Review",
+        description: "Chef reviews restrictions before confirming the menu.",
+        requestOnly: true,
+      },
+    ],
+  });
+
+  const salmonBowl = await upsertMenuItem({
+    name: "Blackened Salmon Power Bowl",
     description:
-      "Blackened salmon with seasonal vegetables and a healthy starch.",
+      "Blackened salmon over rice or sweet potatoes with roasted broccoli, peppers, citrus herb drizzle, and scallions.",
     price: "18.00",
     type: "A_LA_CARTE",
     categoryId: aLaCarte.id,
+    imageUrl: images.chickenBroccoli,
   });
 
-  await upsertMenuItem({
+  await createOptionGroup({
+    menuItemId: salmonBowl.id,
+    name: "Base",
+    required: true,
+    choices: [
+      { name: "Jasmine Rice", description: "Classic bowl base." },
+      { name: "Sweet Potato Hash", description: "Roasted and lightly spiced." },
+      {
+        name: "Greens Only",
+        description: "Extra vegetables instead of starch.",
+      },
+    ],
+  });
+
+  await createOptionGroup({
+    menuItemId: salmonBowl.id,
+    name: "Finish",
+    multiple: true,
+    choices: [
+      { name: "Citrus Herb Drizzle" },
+      { name: "Spicy Garlic Butter", priceDelta: "1.50" },
+      { name: "Sauce On The Side" },
+    ],
+  });
+
+  await syncMenuItemAllergens(salmonBowl.id, ["Fish", "Dairy"]);
+
+  const turkeyWingPlate = await upsertMenuItem({
+    name: "Smothered Turkey Wing Plate",
+    description:
+      "Slow-braised turkey wings over rice with rich pan gravy and a rotating vegetable side.",
+    price: "19.00",
+    type: "PLATE",
+    categoryId: plates.id,
+    imageUrl: images.stirFry,
+  });
+
+  await createOptionGroup({
+    menuItemId: turkeyWingPlate.id,
+    name: "Two Sides",
+    required: true,
+    multiple: true,
+    choices: [
+      { name: "Garlic Green Beans" },
+      { name: "Southern Mac and Cheese", priceDelta: "2.00" },
+      { name: "Candied Yams", priceDelta: "2.00" },
+      { name: "Cabbage and Smoked Turkey" },
+    ],
+  });
+
+  await syncMenuItemAllergens(turkeyWingPlate.id, ["Wheat"]);
+
+  const catfishPlate = await upsertMenuItem({
+    name: "Lemon Pepper Catfish Plate",
+    description:
+      "Crispy catfish seasoned with lemon pepper, packed with two sides and a house remoulade cup.",
+    price: "18.00",
+    type: "PLATE",
+    categoryId: plates.id,
+    imageUrl: images.stuffedPeppers,
+  });
+
+  await createOptionGroup({
+    menuItemId: catfishPlate.id,
+    name: "Sauce",
+    required: true,
+    choices: [
+      { name: "House Remoulade", description: "Creamy, tangy, lightly spicy." },
+      { name: "Hot Honey", description: "Sweet heat finish.", priceDelta: "1.00" },
+      { name: "No Sauce" },
+    ],
+  });
+
+  await syncMenuItemAllergens(catfishPlate.id, ["Fish", "Egg", "Wheat"]);
+
+  const bbqChickenPlate = await upsertMenuItem({
+    name: "BBQ Chicken Dinner Plate",
+    description:
+      "BBQ chicken glazed with house sauce, served with mac and cheese, greens, and cornbread crumble.",
+    price: "17.00",
+    type: "PLATE",
+    categoryId: plates.id,
+    imageUrl: images.catering,
+  });
+
+  await createOptionGroup({
+    menuItemId: bbqChickenPlate.id,
+    name: "BBQ Sauce",
+    required: true,
+    choices: [
+      { name: "Sweet Heat" },
+      { name: "Tangy Carolina" },
+      { name: "Sauce On The Side" },
+    ],
+  });
+
+  await syncMenuItemAllergens(bbqChickenPlate.id, ["Dairy", "Wheat"]);
+
+  const veggiePlate = await upsertMenuItem({
+    name: "Veggie Soul Bowl Plate",
+    description:
+      "Black beans, sweet potatoes, greens, roasted vegetables, rice, and green herb sauce for a hearty meatless plate.",
+    price: "15.00",
+    type: "PLATE",
+    categoryId: plates.id,
+    imageUrl: images.soulBowl,
+  });
+
+  await createOptionGroup({
+    menuItemId: veggiePlate.id,
+    name: "Add-On Protein",
+    choices: [
+      { name: "No Protein" },
+      { name: "Jerk Chicken", priceDelta: "5.00" },
+      { name: "Salmon", priceDelta: "8.00", requestOnly: true },
+    ],
+  });
+
+  const jerkChicken = await upsertMenuItem({
     name: "Jerk Chicken Plate",
     description:
-      "Seasoned jerk chicken with vegetables and rice or another available starch.",
+      "Jerk-marinated chicken with coconut rice, peppers, roasted vegetables, and a cooling herb sauce.",
     price: "16.00",
     type: "A_LA_CARTE",
     categoryId: aLaCarte.id,
+    imageUrl: images.stirFry,
   });
 
-  await upsertMenuItem({
+  await createOptionGroup({
+    menuItemId: jerkChicken.id,
+    name: "Heat Level",
+    required: true,
+    choices: [
+      { name: "Mild" },
+      { name: "Medium" },
+      { name: "Hot" },
+    ],
+  });
+
+  const turkeyBowl = await upsertMenuItem({
     name: "Turkey Meatball Bowl",
     description:
-      "Turkey meatballs served with vegetables and a healthy starch.",
+      "Turkey meatballs in tomato gravy with black beans, sweet potato, cilantro, lime, and avocado-style crema.",
     price: "15.00",
     type: "A_LA_CARTE",
     categoryId: aLaCarte.id,
+    imageUrl: images.turkeyBowl,
   });
 
-  await upsertMenuItem({
+  await createOptionGroup({
+    menuItemId: turkeyBowl.id,
+    name: "Bowl Base",
+    required: true,
+    choices: [
+      { name: "Rice + Beans" },
+      { name: "Sweet Potato + Greens" },
+      { name: "Half Rice / Half Greens" },
+    ],
+  });
+
+  const shrimpPasta = await upsertMenuItem({
+    name: "Cajun Shrimp Pasta Cup",
+    description:
+      "A single-serve creamy Cajun pasta with shrimp, peppers, onions, herbs, and parmesan.",
+    price: "14.00",
+    type: "A_LA_CARTE",
+    categoryId: aLaCarte.id,
+    imageUrl: images.catering,
+  });
+
+  await createOptionGroup({
+    menuItemId: shrimpPasta.id,
+    name: "Pasta Finish",
+    choices: [
+      { name: "Extra Cajun Cream", priceDelta: "1.50" },
+      { name: "Add Broccoli", priceDelta: "2.00" },
+      { name: "Light Sauce" },
+    ],
+  });
+
+  await syncMenuItemAllergens(shrimpPasta.id, ["Shellfish", "Dairy", "Wheat"]);
+
+  const consultation = await upsertMenuItem({
     name: "Catering Consultation",
     description:
-      "A consultation placeholder for catering menu planning and quote requests.",
+      "Start a catered event quote with menu direction, guest count, service style, and dietary needs.",
     price: "0.00",
     type: "CATERING",
     categoryId: catering.id,
+    imageUrl: images.catering,
     requiresApproval: true,
   });
 
-  await upsertMenuItem({
+  await createOptionGroup({
+    menuItemId: consultation.id,
+    name: "Event Style",
+    required: true,
+    choices: [
+      { name: "Drop-Off Catering" },
+      { name: "Buffet Setup" },
+      { name: "Private Chef Service", requestOnly: true },
+    ],
+  });
+
+  const buffet = await upsertMenuItem({
+    name: "Small Event Buffet",
+    description:
+      "Buffet-style package for intimate events with one protein, two sides, salad, rolls, and serving utensils.",
+    price: "350.00",
+    type: "CATERING",
+    categoryId: catering.id,
+    imageUrl: images.catering,
+    requiresApproval: true,
+    customerInstructionsEnabled: true,
+  });
+
+  await createOptionGroup({
+    menuItemId: buffet.id,
+    name: "Protein Feature",
+    required: true,
+    choices: [
+      { name: "BBQ Chicken" },
+      { name: "Smothered Turkey Wings", priceDelta: "45.00" },
+      { name: "Salmon Tray", priceDelta: "85.00", requestOnly: true },
+    ],
+  });
+
+  const corporate = await upsertMenuItem({
+    name: "Corporate Lunch Drop-Off",
+    description:
+      "Individually packed lunch service for meetings and trainings with labels, utensils, and simple dietary sorting.",
+    price: "275.00",
+    type: "CATERING",
+    categoryId: catering.id,
+    imageUrl: images.mealPrep,
+    requiresApproval: true,
+    customerInstructionsEnabled: true,
+  });
+
+  await createOptionGroup({
+    menuItemId: corporate.id,
+    name: "Lunch Format",
+    required: true,
+    choices: [
+      { name: "Bowls" },
+      { name: "Sandwich + Side Boxes" },
+      { name: "Mixed Entree Boxes", priceDelta: "35.00" },
+    ],
+  });
+
+  const grazing = await upsertMenuItem({
+    name: "Celebration Grazing Table",
+    description:
+      "A request-only party spread with savory bites, fresh produce, dips, small desserts, and styled setup.",
+    price: "425.00",
+    type: "CATERING",
+    categoryId: catering.id,
+    imageUrl: images.dessert,
+    requiresApproval: true,
+    customerInstructionsEnabled: true,
+  });
+
+  await createOptionGroup({
+    menuItemId: grazing.id,
+    name: "Grazing Add-Ons",
+    multiple: true,
+    choices: [
+      { name: "Mini Dessert Cups", priceDelta: "48.00" },
+      { name: "Warm Appetizer Tray", priceDelta: "75.00" },
+      { name: "Theme Styling", requestOnly: true },
+    ],
+  });
+
+  const greenBeans = await upsertMenuItem({
     name: "Garlic Green Beans",
-    description: "Seasoned green beans prepared as a side option.",
+    description:
+      "Tender green beans sauteed with garlic, onion, pepper, and a savory pan finish.",
     price: "6.00",
     type: "SIDE",
     categoryId: sides.id,
+    imageUrl: images.chickenBroccoli,
   });
 
-  await upsertMenuItem({
+  await createOptionGroup({
+    menuItemId: greenBeans.id,
+    name: "Portion",
+    required: true,
+    choices: [
+      { name: "Single Side" },
+      { name: "Pint", priceDelta: "6.00" },
+      { name: "Quart", priceDelta: "16.00" },
+    ],
+  });
+
+  const mac = await upsertMenuItem({
+    name: "Southern Mac and Cheese",
+    description:
+      "Baked mac and cheese with a creamy seasoned cheese blend and golden top.",
+    price: "7.00",
+    type: "SIDE",
+    categoryId: sides.id,
+    imageUrl: images.catering,
+  });
+
+  await syncMenuItemAllergens(mac.id, ["Dairy", "Wheat"]);
+
+  const yams = await upsertMenuItem({
+    name: "Candied Yams",
+    description:
+      "Sweet potatoes simmered with brown sugar, warm spice, and a glossy butter finish.",
+    price: "7.00",
+    type: "SIDE",
+    categoryId: sides.id,
+    imageUrl: images.soulBowl,
+    seasonal: true,
+  });
+
+  await syncMenuItemAllergens(yams.id, ["Dairy"]);
+
+  const cabbage = await upsertMenuItem({
+    name: "Cabbage and Smoked Turkey",
+    description:
+      "Tender cabbage cooked with smoked turkey flavor and house seasoning.",
+    price: "7.00",
+    type: "SIDE",
+    categoryId: sides.id,
+    imageUrl: images.stirFry,
+  });
+
+  await createOptionGroup({
+    menuItemId: cabbage.id,
+    name: "Seasoning",
+    choices: [
+      { name: "Classic" },
+      { name: "Extra Pepper" },
+      { name: "No Meat Flavor", requestOnly: true },
+    ],
+  });
+
+  const dessertCups = await upsertMenuItem({
     name: "Mini Dessert Cups",
-    description: "Assorted dessert cups for events or add-on orders.",
+    description:
+      "Assorted mini dessert cups for events or add-on orders, packed by the dozen.",
     price: "24.00",
     type: "DESSERT",
     categoryId: desserts.id,
+    imageUrl: images.dessert,
+  });
+
+  await createOptionGroup({
+    menuItemId: dessertCups.id,
+    name: "Flavor Set",
+    required: true,
+    choices: [
+      { name: "Banana Pudding" },
+      { name: "Strawberry Crunch" },
+      { name: "Mixed Dozen", priceDelta: "4.00" },
+    ],
+  });
+
+  await syncMenuItemAllergens(dessertCups.id, ["Dairy", "Wheat"]);
+
+  const cobbler = await upsertMenuItem({
+    name: "Peach Cobbler Pan",
+    description:
+      "A shareable peach cobbler pan with buttery crust, syrupy peaches, and warm spice.",
+    price: "28.00",
+    type: "DESSERT",
+    categoryId: desserts.id,
+    imageUrl: images.dessert,
+    seasonal: true,
+  });
+
+  await syncMenuItemAllergens(cobbler.id, ["Dairy", "Wheat"]);
+
+  const pudding = await upsertMenuItem({
+    name: "Banana Pudding Cups",
+    description:
+      "Layered banana pudding cups with vanilla wafers, whipped topping, and banana slices.",
+    price: "24.00",
+    type: "DESSERT",
+    categoryId: desserts.id,
+    imageUrl: images.dessert,
+  });
+
+  await syncMenuItemAllergens(pudding.id, ["Dairy", "Wheat"]);
+
+  const cheesecake = await upsertMenuItem({
+    name: "Sweet Potato Cheesecake Bites",
+    description:
+      "Mini cheesecake bites with sweet potato filling and spiced crumble.",
+    price: "26.00",
+    type: "DESSERT",
+    categoryId: desserts.id,
+    imageUrl: images.dessert,
+  });
+
+  await syncMenuItemAllergens(cheesecake.id, ["Dairy", "Egg", "Wheat"]);
+
+  const seasonalSpecial = await upsertMenuItem({
+    name: "Chef's Seasonal Special",
+    description:
+      "A rotating request-only item for limited runs, market finds, and weekend specials.",
+    price: "20.00",
+    type: "OTHER",
+    categoryId: other.id,
+    imageUrl: images.stuffedPeppers,
+    seasonal: true,
+    requiresApproval: true,
+    customerInstructionsEnabled: true,
+  });
+
+  await createOptionGroup({
+    menuItemId: seasonalSpecial.id,
+    name: "Special Direction",
+    required: true,
+    choices: [
+      { name: "Comfort Plate" },
+      { name: "Seafood Feature", requestOnly: true, priceDelta: "8.00" },
+      { name: "Vegetarian Feature" },
+    ],
+  });
+
+  const sauceFlight = await upsertMenuItem({
+    name: "Sauce Flight",
+    description:
+      "Three house sauces packaged as an add-on for plates, sides, or meal prep.",
+    price: "9.00",
+    type: "OTHER",
+    categoryId: other.id,
+    imageUrl: images.catering,
+  });
+
+  await createOptionGroup({
+    menuItemId: sauceFlight.id,
+    name: "Choose Three",
+    required: true,
+    multiple: true,
+    choices: [
+      { name: "Jerk Honey" },
+      { name: "Citrus Herb" },
+      { name: "Spicy Garlic Butter" },
+      { name: "House BBQ" },
+      { name: "Avocado Lime Crema" },
+    ],
+  });
+
+  const familyAddOn = await upsertMenuItem({
+    name: "Family Heat-and-Serve Add-On",
+    description:
+      "A flexible family-size add-on for reheatable portions, extra proteins, or special request trays.",
+    price: "45.00",
+    type: "OTHER",
+    categoryId: other.id,
+    imageUrl: images.mealPrep,
+    requiresApproval: true,
+    customerInstructionsEnabled: true,
+  });
+
+  await createOptionGroup({
+    menuItemId: familyAddOn.id,
+    name: "Tray Type",
+    required: true,
+    choices: [
+      { name: "Extra Protein Tray", priceDelta: "20.00" },
+      { name: "Vegetable Tray" },
+      { name: "Chef's Choice Family Pan", requestOnly: true },
+    ],
   });
 
   console.log("Demo menu items ready.");
